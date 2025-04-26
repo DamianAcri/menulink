@@ -18,7 +18,7 @@ export default function Dashboard() {
       try {
         // Obtener el usuario actual
         const { data: { user } } = await supabase.auth.getUser();
-        
+        console.log("Usuario autenticado en dashboard:", user);
         if (!user) return;
 
         // Buscar el restaurante del usuario actual

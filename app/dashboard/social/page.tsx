@@ -33,14 +33,14 @@ const SOCIAL_PLATFORMS = [
 
 // Plataformas de delivery disponibles
 const DELIVERY_PLATFORMS = [
-  { id: "uber_eats", name: "Uber Eats", icon: "uber-eats.svg" },
+  { id: "uber_eats", name: "Uber Eats", icon: "ubereats.svg" },
   { id: "glovo", name: "Glovo", icon: "glovo.svg" },
   { id: "deliveroo", name: "Deliveroo", icon: "deliveroo.svg" },
-  { id: "just_eat", name: "Just Eat", icon: "just-eat.svg" },
+  { id: "just_eat", name: "Just Eat", icon: "justeat.svg" },
   { id: "custom", name: "Otro servicio", icon: "delivery.svg" },
 ];
 
-export default function SocialLinksPage() {
+function SocialLinksPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [restaurantId, setRestaurantId] = useState<string | null>(null);
@@ -82,9 +82,12 @@ export default function SocialLinksPage() {
         // Obtener el restaurante del usuario
         const { data: restaurant, error: restaurantError } = await supabase
           .from('restaurants')
-          .select('id')
+          .select('id, user_id')
           .eq('user_id', user.id)
           .single();
+
+        // Log para depuración: compara user.id y restaurant.user_id
+        console.log("user.id:", user.id, "restaurant.id:", restaurant?.id, "restaurant.user_id:", restaurant?.user_id);
 
         if (restaurantError || !restaurant) {
           console.error("Error fetching restaurant:", restaurantError);
@@ -495,7 +498,15 @@ export default function SocialLinksPage() {
                     <div className="ml-4">
                       <div className="text-sm font-medium text-gray-900 dark:text-white">{platform.name}</div>
                       <div className="text-sm text-blue-600 dark:text-blue-400 truncate">
-                        <a href={link.url} target="_blank" rel="noopener noreferrer" className="hover:underline">
+                        <a href={link.url} 
+                          target="_blank" 
+                          rel="noopener noreferrer" 
+                          className="hover:underline" 
+                          onClick={(e) => {
+                            // Solo detener la propagación, no prevenir el comportamiento predeterminado
+                            e.stopPropagation();
+                            // No usar window.open ni preventDefault para evitar las recargas
+                          }}>
                           {link.url}
                         </a>
                       </div>
@@ -590,7 +601,15 @@ export default function SocialLinksPage() {
                         {platform.id === "custom" ? link.platform : platform.name}
                       </div>
                       <div className="text-sm text-blue-600 dark:text-blue-400 truncate">
-                        <a href={link.url} target="_blank" rel="noopener noreferrer" className="hover:underline">
+                        <a href={link.url} 
+                          target="_blank" 
+                          rel="noopener noreferrer" 
+                          className="hover:underline" 
+                          onClick={(e) => {
+                            // Solo detener la propagación, no prevenir el comportamiento predeterminado
+                            e.stopPropagation();
+                            // No usar window.open ni preventDefault para evitar las recargas
+                          }}>
                           {link.url}
                         </a>
                       </div>
@@ -625,11 +644,9 @@ export default function SocialLinksPage() {
 
       {/* Modal para redes sociales */}
       {showSocialModal && (
-        <div className="fixed z-10 inset-0 overflow-y-auto">
-          <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onClick={() => setShowSocialModal(false)}></div>
-
-            <div className="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
+        <div className="fixed z-50 inset-0 flex items-center justify-center bg-black bg-opacity-40">
+          <div className="relative w-full max-w-lg mx-auto">
+            <div className="bg-white dark:bg-gray-800 rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:p-6">
               <div>
                 <div className="mt-3 text-center sm:mt-5">
                   <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-white">
@@ -691,17 +708,22 @@ export default function SocialLinksPage() {
                 </div>
               </div>
             </div>
+            <button
+              className="absolute top-2 right-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+              onClick={() => setShowSocialModal(false)}
+              aria-label="Cerrar"
+            >
+              <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
           </div>
         </div>
       )}
 
       {/* Modal para delivery */}
       {showDeliveryModal && (
-        <div className="fixed z-10 inset-0 overflow-y-auto">
-          <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onClick={() => setShowDeliveryModal(false)}></div>
-
-            <div className="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
+        <div className="fixed z-50 inset-0 flex items-center justify-center bg-black bg-opacity-40">
+          <div className="relative w-full max-w-lg mx-auto">
+            <div className="bg-white dark:bg-gray-800 rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:p-6">
               <div>
                 <div className="mt-3 text-center sm:mt-5">
                   <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-white">
@@ -781,9 +803,18 @@ export default function SocialLinksPage() {
                 </div>
               </div>
             </div>
+            <button
+              className="absolute top-2 right-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+              onClick={() => setShowDeliveryModal(false)}
+              aria-label="Cerrar"
+            >
+              <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
           </div>
         </div>
       )}
     </div>
   );
 }
+
+export default SocialLinksPage;
