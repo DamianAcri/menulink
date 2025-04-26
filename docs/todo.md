@@ -38,7 +38,8 @@
 - [x] Enlaces y Redes Sociales:
   - [x] Gestión de enlaces a redes
   - [x] Enlaces a delivery
-- [ ] [ ] Crear página herramientas, que incluya generador rápido de enlaces personalizados para campañas, generador de códigos QR enlazados al menú con opciones básicas de personalización, descarga automática del menú en PDF con los colores del restaurante, kit de recursos gráficos descargables (logo y portada en formatos útiles), guía rápida para integrar el menú en redes sociales, configuración básica de notificaciones por email (resumen semanal de visitas), y acceso directo a soporte y envío de sugerencias. 
+- [x] Crear página herramientas, que incluya generador rápido de enlaces personalizados para campañas, generador de códigos QR enlazados al menú con opciones básicas de personalización, descarga automática del menú en PDF con los colores del restaurante, kit de recursos gráficos descargables (logo y portada en formatos útiles), y acceso directo a soporte y envío de sugerencias.  
+    - [ ] Configuración básica de notificaciones por email (resumen semanal de visitas)
 - [ ] Crear página estadísitcas
 - [ ] Crear página configuración
 
