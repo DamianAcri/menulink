@@ -60,6 +60,12 @@ export default function ToolsPage() {
         } else {
           setRestaurant(restaurantData);
           
+          // Actualizar el estado emailNotifications con el valor de la base de datos
+          if (restaurantData?.email_notifications !== undefined) {
+            console.log("Cargando valor de notificaciones:", restaurantData.email_notifications);
+            setEmailNotifications(restaurantData.email_notifications);
+          }
+          
           // Si hay un restaurante, inicializar la URL base para campañas
           if (restaurantData?.slug) {
             setCampaignUrl(`https://menulink.com/r/${restaurantData.slug}`);
@@ -296,19 +302,43 @@ export default function ToolsPage() {
     if (!restaurant) return;
     
     try {
-      // Simulación: Guardar preferencias en supabase
-      const { error } = await supabase
+      console.log("Intentando guardar preferencias para el restaurante ID:", restaurant.id);
+      console.log("Valor de email_notifications:", emailNotifications);
+      
+      // Guardar preferencias en supabase
+      const { data, error } = await supabase
         .from('restaurants')
         .update({
           email_notifications: emailNotifications
         })
         .eq('id', restaurant.id);
         
-      if (error) throw error;
+      if (error) {
+        console.error("Error de Supabase:", JSON.stringify(error));
+        throw error;
+      }
       
+      // Verificar que la actualización se haya aplicado correctamente
+      const { data: updatedRestaurant, error: fetchError } = await supabase
+        .from('restaurants')
+        .select('*')
+        .eq('id', restaurant.id)
+        .single();
+        
+      if (fetchError) {
+        console.error("Error al verificar actualización:", JSON.stringify(fetchError));
+        throw fetchError;
+      }
+      
+      console.log("Valor actualizado en la base de datos:", updatedRestaurant.email_notifications);
+      
+      // Actualizar el estado del restaurante
+      setRestaurant(updatedRestaurant);
+      
+      console.log("Preferencias guardadas correctamente");
       alert("¡Preferencias de notificaciones guardadas!");
     } catch (error) {
-      console.error("Error guardando preferencias:", error);
+      console.error("Error guardando preferencias:", error instanceof Error ? error.message : JSON.stringify(error));
       alert("Error al guardar preferencias. Inténtalo de nuevo.");
     }
   };
@@ -570,7 +600,7 @@ export default function ToolsPage() {
         <div className="px-4 py-5 sm:p-6">
           <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-white flex items-center">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
             </svg>
             Descargar menú en PDF
           </h3>
