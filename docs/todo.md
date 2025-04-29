@@ -39,16 +39,16 @@
   - [x] Gestión de enlaces a redes
   - [x] Enlaces a delivery
 - [x] Crear página herramientas, que incluya generador rápido de enlaces personalizados para campañas, generador de códigos QR enlazados al menú con opciones básicas de personalización, descarga automática del menú en PDF con los colores del restaurante, kit de recursos gráficos descargables (logo y portada en formatos útiles), y acceso directo a soporte y envío de sugerencias.  
-    - [ ] Configuración básica de notificaciones por email (resumen semanal de visitas)
-- [ ] Crear página estadísitcas
-- [ ] Crear página configuración
+    - [creo] Configuración básica de notificaciones por email (resumen semanal de visitas)
+- [x] Crear página estadísitcas
+- [x] Crear página configuración
 
 ## Funcionalidades Clave
 - [x] Sistema de autenticación con Supabase
 - [x] Subida y gestión de imágenes
-- [ ] Sistema de generación de páginas personalizadas
-- [ ] Generación de códigos QR para menús
-- [ ] Descargar menú en PDF
+- [x] Sistema de generación de páginas personalizadas
+- [x] Generación de códigos QR para menús
+- [x] Descargar menú en PDF
 
 ## Sistema de Suscripciones
 - [ ] Implementación de planes (Gratuito, Pro, Premium)

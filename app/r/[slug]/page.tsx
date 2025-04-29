@@ -6,6 +6,8 @@ import SocialLinks from './components/SocialLinks';
 import DeliveryLinks from './components/DeliveryLinks';
 import MenuSection from './components/MenuSection';
 import ContactSection from './components/ContactSection';
+import Header from './components/Header';
+import ReservationSection from './components/ReservationSection';
 
 // Generamos metadata estática para evitar errores
 export const metadata: Metadata = {
@@ -155,43 +157,27 @@ export default async function RestaurantPage(props: RestaurantPageProps) {
     const fontFamily = restaurant.font_family || 'Inter, sans-serif';
 
     return (
-      <main className="min-h-screen" style={{ backgroundColor: themeColors.background, color: themeColors.text, fontFamily }}>
+      <main className="min-h-screen" style={{ background: '#fff', color: themeColors.text, fontFamily }}>
         <div className="max-w-3xl mx-auto px-4 py-8">
-          {/* Cabecera del restaurante */}
-          <header className="text-center mb-10">
-            {restaurant.logo_url && (
-              <div className="mb-4 flex justify-center">
-                <div className="relative w-24 h-24 sm:w-32 sm:h-32 rounded-full overflow-hidden">
-                  <Image 
-                    src={restaurant.logo_url} 
-                    alt={`Logo de ${restaurant.name}`}
-                    fill
-                    className="object-cover"
-                    priority
-                  />
-                </div>
-              </div>
-            )}
-            <h1 className="text-3xl sm:text-4xl font-bold mb-2" style={{ color: themeColors.primary }}>
-              {restaurant.name}
-            </h1>
-            {restaurant.description && (
-              <p className="text-lg opacity-80 mb-4">{restaurant.description}</p>
-            )}
-            
-            {/* Enlaces sociales */}
-            <SocialLinks links={restaurant.social_links} themeColors={themeColors} />
-            
-            {/* Enlaces de delivery */}
-            <DeliveryLinks links={restaurant.delivery_links} themeColors={themeColors} />
-          </header>
-
-          {/* Sección de menú */}
+          {/* Header: Logo + Nombre + Descripción + Botón */}
+          <Header
+            name={restaurant.name}
+            description={restaurant.description}
+            logo_url={restaurant.logo_url}
+            cover_url={restaurant.cover_url}
+            themeColors={themeColors}
+          />
+          {/* Sección de menús */}
           <MenuSection 
             categories={restaurant.menu_categories} 
             themeColors={themeColors} 
           />
-
+          {/* Sección de reservas */}
+          <ReservationSection
+            restaurantId={restaurant.id}
+            restaurantName={restaurant.name}
+            themeColors={themeColors}
+          />
           {/* Sección de contacto */}
           <ContactSection 
             restaurant={restaurantWithDetails} 
@@ -200,7 +186,7 @@ export default async function RestaurantPage(props: RestaurantPageProps) {
         </div>
         
         {/* Footer */}
-        <footer className="text-center pb-6 pt-10 text-sm opacity-70">
+        <footer className="text-xs text-gray-400 text-center py-6">
           <p>Creado con <a href="/" className="hover:underline font-medium" style={{ color: themeColors.primary }}>MenuLink</a></p>
         </footer>
       </main>
