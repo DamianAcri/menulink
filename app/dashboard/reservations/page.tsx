@@ -384,54 +384,19 @@ export default function ReservationsPage() {
                             onClick={() => {
                               const confirmMessage = `¿Estás seguro de que deseas eliminar esta reserva?`;
                               if (window.confirm(confirmMessage)) {
-                                try {
-                                  console.log("Eliminando reserva ID:", reservation.id);
-                                  
-                                  // Primero intentamos usando RPC si existe la función
-                                  supabase.rpc(
-                                    'delete_reservation',
-                                    { reservation_id_param: reservation.id }
-                                  ).then(({ data, error: rpcError }) => {
-                                    console.log("Resultado eliminación RPC:", data);
-                                    console.log("Error eliminación RPC:", rpcError);
-                                    
-                                    if (rpcError) {
-                                      // Si falla el RPC, intentamos con eliminación directa
-                                      console.log("RPC fallida, intentando eliminación directa...");
-                                      
-                                      return supabase
-                                        .from('reservations')
-                                        .delete()
-                                        .eq('id', reservation.id);
-                                    }
-                                    
-                                    // Si no hay error, actualizamos UI directamente
-                                    console.log("Eliminación exitosa via RPC");
-                                    toast.success('Reserva eliminada correctamente');
-                                    setReservations(prev => prev.filter(r => r.id !== reservation.id));
-                                    throw new Error("SUCCESS_VIA_RPC"); // Para evitar que siga el flujo
-                                  }).then(({ error }) => {
-                                    // Solo llegamos aquí si falló el RPC y estamos intentando método directo
+                                supabase
+                                  .from('reservations')
+                                  .delete()
+                                  .eq('id', reservation.id)
+                                  .then(({ error }) => {
                                     if (error) {
-                                      console.error("Error en eliminación directa:", error);
                                       toast.error('Error al eliminar la reserva');
+                                      console.error(error);
                                     } else {
-                                      // Eliminación directa exitosa
-                                      console.log("Eliminación exitosa via método directo");
                                       toast.success('Reserva eliminada correctamente');
                                       setReservations(prev => prev.filter(r => r.id !== reservation.id));
                                     }
-                                  }).catch(err => {
-                                    // No mostrar errores si fue un SUCCESS_VIA_RPC
-                                    if (err.message !== "SUCCESS_VIA_RPC") {
-                                      console.error("Error inesperado:", err);
-                                      toast.error('Error al eliminar la reserva');
-                                    }
                                   });
-                                } catch (error) {
-                                  console.error('Error al eliminar reserva:', error);
-                                  toast.error('Error al eliminar la reserva');
-                                }
                               }
                             }}
                             className="text-gray-600 hover:text-gray-900 text-xs font-medium"
@@ -487,57 +452,17 @@ export default function ReservationsPage() {
 
   async function handleStatusChange(reservationId: string, newStatus: string) {
     try {
-      console.log("Actualizando reserva ID:", reservationId, "a estado:", newStatus);
-      
-      // Primero intentamos usando RPC si existe la función
-      try {
-        const { data: rpcData, error: rpcError } = await supabase.rpc(
-          'update_reservation_status',
-          { 
-            reservation_id_param: reservationId,
-            new_status_param: newStatus,
-            updated_at_param: new Date().toISOString()
-          }
-        );
-        
-        console.log("Resultado actualización por RPC:", rpcData);
-        console.log("Error actualización por RPC:", rpcError);
-        
-        if (rpcError) {
-          // Si falla el RPC, intentamos con la actualización directa
-          console.log("RPC fallida, intentando actualización directa...");
-          
-          const { error } = await supabase
-            .from('reservations')
-            .update({ status: newStatus, updated_at: new Date().toISOString() })
-            .eq('id', reservationId);
+      const { error } = await supabase
+        .from('reservations')
+        .update({ status: newStatus, updated_at: new Date().toISOString() })
+        .eq('id', reservationId);
 
-          if (error) throw error;
-        } else {
-          console.log("Actualización exitosa via RPC");
-        }
-      } catch (rpcError) {
-        console.log("Error en llamada RPC, intentando actualización directa:", rpcError);
-        
-        // Si falla o no existe el RPC, usar el método directo
-        const { error } = await supabase
-          .from('reservations')
-          .update({ status: newStatus, updated_at: new Date().toISOString() })
-          .eq('id', reservationId);
+      if (error) throw error;
 
-        if (error) throw error;
-      }
-
-      // Actualizar localmente independientemente del método que haya tenido éxito
+      // Actualizar localmente
       setReservations(prev => prev.map(res => 
         res.id === reservationId ? { ...res, status: newStatus as any } : res
       ));
-      
-      // Refrescar los datos para asegurarnos que todo está sincronizado
-      if (restaurant) {
-        console.log("Refrescando datos de reservas después de la actualización");
-        fetchReservations(restaurant.id);
-      }
       
       toast.success('Estado de reserva actualizado');
     } catch (error) {
