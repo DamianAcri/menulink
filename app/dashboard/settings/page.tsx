@@ -31,44 +31,51 @@ export default function ConfigPage() {
     }
     setLoading(true);
     try {
-      // Obtener el usuario actual
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        alert("No hay sesión de usuario");
-        return;
+      // Obtener el token de sesión actual
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session || !session.access_token) {
+        throw new Error("No hay sesión de usuario");
       }
-      // Buscar restaurante asociado al usuario
-      const { data: restaurant, error: restaurantError } = await supabase
-        .from('restaurants')
-        .select('id')
-        .eq('user_id', user.id)
-        .single();
-      if (restaurantError) throw restaurantError;
-      if (restaurant && restaurant.id) {
-        // Eliminar datos relacionados (contact_info, social_links, delivery_links, menu_categories, menu_items, opening_hours, page_views)
-        await supabase.from('contact_info').delete().eq('restaurant_id', restaurant.id);
-        await supabase.from('social_links').delete().eq('restaurant_id', restaurant.id);
-        await supabase.from('delivery_links').delete().eq('restaurant_id', restaurant.id);
-        await supabase.from('opening_hours').delete().eq('restaurant_id', restaurant.id);
-        await supabase.from('page_views').delete().eq('restaurant_id', restaurant.id);
-        // Eliminar categorías y platos
-        const { data: categories } = await supabase.from('menu_categories').select('id').eq('restaurant_id', restaurant.id);
-        if (categories && categories.length > 0) {
-          const categoryIds = categories.map((cat: any) => cat.id);
-          await supabase.from('menu_items').delete().in('category_id', categoryIds);
-          await supabase.from('menu_categories').delete().eq('restaurant_id', restaurant.id);
+      
+      // Llamar a nuestra API serverless para eliminar el usuario por completo
+      const response = await fetch('/api/user/delete', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
         }
-        // Eliminar restaurante
-        await supabase.from('restaurants').delete().eq('id', restaurant.id);
+      });
+      
+      // Verificar primero si la respuesta es ok antes de intentar parsear el JSON
+      if (!response.ok) {
+        const contentType = response.headers.get("content-type");
+        
+        // Si la respuesta es JSON, intentar extraer el mensaje de error
+        if (contentType && contentType.indexOf("application/json") !== -1) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || `Error del servidor: ${response.status}`);
+        } else {
+          // Si no es JSON, usar el texto de la respuesta
+          const errorText = await response.text();
+          throw new Error(`Error del servidor: ${response.status} - ${errorText || 'Sin detalles'}`);
+        }
       }
-      // Eliminar la cuenta de autenticación
-      const { error } = await supabase.auth.admin.deleteUser(user.id);
-      if (error) throw error;
+      
+      // Solo parsear JSON si la respuesta es exitosa
+      const result = await response.json();
+      
+      // Cerrar sesión y redirigir
       await supabase.auth.signOut();
+      
+      // Mostrar mensaje de éxito
+      alert("Tu cuenta ha sido eliminada completamente.");
       router.push('/');
+      
     } catch (error) {
-      console.error("Error al eliminar cuenta:", error, JSON.stringify(error), error instanceof Error ? error.message : "");
-      alert("Hubo un problema al eliminar la cuenta. Por favor, contacta con soporte.\n" + (error instanceof Error ? error.message : JSON.stringify(error)));
+      console.error("Error al eliminar cuenta:", error);
+      alert("Hubo un problema al eliminar la cuenta. Por favor, contacta con soporte.\n" + 
+        (error instanceof Error ? error.message : String(error)));
     } finally {
       setLoading(false);
       setDeleteConfirmOpen(false);

@@ -27,11 +27,34 @@ export default function DashboardLayout({
       }
       
       setUser(session.user);
+      
+      // Verificar si el usuario es nuevo y si no está en la ruta de onboarding
+      const isNewUser = session.user?.user_metadata?.is_new_user === true;
+      const hasRestaurant = await checkUserHasRestaurant(session.user.id);
+      
+      if (isNewUser && !hasRestaurant && !pathname.includes('/dashboard/onboarding')) {
+        // Si el usuario es nuevo, no tiene restaurante y no está en la ruta de onboarding,
+        // redirigirlo al onboarding
+        router.push("/dashboard/onboarding");
+        return;
+      }
+      
       setLoading(false);
     };
     
     checkUser();
-  }, [router]);
+  }, [router, pathname]);
+  
+  // Función para verificar si el usuario ya tiene un restaurante configurado
+  const checkUserHasRestaurant = async (userId: string) => {
+    const { data, error } = await supabase
+      .from('restaurants')
+      .select('id')
+      .eq('user_id', userId)
+      .single();
+      
+    return !!data;
+  };
 
   // Verificar si un enlace está activo
   const isActive = (path: string) => {

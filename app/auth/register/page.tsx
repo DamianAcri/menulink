@@ -12,7 +12,6 @@ export default function Register() {
     email: "",
     password: "",
     confirmPassword: "",
-    businessName: "",
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -39,23 +38,20 @@ export default function Register() {
     setLoading(true);
 
     try {
-      // Registrar usuario con Supabase
+      // Registrar usuario con Supabase - configuración simple que funcionaba antes
       const { data, error: signUpError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
         options: {
           data: {
             full_name: formData.name,
-            business_name: formData.businessName,
-          },
-        },
+            is_new_user: true
+          }
+        }
       });
 
       if (signUpError) throw signUpError;
 
-      // Crear el perfil del restaurante en la base de datos
-      // Esto lo haremos una vez el usuario confirme su email
-      
       // Redirigir a página de confirmación
       router.push("/auth/verify-email");
     } catch (err: any) {
@@ -121,21 +117,6 @@ export default function Register() {
                 onChange={handleChange}
                 className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
                 placeholder="Correo electrónico"
-              />
-            </div>
-            <div>
-              <label htmlFor="businessName" className="sr-only">
-                Nombre del negocio
-              </label>
-              <input
-                id="businessName"
-                name="businessName"
-                type="text"
-                required
-                value={formData.businessName}
-                onChange={handleChange}
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                placeholder="Nombre de tu restaurante o negocio"
               />
             </div>
             <div>
