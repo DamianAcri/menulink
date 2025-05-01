@@ -112,6 +112,55 @@ export default function ReservationsPage() {
     fetchData();
   }, []);
 
+  // Efecto para suscripción en tiempo real y carga de reservas cuando cambia el restaurante
+  useEffect(() => {
+    if (!restaurant) return;
+    
+    // Cargar reservas iniciales
+    fetchReservations(restaurant.id);
+
+    // Configurar canal para suscripción a nuevas reservas
+    const channel = supabase.channel('public:reservations')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'reservations',
+          filter: `restaurant_id=eq.${restaurant.id}`,
+        },
+        (payload) => {
+          console.log('Nueva reserva detectada:', payload);
+          
+          // Obtener datos de la nueva reserva
+          const newReservation = payload.new as Reservation;
+          
+          // Mostrar notificación
+          toast.success(
+            <div>
+              <p className="font-bold">¡Nueva reserva recibida!</p>
+              <p>Cliente: {newReservation.customer_name}</p>
+              <p>Fecha: {formatDate(newReservation.reservation_date)} a las {newReservation.reservation_time.substring(0, 5)}</p>
+            </div>,
+            { duration: 6000 }
+          );
+          
+          // Recargar lista de reservas
+          fetchReservations(restaurant.id);
+        }
+      )
+      .subscribe();
+
+    console.log('Canal de suscripción configurado para restaurante:', restaurant.id);
+
+    // Limpiar suscripción al desmontar
+    return () => {
+      console.log('Limpiando suscripción');
+      supabase.removeChannel(channel);
+    };
+  }, [restaurant]);
+
+  // Efecto separado para actualizar cuando cambian los filtros
   useEffect(() => {
     if (restaurant) {
       fetchReservations(restaurant.id);
@@ -465,6 +514,33 @@ export default function ReservationsPage() {
       ));
       
       toast.success('Estado de reserva actualizado');
+      
+      // Si la reserva se ha completado, enviar correo de agradecimiento
+      if (newStatus === 'completed') {
+        try {
+          const response = await fetch('/api/email/send-thank-you', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ reservationId }),
+          });
+          
+          const data = await response.json();
+          
+          if (!response.ok && !data.already_sent) {
+            console.error('Error al enviar correo de agradecimiento:', data.error);
+            toast.error('La reserva se completó pero no se pudo enviar el correo de agradecimiento');
+          } else if (data.already_sent) {
+            console.log('El correo de agradecimiento ya había sido enviado anteriormente');
+          } else {
+            console.log('Correo de agradecimiento enviado correctamente', data);
+            toast.success('Correo de agradecimiento enviado al cliente');
+          }
+        } catch (emailError) {
+          console.error('Error en la solicitud de envío de correo:', emailError);
+        }
+      }
     } catch (error) {
       console.error('Error al actualizar estado:', error);
       toast.error('Error al actualizar estado de la reserva');
