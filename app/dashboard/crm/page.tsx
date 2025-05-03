@@ -24,6 +24,8 @@ export default function CRMPage() {
   const [editId, setEditId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<Partial<Customer>>({});
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  // Añadir filtro de búsqueda
+  const [search, setSearch] = useState('');
 
   // Obtener el restaurant_id del usuario autenticado
   const [restaurantId, setRestaurantId] = useState<string | null>(null);
@@ -87,23 +89,40 @@ export default function CRMPage() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  // Modificar handleSubmit para evitar duplicados por email
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setSuccess(null);
-    if (!form.first_name || !form.last_name || !form.email) {
-      setError('Nombre, apellidos y email son obligatorios.');
+    if (!form.first_name || !form.email) {
+      setError('Nombre y email son obligatorios.');
       return;
     }
     if (!restaurantId) {
       setError('No se ha encontrado el restaurante.');
       return;
     }
+    // Validar teléfono (mínimo 7 dígitos)
+    if (form.phone && form.phone.replace(/\D/g, '').length < 7) {
+      setError('El teléfono debe tener al menos 7 dígitos.');
+      return;
+    }
+    // Comprobar si ya existe cliente por email
+    const { data: existing } = await supabase
+      .from('customers')
+      .select('id')
+      .eq('restaurant_id', restaurantId)
+      .eq('email', form.email)
+      .maybeSingle();
+    if (existing) {
+      setError('Ya existe un cliente con ese email.');
+      return;
+    }
     const { data, error } = await supabase
       .from('customers')
       .insert({
         first_name: form.first_name,
-        last_name: form.last_name,
+        last_name: form.last_name || '',
         email: form.email,
         phone: form.phone || null,
         restaurant_id: restaurantId,
@@ -159,38 +178,81 @@ export default function CRMPage() {
     setDeletingId(null);
   };
 
+  // Filtro de clientes por búsqueda
+  const filteredCustomers = customers.filter(c =>
+    c.first_name?.toLowerCase().includes(search.toLowerCase()) ||
+    c.last_name?.toLowerCase().includes(search.toLowerCase()) ||
+    c.email?.toLowerCase().includes(search.toLowerCase())
+  );
+
   return (
     <div className="max-w-2xl mx-auto py-8">
       <h1 className="text-2xl font-bold mb-4">CRM - Clientes</h1>
       <form onSubmit={handleSubmit} className="mb-6 space-y-2">
         <div className="flex gap-2">
-          <input name="first_name" value={form.first_name} onChange={handleChange} placeholder="Nombre" className="border px-2 py-1 flex-1" />
-          <input name="last_name" value={form.last_name} onChange={handleChange} placeholder="Apellidos" className="border px-2 py-1 flex-1" />
+          <div className="flex-1">
+            <label className="block text-xs text-gray-600 mb-1">Nombre</label>
+            <input name="first_name" value={form.first_name} onChange={handleChange} placeholder="Nombre" className="border px-2 py-1 w-full" />
+          </div>
+          <div className="flex-1">
+            <label className="block text-xs text-gray-600 mb-1">Apellidos</label>
+            <input name="last_name" value={form.last_name} onChange={handleChange} placeholder="Apellidos" className="border px-2 py-1 w-full" />
+          </div>
         </div>
-        <input name="email" value={form.email} onChange={handleChange} placeholder="Email" className="border px-2 py-1 w-full" />
-        <input name="phone" value={form.phone} onChange={handleChange} placeholder="Teléfono (opcional)" className="border px-2 py-1 w-full" />
+        <div>
+          <label className="block text-xs text-gray-600 mb-1">Email</label>
+          <input name="email" value={form.email} onChange={handleChange} placeholder="Email" className="border px-2 py-1 w-full" />
+        </div>
+        <div>
+          <label className="block text-xs text-gray-600 mb-1">Teléfono</label>
+          <input name="phone" value={form.phone} onChange={handleChange} placeholder="Teléfono (opcional)" className="border px-2 py-1 w-full" />
+        </div>
         <button type="submit" className="bg-blue-600 text-white px-4 py-1 rounded">Añadir cliente</button>
         {error && <div className="text-red-600 text-sm">{error}</div>}
         {success && <div className="text-green-600 text-sm">{success}</div>}
       </form>
+      <div className="mb-4">
+        <input
+          type="text"
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          placeholder="Buscar por nombre, apellidos o email..."
+          className="border px-2 py-1 w-full"
+        />
+      </div>
       <h2 className="font-semibold mb-2">Clientes registrados</h2>
       {loading ? (
         <div>Cargando...</div>
-      ) : customers.length === 0 ? (
+      ) : filteredCustomers.length === 0 ? (
         <div>No hay clientes aún.</div>
       ) : (
         <ul className="divide-y">
-          {customers.map(c => (
+          {filteredCustomers.map(c => (
             <li key={c.id} className="py-4">
               {editId === c.id ? (
                 <div className="space-y-1 bg-gray-50 p-2 rounded">
                   <div className="flex gap-2">
-                    <input name="first_name" value={editForm.first_name || ''} onChange={handleEditChange} placeholder="Nombre" className="border px-2 py-1 flex-1" />
-                    <input name="last_name" value={editForm.last_name || ''} onChange={handleEditChange} placeholder="Apellidos" className="border px-2 py-1 flex-1" />
+                    <div className="flex-1">
+                      <label className="block text-xs text-gray-600 mb-1">Nombre</label>
+                      <input name="first_name" value={editForm.first_name || ''} onChange={handleEditChange} placeholder="Nombre" className="border px-2 py-1 w-full" />
+                    </div>
+                    <div className="flex-1">
+                      <label className="block text-xs text-gray-600 mb-1">Apellidos</label>
+                      <input name="last_name" value={editForm.last_name || ''} onChange={handleEditChange} placeholder="Apellidos" className="border px-2 py-1 w-full" />
+                    </div>
                   </div>
-                  <input name="email" value={editForm.email || ''} onChange={handleEditChange} placeholder="Email" className="border px-2 py-1 w-full" />
-                  <input name="phone" value={editForm.phone || ''} onChange={handleEditChange} placeholder="Teléfono" className="border px-2 py-1 w-full" />
-                  <textarea name="notes" value={editForm.notes || ''} onChange={handleEditChange} placeholder="Notas" className="border px-2 py-1 w-full" />
+                  <div>
+                    <label className="block text-xs text-gray-600 mb-1">Email</label>
+                    <input name="email" value={editForm.email || ''} onChange={handleEditChange} placeholder="Email" className="border px-2 py-1 w-full" />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-600 mb-1">Teléfono</label>
+                    <input name="phone" value={editForm.phone || ''} onChange={handleEditChange} placeholder="Teléfono" className="border px-2 py-1 w-full" />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-600 mb-1">Notas</label>
+                    <textarea name="notes" value={editForm.notes || ''} onChange={handleEditChange} placeholder="Notas" className="border px-2 py-1 w-full" />
+                  </div>
                   <div className="flex gap-2 mt-2">
                     <button type="button" onClick={saveEdit} className="bg-blue-600 text-white px-3 py-1 rounded">Guardar</button>
                     <button type="button" onClick={cancelEdit} className="bg-gray-300 px-3 py-1 rounded">Cancelar</button>
@@ -200,13 +262,14 @@ export default function CRMPage() {
                 <div>
                   <div className="flex justify-between items-center">
                     <div>
-                      <div className="font-medium">{c.first_name} {c.last_name}</div>
-                      <div className="text-sm text-gray-600">{c.email}{c.phone ? ` · ${c.phone}` : ''}</div>
-                      <div className="text-xs text-gray-500">Alta: {c.created_at ? new Date(c.created_at).toLocaleDateString() : '-'}</div>
+                      <div className="font-medium text-lg">{c.first_name} {c.last_name}</div>
+                      <div className="text-sm text-gray-600"><span className="font-semibold">Email:</span> {c.email}</div>
+                      <div className="text-sm text-gray-600"><span className="font-semibold">Teléfono:</span> {c.phone || '-'}</div>
+                      <div className="text-xs text-gray-500">Alta: {c.created_at ? new Date(c.created_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-'}</div>
                     </div>
                     <div className="flex gap-2">
                       <button onClick={() => startEdit(c)} className="text-blue-600 text-xs">Editar</button>
-                      <button onClick={() => { if(window.confirm('¿Eliminar cliente?')) deleteCustomer(c.id); }} className="text-red-600 text-xs" disabled={deletingId === c.id}>{deletingId === c.id ? 'Eliminando...' : 'Eliminar'}</button>
+                      <button onClick={() => { if(window.confirm('¿Seguro que quieres eliminar este cliente?')) deleteCustomer(c.id); }} className="text-red-600 text-xs" disabled={deletingId === c.id}>{deletingId === c.id ? 'Eliminando...' : 'Eliminar'}</button>
                     </div>
                   </div>
                   {c.notes && <div className="text-xs text-gray-700 mt-1">📝 {c.notes}</div>}
@@ -215,7 +278,7 @@ export default function CRMPage() {
                     <div className="text-xs text-gray-500 mt-1">Últimas reservas:
                       <ul className="list-disc ml-4">
                         {c.last_reservations.map(r => (
-                          <li key={r.id}>{new Date(r.reservation_date).toLocaleDateString()} {r.reservation_time?.slice(0,5)} - {r.status}</li>
+                          <li key={r.id}>{new Date(r.reservation_date).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })} {r.reservation_time?.slice(0,5)}h - <span className="capitalize">{r.status}</span></li>
                         ))}
                       </ul>
                     </div>
