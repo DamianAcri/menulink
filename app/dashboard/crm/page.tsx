@@ -2,6 +2,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
+import { saveAs } from 'file-saver';
 
 interface Customer {
   id: string;
@@ -18,7 +19,7 @@ interface Customer {
 export default function CRMPage() {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
-  const [form, setForm] = useState({ first_name: '', last_name: '', email: '', phone: '' });
+  const [form, setForm] = useState({ first_name: '', last_name: '', email: '', phone: '', notes: '' });
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [editId, setEditId] = useState<string | null>(null);
@@ -125,6 +126,7 @@ export default function CRMPage() {
         last_name: form.last_name || '',
         email: form.email,
         phone: form.phone || null,
+        notes: form.notes || null,
         restaurant_id: restaurantId,
       })
       .select('*')
@@ -134,7 +136,7 @@ export default function CRMPage() {
     } else {
       setSuccess('Cliente añadido correctamente.');
       setCustomers([data, ...customers]);
-      setForm({ first_name: '', last_name: '', email: '', phone: '' });
+      setForm({ first_name: '', last_name: '', email: '', phone: '', notes: '' });
     }
   };
 
@@ -178,16 +180,53 @@ export default function CRMPage() {
     setDeletingId(null);
   };
 
-  // Filtro de clientes por búsqueda
-  const filteredCustomers = customers.filter(c =>
-    c.first_name?.toLowerCase().includes(search.toLowerCase()) ||
-    c.last_name?.toLowerCase().includes(search.toLowerCase()) ||
-    c.email?.toLowerCase().includes(search.toLowerCase())
-  );
+  // Exportar clientes a CSV
+  const exportCSV = () => {
+    const header = ['Nombre', 'Apellidos', 'Email', 'Teléfono', 'Notas'];
+    const rows = filteredCustomers.map(c => [
+      c.first_name,
+      c.last_name,
+      c.email,
+      c.phone || '',
+      c.notes || ''
+    ]);
+    const csv = [header, ...rows].map(r => r.map(x => `"${(x || '').replace(/"/g, '""')}` ).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    saveAs(blob, `clientes_${new Date().toISOString().slice(0,10)}.csv`);
+  };
+
+  // Filtro por clientes con reservas activas
+  const [onlyWithReservations, setOnlyWithReservations] = useState(false);
+  const filteredCustomers = customers.filter(c => {
+    const matchesSearch =
+      c.first_name?.toLowerCase().includes(search.toLowerCase()) ||
+      c.last_name?.toLowerCase().includes(search.toLowerCase()) ||
+      c.email?.toLowerCase().includes(search.toLowerCase());
+    const matchesReservations = !onlyWithReservations || (c.reservation_count && c.reservation_count > 0);
+    return matchesSearch && matchesReservations;
+  });
 
   return (
     <div className="max-w-2xl mx-auto py-8">
       <h1 className="text-2xl font-bold mb-4">CRM - Clientes</h1>
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mb-2">
+        <div className="flex-1">
+          <input
+            type="text"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="Buscar por nombre, apellidos o email..."
+            className="border px-2 py-1 w-full"
+          />
+        </div>
+        <button onClick={exportCSV} className="bg-green-600 text-white px-3 py-1 rounded text-sm">Exportar clientes</button>
+      </div>
+      <div className="mb-2 flex gap-2 items-center">
+        <label className="text-xs flex items-center gap-1">
+          <input type="checkbox" checked={onlyWithReservations} onChange={e => setOnlyWithReservations(e.target.checked)} />
+          Mostrar solo clientes con reservas
+        </label>
+      </div>
       <form onSubmit={handleSubmit} className="mb-6 space-y-2">
         <div className="flex gap-2">
           <div className="flex-1">
@@ -207,19 +246,14 @@ export default function CRMPage() {
           <label className="block text-xs text-gray-600 mb-1">Teléfono</label>
           <input name="phone" value={form.phone} onChange={handleChange} placeholder="Teléfono (opcional)" className="border px-2 py-1 w-full" />
         </div>
+        <div>
+          <label className="block text-xs text-gray-600 mb-1">Notas internas</label>
+          <textarea name="notes" value={form.notes || ''} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} placeholder="Ej: Cliente habitual, llamar para confirmar, alergias..." className="border px-2 py-1 w-full" />
+        </div>
         <button type="submit" className="bg-blue-600 text-white px-4 py-1 rounded">Añadir cliente</button>
         {error && <div className="text-red-600 text-sm">{error}</div>}
         {success && <div className="text-green-600 text-sm">{success}</div>}
       </form>
-      <div className="mb-4">
-        <input
-          type="text"
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          placeholder="Buscar por nombre, apellidos o email..."
-          className="border px-2 py-1 w-full"
-        />
-      </div>
       <h2 className="font-semibold mb-2">Clientes registrados</h2>
       {loading ? (
         <div>Cargando...</div>
@@ -250,7 +284,7 @@ export default function CRMPage() {
                     <input name="phone" value={editForm.phone || ''} onChange={handleEditChange} placeholder="Teléfono" className="border px-2 py-1 w-full" />
                   </div>
                   <div>
-                    <label className="block text-xs text-gray-600 mb-1">Notas</label>
+                    <label className="block text-xs text-gray-600 mb-1">Notas internas</label>
                     <textarea name="notes" value={editForm.notes || ''} onChange={handleEditChange} placeholder="Notas" className="border px-2 py-1 w-full" />
                   </div>
                   <div className="flex gap-2 mt-2">
@@ -265,6 +299,7 @@ export default function CRMPage() {
                       <div className="font-medium text-lg">{c.first_name} {c.last_name}</div>
                       <div className="text-sm text-gray-600"><span className="font-semibold">Email:</span> {c.email}</div>
                       <div className="text-sm text-gray-600"><span className="font-semibold">Teléfono:</span> {c.phone || '-'}</div>
+                      {c.notes && <div className="text-xs text-gray-700 mt-1">📝 {c.notes}</div>}
                       <div className="text-xs text-gray-500">Alta: {c.created_at ? new Date(c.created_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-'}</div>
                     </div>
                     <div className="flex gap-2">
@@ -272,7 +307,6 @@ export default function CRMPage() {
                       <button onClick={() => { if(window.confirm('¿Seguro que quieres eliminar este cliente?')) deleteCustomer(c.id); }} className="text-red-600 text-xs" disabled={deletingId === c.id}>{deletingId === c.id ? 'Eliminando...' : 'Eliminar'}</button>
                     </div>
                   </div>
-                  {c.notes && <div className="text-xs text-gray-700 mt-1">📝 {c.notes}</div>}
                   <div className="text-xs text-gray-500 mt-1">Reservas: {c.reservation_count || 0}</div>
                   {c.last_reservations && c.last_reservations.length > 0 && (
                     <div className="text-xs text-gray-500 mt-1">Últimas reservas:
