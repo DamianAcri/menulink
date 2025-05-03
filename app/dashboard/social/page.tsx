@@ -491,9 +491,8 @@ function SocialLinksPage() {
                         src={`/social/${platform.icon}`} 
                         alt={platform.name} 
                         className="h-6 w-6"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).src = '/globe.svg';
-                        }}
+                        width={24}
+                        height={24}
                       />
                     </div>
                     <div className="ml-4">
@@ -592,6 +591,8 @@ function SocialLinksPage() {
                         src={`/delivery/${platform.icon}`} 
                         alt={platform.name} 
                         className="h-6 w-6"
+                        width={24}
+                        height={24}
                         onError={(e) => {
                           (e.target as HTMLImageElement).src = '/delivery/delivery.svg';
                         }}

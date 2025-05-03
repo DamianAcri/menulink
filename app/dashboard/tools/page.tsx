@@ -285,16 +285,6 @@ export default function ToolsPage() {
     }
   };
 
-  // Función para descargar kit de recursos
-  const downloadResourceKit = () => {
-    if (!restaurant?.logo_url) {
-      alert("Tu restaurante no tiene logo. Sube uno primero desde la sección de Perfil.");
-      return;
-    }
-    
-    alert("Esta función descargará un archivo ZIP con tu logo en diferentes formatos, portadas para redes sociales y plantillas para promociones. Actualmente en desarrollo.");
-  };
-
   // Función para guardar preferencias de notificaciones
   const saveNotificationPreferences = async () => {
     if (!restaurant) return;
@@ -622,40 +612,6 @@ export default function ToolsPage() {
         </div>
       </div>
 
-      {/* Kit de recursos gráficos */}
-      <div className="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-lg">
-        <div className="px-4 py-5 sm:p-6">
-          <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-white flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
-            Kit de recursos gráficos
-          </h3>
-          <div className="mt-2 max-w-xl text-sm text-gray-500 dark:text-gray-400">
-            <p>
-              Descarga recursos gráficos personalizados para tu negocio, incluyendo tu logo en diferentes formatos, portadas para redes sociales y plantillas para promociones.
-            </p>
-          </div>
-          <div className="mt-5">
-            <button
-              type="button"
-              onClick={downloadResourceKit}
-              className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              disabled={!restaurant?.logo_url}
-            >
-              <svg className="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-              </svg>
-              Descargar recursos gráficos
-            </button>
-            {!restaurant?.logo_url && (
-              <p className="mt-2 text-xs text-red-500">
-                Necesitas añadir un logo a tu perfil primero.
-              </p>
-            )}
-          </div>
-        </div>
-      </div>
 
       {/* Soporte y sugerencias */}
       <div className="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-lg">
