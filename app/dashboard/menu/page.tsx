@@ -418,13 +418,16 @@ export default function MenuPage() {
           if (uploadError) throw uploadError;
           const { data: urlData } = supabase.storage.from('menulink').getPublicUrl(filePath);
           imageUrl = urlData.publicUrl;
-          // 3. Actualizar el registro con la URL de la imagen
-          const { error: updateError } = await supabase
+          // 3. Actualizar el registro con la URL de la imagen y obtener el registro actualizado
+          const { error: updateError, data: updatedData } = await supabase
             .from('menu_items')
             .update({ image_url: imageUrl })
-            .eq('id', newItemId);
+            .eq('id', newItemId)
+            .select()
+            .single();
           if (updateError) throw updateError;
-          newItem.image_url = imageUrl;
+          // Usar el registro actualizado para el estado local
+          newItem = updatedData as MenuItem;
         }
         setMenuItems([...menuItems, newItem]);
       }
