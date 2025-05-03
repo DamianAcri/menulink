@@ -460,689 +460,1283 @@ Este sistema de registro permite:
 #Estructura de la base de datos (v1)
 [
   {
-    "table_name": "contact_info",
-    "column_name": "address",
-    "data_type": "text",
-    "is_nullable": "YES",
-    "column_default": null
+    "tabla": "campaign_recipients",
+    "columna": "campaign_id",
+    "tipo": "uuid",
+    "permite_nulos": "NO",
+    "tabla_referenciada": "marketing_campaigns",
+    "columna_referenciada": "id"
+  },
+  {
+    "tabla": "campaign_recipients",
+    "columna": "clicked_through",
+    "tipo": "boolean",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
+  },
+  {
+    "tabla": "campaign_recipients",
+    "columna": "customer_id",
+    "tipo": "uuid",
+    "permite_nulos": "NO",
+    "tabla_referenciada": "customers",
+    "columna_referenciada": "id"
+  },
+  {
+    "tabla": "campaign_recipients",
+    "columna": "email_opened",
+    "tipo": "boolean",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
+  },
+  {
+    "tabla": "campaign_recipients",
+    "columna": "email_sent",
+    "tipo": "boolean",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
+  },
+  {
+    "tabla": "contact_info",
+    "columna": "address",
+    "tipo": "text",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
+  },
+  {
+    "tabla": "contact_info",
+    "columna": "city",
+    "tipo": "text",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
+  },
+  {
+    "tabla": "contact_info",
+    "columna": "country",
+    "tipo": "text",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
+  },
+  {
+    "tabla": "contact_info",
+    "columna": "created_at",
+    "tipo": "timestamp with time zone",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
+  },
+  {
+    "tabla": "contact_info",
+    "columna": "email",
+    "tipo": "text",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
+  },
+  {
+    "tabla": "contact_info",
+    "columna": "id",
+    "tipo": "uuid",
+    "permite_nulos": "NO",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
+  },
+  {
+    "tabla": "contact_info",
+    "columna": "latitude",
+    "tipo": "numeric(10,8)",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
+  },
+  {
+    "tabla": "contact_info",
+    "columna": "longitude",
+    "tipo": "numeric(11,8)",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
   },
   {
-    "table_name": "contact_info",
-    "column_name": "city",
-    "data_type": "text",
-    "is_nullable": "YES",
-    "column_default": null
+    "tabla": "contact_info",
+    "columna": "phone",
+    "tipo": "text",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
   },
   {
-    "table_name": "contact_info",
-    "column_name": "country",
-    "data_type": "text",
-    "is_nullable": "YES",
-    "column_default": null
+    "tabla": "contact_info",
+    "columna": "postal_code",
+    "tipo": "text",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
   },
   {
-    "table_name": "contact_info",
-    "column_name": "created_at",
-    "data_type": "timestamp with time zone",
-    "is_nullable": "YES",
-    "column_default": "now()"
+    "tabla": "contact_info",
+    "columna": "restaurant_id",
+    "tipo": "uuid",
+    "permite_nulos": "NO",
+    "tabla_referenciada": "restaurants",
+    "columna_referenciada": "id"
   },
   {
-    "table_name": "contact_info",
-    "column_name": "email",
-    "data_type": "text",
-    "is_nullable": "YES",
-    "column_default": null
+    "tabla": "contact_info",
+    "columna": "updated_at",
+    "tipo": "timestamp with time zone",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
   },
   {
-    "table_name": "contact_info",
-    "column_name": "id",
-    "data_type": "uuid",
-    "is_nullable": "NO",
-    "column_default": "uuid_generate_v4()"
+    "tabla": "contact_info",
+    "columna": "whatsapp",
+    "tipo": "text",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
   },
   {
-    "table_name": "contact_info",
-    "column_name": "latitude",
-    "data_type": "numeric",
-    "is_nullable": "YES",
-    "column_default": null
+    "tabla": "customer_interactions",
+    "columna": "customer_id",
+    "tipo": "uuid",
+    "permite_nulos": "NO",
+    "tabla_referenciada": "customers",
+    "columna_referenciada": "id"
   },
   {
-    "table_name": "contact_info",
-    "column_name": "longitude",
-    "data_type": "numeric",
-    "is_nullable": "YES",
-    "column_default": null
+    "tabla": "customer_interactions",
+    "columna": "id",
+    "tipo": "uuid",
+    "permite_nulos": "NO",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
   },
   {
-    "table_name": "contact_info",
-    "column_name": "phone",
-    "data_type": "text",
-    "is_nullable": "YES",
-    "column_default": null
+    "tabla": "customer_interactions",
+    "columna": "interaction_date",
+    "tipo": "timestamp with time zone",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
   },
   {
-    "table_name": "contact_info",
-    "column_name": "postal_code",
-    "data_type": "text",
-    "is_nullable": "YES",
-    "column_default": null
+    "tabla": "customer_interactions",
+    "columna": "interaction_type",
+    "tipo": "text",
+    "permite_nulos": "NO",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
   },
   {
-    "table_name": "contact_info",
-    "column_name": "restaurant_id",
-    "data_type": "uuid",
-    "is_nullable": "NO",
-    "column_default": null
+    "tabla": "customer_interactions",
+    "columna": "notes",
+    "tipo": "text",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
   },
   {
-    "table_name": "contact_info",
-    "column_name": "restaurant_id",
-    "data_type": "FOREIGN KEY REFERENCES restaurants(id)",
-    "is_nullable": "FK",
-    "column_default": null
+    "tabla": "customer_interactions",
+    "columna": "restaurant_id",
+    "tipo": "uuid",
+    "permite_nulos": "NO",
+    "tabla_referenciada": "restaurants",
+    "columna_referenciada": "id"
   },
   {
-    "table_name": "contact_info",
-    "column_name": "updated_at",
-    "data_type": "timestamp with time zone",
-    "is_nullable": "YES",
-    "column_default": "now()"
+    "tabla": "customer_interactions",
+    "columna": "staff_id",
+    "tipo": "uuid",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
   },
   {
-    "table_name": "contact_info",
-    "column_name": "whatsapp",
-    "data_type": "text",
-    "is_nullable": "YES",
-    "column_default": null
+    "tabla": "customer_loyalty",
+    "columna": "created_at",
+    "tipo": "timestamp with time zone",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
   },
   {
-    "table_name": "delivery_links",
-    "column_name": "created_at",
-    "data_type": "timestamp with time zone",
-    "is_nullable": "YES",
-    "column_default": "now()"
+    "tabla": "customer_loyalty",
+    "columna": "current_points",
+    "tipo": "integer(32,0)",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
   },
   {
-    "table_name": "delivery_links",
-    "column_name": "display_order",
-    "data_type": "integer",
-    "is_nullable": "NO",
-    "column_default": "0"
+    "tabla": "customer_loyalty",
+    "columna": "customer_id",
+    "tipo": "uuid",
+    "permite_nulos": "NO",
+    "tabla_referenciada": "customers",
+    "columna_referenciada": "id"
   },
   {
-    "table_name": "delivery_links",
-    "column_name": "id",
-    "data_type": "uuid",
-    "is_nullable": "NO",
-    "column_default": "gen_random_uuid()"
+    "tabla": "customer_loyalty",
+    "columna": "last_activity_date",
+    "tipo": "timestamp with time zone",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
   },
   {
-    "table_name": "delivery_links",
-    "column_name": "platform",
-    "data_type": "text",
-    "is_nullable": "NO",
-    "column_default": null
+    "tabla": "customer_loyalty",
+    "columna": "total_points",
+    "tipo": "integer(32,0)",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
   },
   {
-    "table_name": "delivery_links",
-    "column_name": "restaurant_id",
-    "data_type": "uuid",
-    "is_nullable": "YES",
-    "column_default": null
+    "tabla": "customer_loyalty",
+    "columna": "updated_at",
+    "tipo": "timestamp with time zone",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
   },
   {
-    "table_name": "delivery_links",
-    "column_name": "restaurant_id",
-    "data_type": "FOREIGN KEY REFERENCES restaurants(id)",
-    "is_nullable": "FK",
-    "column_default": null
+    "tabla": "customer_preferences",
+    "columna": "created_at",
+    "tipo": "timestamp with time zone",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
   },
   {
-    "table_name": "delivery_links",
-    "column_name": "url",
-    "data_type": "text",
-    "is_nullable": "NO",
-    "column_default": null
+    "tabla": "customer_preferences",
+    "columna": "customer_id",
+    "tipo": "uuid",
+    "permite_nulos": "NO",
+    "tabla_referenciada": "customers",
+    "columna_referenciada": "id"
   },
   {
-    "table_name": "menu_categories",
-    "column_name": "created_at",
-    "data_type": "timestamp with time zone",
-    "is_nullable": "YES",
-    "column_default": "now()"
+    "tabla": "customer_preferences",
+    "columna": "id",
+    "tipo": "uuid",
+    "permite_nulos": "NO",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
   },
   {
-    "table_name": "menu_categories",
-    "column_name": "description",
-    "data_type": "text",
-    "is_nullable": "YES",
-    "column_default": null
+    "tabla": "customer_preferences",
+    "columna": "preference_type",
+    "tipo": "text",
+    "permite_nulos": "NO",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
   },
   {
-    "table_name": "menu_categories",
-    "column_name": "display_order",
-    "data_type": "integer",
-    "is_nullable": "YES",
-    "column_default": "0"
+    "tabla": "customer_preferences",
+    "columna": "preference_value",
+    "tipo": "text",
+    "permite_nulos": "NO",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
   },
   {
-    "table_name": "menu_categories",
-    "column_name": "id",
-    "data_type": "uuid",
-    "is_nullable": "NO",
-    "column_default": "uuid_generate_v4()"
+    "tabla": "customer_preferences",
+    "columna": "restaurant_id",
+    "tipo": "uuid",
+    "permite_nulos": "NO",
+    "tabla_referenciada": "restaurants",
+    "columna_referenciada": "id"
   },
   {
-    "table_name": "menu_categories",
-    "column_name": "name",
-    "data_type": "text",
-    "is_nullable": "NO",
-    "column_default": null
+    "tabla": "customer_preferences",
+    "columna": "updated_at",
+    "tipo": "timestamp with time zone",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
   },
   {
-    "table_name": "menu_categories",
-    "column_name": "restaurant_id",
-    "data_type": "uuid",
-    "is_nullable": "NO",
-    "column_default": null
+    "tabla": "customer_segments",
+    "columna": "created_at",
+    "tipo": "timestamp with time zone",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
   },
   {
-    "table_name": "menu_categories",
-    "column_name": "restaurant_id",
-    "data_type": "FOREIGN KEY REFERENCES restaurants(id)",
-    "is_nullable": "FK",
-    "column_default": null
+    "tabla": "customer_segments",
+    "columna": "description",
+    "tipo": "text",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
   },
   {
-    "table_name": "menu_categories",
-    "column_name": "updated_at",
-    "data_type": "timestamp with time zone",
-    "is_nullable": "YES",
-    "column_default": "now()"
+    "tabla": "customer_segments",
+    "columna": "id",
+    "tipo": "uuid",
+    "permite_nulos": "NO",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
   },
   {
-    "table_name": "menu_items",
-    "column_name": "category_id",
-    "data_type": "FOREIGN KEY REFERENCES menu_categories(id)",
-    "is_nullable": "FK",
-    "column_default": null
+    "tabla": "customer_segments",
+    "columna": "name",
+    "tipo": "text",
+    "permite_nulos": "NO",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
   },
   {
-    "table_name": "menu_items",
-    "column_name": "category_id",
-    "data_type": "uuid",
-    "is_nullable": "NO",
-    "column_default": null
+    "tabla": "customer_segments",
+    "columna": "restaurant_id",
+    "tipo": "uuid",
+    "permite_nulos": "NO",
+    "tabla_referenciada": "restaurants",
+    "columna_referenciada": "id"
   },
   {
-    "table_name": "menu_items",
-    "column_name": "created_at",
-    "data_type": "timestamp with time zone",
-    "is_nullable": "YES",
-    "column_default": "now()"
+    "tabla": "customer_segments",
+    "columna": "updated_at",
+    "tipo": "timestamp with time zone",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
   },
   {
-    "table_name": "menu_items",
-    "column_name": "description",
-    "data_type": "text",
-    "is_nullable": "YES",
-    "column_default": null
+    "tabla": "customers",
+    "columna": "birth_date",
+    "tipo": "date",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
   },
   {
-    "table_name": "menu_items",
-    "column_name": "display_order",
-    "data_type": "integer",
-    "is_nullable": "YES",
-    "column_default": "0"
+    "tabla": "customers",
+    "columna": "created_at",
+    "tipo": "timestamp with time zone",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
   },
   {
-    "table_name": "menu_items",
-    "column_name": "id",
-    "data_type": "uuid",
-    "is_nullable": "NO",
-    "column_default": "uuid_generate_v4()"
+    "tabla": "customers",
+    "columna": "customer_source",
+    "tipo": "text",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
   },
   {
-    "table_name": "menu_items",
-    "column_name": "image_url",
-    "data_type": "text",
-    "is_nullable": "YES",
-    "column_default": null
+    "tabla": "customers",
+    "columna": "email",
+    "tipo": "text",
+    "permite_nulos": "NO",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
   },
   {
-    "table_name": "menu_items",
-    "column_name": "is_available",
-    "data_type": "boolean",
-    "is_nullable": "YES",
-    "column_default": "true"
+    "tabla": "customers",
+    "columna": "first_name",
+    "tipo": "text",
+    "permite_nulos": "NO",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
   },
   {
-    "table_name": "menu_items",
-    "column_name": "is_featured",
-    "data_type": "boolean",
-    "is_nullable": "YES",
-    "column_default": "false"
+    "tabla": "customers",
+    "columna": "id",
+    "tipo": "uuid",
+    "permite_nulos": "NO",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
   },
   {
-    "table_name": "menu_items",
-    "column_name": "name",
-    "data_type": "text",
-    "is_nullable": "NO",
-    "column_default": null
+    "tabla": "customers",
+    "columna": "last_name",
+    "tipo": "text",
+    "permite_nulos": "NO",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
   },
   {
-    "table_name": "menu_items",
-    "column_name": "price",
-    "data_type": "numeric",
-    "is_nullable": "NO",
-    "column_default": null
+    "tabla": "customers",
+    "columna": "notes",
+    "tipo": "text",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
   },
   {
-    "table_name": "menu_items",
-    "column_name": "updated_at",
-    "data_type": "timestamp with time zone",
-    "is_nullable": "YES",
-    "column_default": "now()"
+    "tabla": "customers",
+    "columna": "phone",
+    "tipo": "text",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
   },
   {
-    "table_name": "opening_hours",
-    "column_name": "closes_at",
-    "data_type": "time without time zone",
-    "is_nullable": "YES",
-    "column_default": null
+    "tabla": "customers",
+    "columna": "restaurant_id",
+    "tipo": "uuid",
+    "permite_nulos": "NO",
+    "tabla_referenciada": "restaurants",
+    "columna_referenciada": "id"
   },
   {
-    "table_name": "opening_hours",
-    "column_name": "created_at",
-    "data_type": "timestamp with time zone",
-    "is_nullable": "YES",
-    "column_default": "now()"
+    "tabla": "customers",
+    "columna": "updated_at",
+    "tipo": "timestamp with time zone",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
   },
   {
-    "table_name": "opening_hours",
-    "column_name": "day_of_week",
-    "data_type": "integer",
-    "is_nullable": "NO",
-    "column_default": null
+    "tabla": "delivery_links",
+    "columna": "created_at",
+    "tipo": "timestamp with time zone",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
   },
   {
-    "table_name": "opening_hours",
-    "column_name": "id",
-    "data_type": "uuid",
-    "is_nullable": "NO",
-    "column_default": "uuid_generate_v4()"
+    "tabla": "delivery_links",
+    "columna": "display_order",
+    "tipo": "integer(32,0)",
+    "permite_nulos": "NO",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
   },
   {
-    "table_name": "opening_hours",
-    "column_name": "is_closed",
-    "data_type": "boolean",
-    "is_nullable": "YES",
-    "column_default": "false"
+    "tabla": "delivery_links",
+    "columna": "id",
+    "tipo": "uuid",
+    "permite_nulos": "NO",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
   },
   {
-    "table_name": "opening_hours",
-    "column_name": "opens_at",
-    "data_type": "time without time zone",
-    "is_nullable": "YES",
-    "column_default": null
+    "tabla": "delivery_links",
+    "columna": "platform",
+    "tipo": "text",
+    "permite_nulos": "NO",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
   },
   {
-    "table_name": "opening_hours",
-    "column_name": "restaurant_id",
-    "data_type": "uuid",
-    "is_nullable": "NO",
-    "column_default": null
+    "tabla": "delivery_links",
+    "columna": "restaurant_id",
+    "tipo": "uuid",
+    "permite_nulos": "YES",
+    "tabla_referenciada": "restaurants",
+    "columna_referenciada": "id"
   },
   {
-    "table_name": "opening_hours",
-    "column_name": "restaurant_id",
-    "data_type": "FOREIGN KEY REFERENCES restaurants(id)",
-    "is_nullable": "FK",
-    "column_default": null
+    "tabla": "delivery_links",
+    "columna": "url",
+    "tipo": "text",
+    "permite_nulos": "NO",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
   },
   {
-    "table_name": "opening_hours",
-    "column_name": "updated_at",
-    "data_type": "timestamp with time zone",
-    "is_nullable": "YES",
-    "column_default": "now()"
+    "tabla": "email_logs",
+    "columna": "created_at",
+    "tipo": "timestamp with time zone",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
   },
   {
-    "table_name": "page_views",
-    "column_name": "id",
-    "data_type": "uuid",
-    "is_nullable": "NO",
-    "column_default": "uuid_generate_v4()"
+    "tabla": "email_logs",
+    "columna": "customer_email",
+    "tipo": "text",
+    "permite_nulos": "NO",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
   },
   {
-    "table_name": "page_views",
-    "column_name": "ip_address",
-    "data_type": "text",
-    "is_nullable": "YES",
-    "column_default": null
+    "tabla": "email_logs",
+    "columna": "error_message",
+    "tipo": "text",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
   },
   {
-    "table_name": "page_views",
-    "column_name": "referrer",
-    "data_type": "text",
-    "is_nullable": "YES",
-    "column_default": null
+    "tabla": "email_logs",
+    "columna": "id",
+    "tipo": "uuid",
+    "permite_nulos": "NO",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
   },
   {
-    "table_name": "page_views",
-    "column_name": "restaurant_id",
-    "data_type": "uuid",
-    "is_nullable": "NO",
-    "column_default": null
+    "tabla": "email_logs",
+    "columna": "reservation_id",
+    "tipo": "uuid",
+    "permite_nulos": "NO",
+    "tabla_referenciada": "reservations",
+    "columna_referenciada": "id"
   },
   {
-    "table_name": "page_views",
-    "column_name": "restaurant_id",
-    "data_type": "FOREIGN KEY REFERENCES restaurants(id)",
-    "is_nullable": "FK",
-    "column_default": null
+    "tabla": "email_logs",
+    "columna": "restaurant_id",
+    "tipo": "uuid",
+    "permite_nulos": "NO",
+    "tabla_referenciada": "restaurants",
+    "columna_referenciada": "id"
   },
   {
-    "table_name": "page_views",
-    "column_name": "user_agent",
-    "data_type": "text",
-    "is_nullable": "YES",
-    "column_default": null
+    "tabla": "email_logs",
+    "columna": "scheduled_for",
+    "tipo": "timestamp with time zone",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
   },
   {
-    "table_name": "page_views",
-    "column_name": "viewed_at",
-    "data_type": "timestamp with time zone",
-    "is_nullable": "YES",
-    "column_default": "now()"
+    "tabla": "email_logs",
+    "columna": "sent_at",
+    "tipo": "timestamp with time zone",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
   },
   {
-    "table_name": "reservations",
-    "column_name": "created_at",
-    "data_type": "timestamp with time zone",
-    "is_nullable": "YES",
-    "column_default": "now()"
+    "tabla": "email_logs",
+    "columna": "status",
+    "tipo": "text",
+    "permite_nulos": "NO",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
   },
   {
-    "table_name": "reservations",
-    "column_name": "customer_email",
-    "data_type": "text",
-    "is_nullable": "NO",
-    "column_default": null
+    "tabla": "email_logs",
+    "columna": "type",
+    "tipo": "text",
+    "permite_nulos": "NO",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
   },
   {
-    "table_name": "reservations",
-    "column_name": "customer_name",
-    "data_type": "text",
-    "is_nullable": "NO",
-    "column_default": null
+    "tabla": "loyalty_programs",
+    "columna": "active",
+    "tipo": "boolean",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
   },
   {
-    "table_name": "reservations",
-    "column_name": "customer_phone",
-    "data_type": "text",
-    "is_nullable": "NO",
-    "column_default": null
+    "tabla": "loyalty_programs",
+    "columna": "created_at",
+    "tipo": "timestamp with time zone",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
   },
   {
-    "table_name": "reservations",
-    "column_name": "id",
-    "data_type": "uuid",
-    "is_nullable": "NO",
-    "column_default": "uuid_generate_v4()"
+    "tabla": "loyalty_programs",
+    "columna": "description",
+    "tipo": "text",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
   },
   {
-    "table_name": "reservations",
-    "column_name": "party_size",
-    "data_type": "integer",
-    "is_nullable": "NO",
-    "column_default": null
+    "tabla": "loyalty_programs",
+    "columna": "id",
+    "tipo": "uuid",
+    "permite_nulos": "NO",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
   },
   {
-    "table_name": "reservations",
-    "column_name": "reservation_date",
-    "data_type": "date",
-    "is_nullable": "NO",
-    "column_default": null
+    "tabla": "loyalty_programs",
+    "columna": "name",
+    "tipo": "text",
+    "permite_nulos": "NO",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
   },
   {
-    "table_name": "reservations",
-    "column_name": "reservation_time",
-    "data_type": "time without time zone",
-    "is_nullable": "NO",
-    "column_default": null
+    "tabla": "loyalty_programs",
+    "columna": "points_required",
+    "tipo": "integer(32,0)",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
   },
   {
-    "table_name": "reservations",
-    "column_name": "restaurant_id",
-    "data_type": "FOREIGN KEY REFERENCES restaurants(id)",
-    "is_nullable": "FK",
-    "column_default": null
+    "tabla": "loyalty_programs",
+    "columna": "restaurant_id",
+    "tipo": "uuid",
+    "permite_nulos": "NO",
+    "tabla_referenciada": "restaurants",
+    "columna_referenciada": "id"
   },
   {
-    "table_name": "reservations",
-    "column_name": "restaurant_id",
-    "data_type": "uuid",
-    "is_nullable": "NO",
-    "column_default": null
+    "tabla": "loyalty_programs",
+    "columna": "reward_description",
+    "tipo": "text",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
   },
   {
-    "table_name": "reservations",
-    "column_name": "special_requests",
-    "data_type": "text",
-    "is_nullable": "YES",
-    "column_default": null
+    "tabla": "loyalty_programs",
+    "columna": "updated_at",
+    "tipo": "timestamp with time zone",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
   },
   {
-    "table_name": "reservations",
-    "column_name": "status",
-    "data_type": "text",
-    "is_nullable": "NO",
-    "column_default": "'pending'::text"
+    "tabla": "marketing_campaigns",
+    "columna": "created_at",
+    "tipo": "timestamp with time zone",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
   },
   {
-    "table_name": "reservations",
-    "column_name": "updated_at",
-    "data_type": "timestamp with time zone",
-    "is_nullable": "YES",
-    "column_default": "now()"
+    "tabla": "marketing_campaigns",
+    "columna": "description",
+    "tipo": "text",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
   },
   {
-    "table_name": "restaurants",
-    "column_name": "color_scheme",
-    "data_type": "character varying",
-    "is_nullable": "YES",
-    "column_default": null
+    "tabla": "marketing_campaigns",
+    "columna": "end_date",
+    "tipo": "timestamp with time zone",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
   },
   {
-    "table_name": "restaurants",
-    "column_name": "cover_image_url",
-    "data_type": "text",
-    "is_nullable": "YES",
-    "column_default": null
+    "tabla": "marketing_campaigns",
+    "columna": "id",
+    "tipo": "uuid",
+    "permite_nulos": "NO",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
   },
   {
-    "table_name": "restaurants",
-    "column_name": "created_at",
-    "data_type": "timestamp with time zone",
-    "is_nullable": "YES",
-    "column_default": "now()"
+    "tabla": "marketing_campaigns",
+    "columna": "name",
+    "tipo": "text",
+    "permite_nulos": "NO",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
   },
   {
-    "table_name": "restaurants",
-    "column_name": "description",
-    "data_type": "text",
-    "is_nullable": "YES",
-    "column_default": null
+    "tabla": "marketing_campaigns",
+    "columna": "restaurant_id",
+    "tipo": "uuid",
+    "permite_nulos": "NO",
+    "tabla_referenciada": "restaurants",
+    "columna_referenciada": "id"
   },
   {
-    "table_name": "restaurants",
-    "column_name": "email_notifications",
-    "data_type": "boolean",
-    "is_nullable": "YES",
-    "column_default": "false"
+    "tabla": "marketing_campaigns",
+    "columna": "start_date",
+    "tipo": "timestamp with time zone",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
   },
   {
-    "table_name": "restaurants",
-    "column_name": "font_family",
-    "data_type": "text",
-    "is_nullable": "YES",
-    "column_default": "'Inter'::text"
+    "tabla": "marketing_campaigns",
+    "columna": "status",
+    "tipo": "text",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
   },
   {
-    "table_name": "restaurants",
-    "column_name": "google_my_business_link",
-    "data_type": "character varying",
-    "is_nullable": "YES",
-    "column_default": null
+    "tabla": "marketing_campaigns",
+    "columna": "updated_at",
+    "tipo": "timestamp with time zone",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
   },
   {
-    "table_name": "restaurants",
-    "column_name": "id",
-    "data_type": "uuid",
-    "is_nullable": "NO",
-    "column_default": "uuid_generate_v4()"
+    "tabla": "menu_categories",
+    "columna": "created_at",
+    "tipo": "timestamp with time zone",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
   },
   {
-    "table_name": "restaurants",
-    "column_name": "logo_url",
-    "data_type": "text",
-    "is_nullable": "YES",
-    "column_default": null
+    "tabla": "menu_categories",
+    "columna": "description",
+    "tipo": "text",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
   },
   {
-    "table_name": "restaurants",
-    "column_name": "name",
-    "data_type": "text",
-    "is_nullable": "NO",
-    "column_default": null
+    "tabla": "menu_categories",
+    "columna": "display_order",
+    "tipo": "integer(32,0)",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
   },
   {
-    "table_name": "restaurants",
-    "column_name": "primary_color",
-    "data_type": "character varying",
-    "is_nullable": "YES",
-    "column_default": null
+    "tabla": "menu_categories",
+    "columna": "id",
+    "tipo": "uuid",
+    "permite_nulos": "NO",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
   },
   {
-    "table_name": "restaurants",
-    "column_name": "restaurant_type",
-    "data_type": "character varying",
-    "is_nullable": "YES",
-    "column_default": null
+    "tabla": "menu_categories",
+    "columna": "name",
+    "tipo": "text",
+    "permite_nulos": "NO",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
   },
   {
-    "table_name": "restaurants",
-    "column_name": "secondary_color",
-    "data_type": "text",
-    "is_nullable": "YES",
-    "column_default": "'#FFFFFF'::text"
+    "tabla": "menu_categories",
+    "columna": "restaurant_id",
+    "tipo": "uuid",
+    "permite_nulos": "NO",
+    "tabla_referenciada": "restaurants",
+    "columna_referenciada": "id"
   },
   {
-    "table_name": "restaurants",
-    "column_name": "slug",
-    "data_type": "text",
-    "is_nullable": "NO",
-    "column_default": null
+    "tabla": "menu_categories",
+    "columna": "updated_at",
+    "tipo": "timestamp with time zone",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
   },
   {
-    "table_name": "restaurants",
-    "column_name": "subscription_tier",
-    "data_type": "text",
-    "is_nullable": "YES",
-    "column_default": "'free'::text"
+    "tabla": "menu_items",
+    "columna": "category_id",
+    "tipo": "uuid",
+    "permite_nulos": "NO",
+    "tabla_referenciada": "menu_categories",
+    "columna_referenciada": "id"
   },
   {
-    "table_name": "restaurants",
-    "column_name": "theme_color",
-    "data_type": "text",
-    "is_nullable": "YES",
-    "column_default": "'#000000'::text"
+    "tabla": "menu_items",
+    "columna": "created_at",
+    "tipo": "timestamp with time zone",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
   },
   {
-    "table_name": "restaurants",
-    "column_name": "theme_type",
-    "data_type": "integer",
-    "is_nullable": "YES",
-    "column_default": "1"
+    "tabla": "menu_items",
+    "columna": "description",
+    "tipo": "text",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
   },
   {
-    "table_name": "restaurants",
-    "column_name": "updated_at",
-    "data_type": "timestamp with time zone",
-    "is_nullable": "YES",
-    "column_default": "now()"
+    "tabla": "menu_items",
+    "columna": "display_order",
+    "tipo": "integer(32,0)",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
   },
   {
-    "table_name": "restaurants",
-    "column_name": "user_id",
-    "data_type": "uuid",
-    "is_nullable": "NO",
-    "column_default": null
+    "tabla": "menu_items",
+    "columna": "id",
+    "tipo": "uuid",
+    "permite_nulos": "NO",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
   },
   {
-    "table_name": "restaurants",
-    "column_name": "user_id",
-    "data_type": "FOREIGN KEY REFERENCES users(id)",
-    "is_nullable": "FK",
-    "column_default": null
+    "tabla": "menu_items",
+    "columna": "image_url",
+    "tipo": "text",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
   },
   {
-    "table_name": "social_links",
-    "column_name": "created_at",
-    "data_type": "timestamp with time zone",
-    "is_nullable": "YES",
-    "column_default": "now()"
+    "tabla": "menu_items",
+    "columna": "is_available",
+    "tipo": "boolean",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
   },
   {
-    "table_name": "social_links",
-    "column_name": "display_order",
-    "data_type": "integer",
-    "is_nullable": "YES",
-    "column_default": "0"
+    "tabla": "menu_items",
+    "columna": "is_featured",
+    "tipo": "boolean",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
   },
   {
-    "table_name": "social_links",
-    "column_name": "id",
-    "data_type": "uuid",
-    "is_nullable": "NO",
-    "column_default": "uuid_generate_v4()"
+    "tabla": "menu_items",
+    "columna": "name",
+    "tipo": "text",
+    "permite_nulos": "NO",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
   },
   {
-    "table_name": "social_links",
-    "column_name": "platform",
-    "data_type": "text",
-    "is_nullable": "NO",
-    "column_default": null
+    "tabla": "menu_items",
+    "columna": "price",
+    "tipo": "numeric(10,2)",
+    "permite_nulos": "NO",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
   },
   {
-    "table_name": "social_links",
-    "column_name": "restaurant_id",
-    "data_type": "FOREIGN KEY REFERENCES restaurants(id)",
-    "is_nullable": "FK",
-    "column_default": null
+    "tabla": "menu_items",
+    "columna": "updated_at",
+    "tipo": "timestamp with time zone",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
   },
   {
-    "table_name": "social_links",
-    "column_name": "restaurant_id",
-    "data_type": "uuid",
-    "is_nullable": "NO",
-    "column_default": null
+    "tabla": "opening_hours",
+    "columna": "closes_at",
+    "tipo": "time without time zone",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
   },
   {
-    "table_name": "social_links",
-    "column_name": "updated_at",
-    "data_type": "timestamp with time zone",
-    "is_nullable": "YES",
-    "column_default": "now()"
+    "tabla": "opening_hours",
+    "columna": "created_at",
+    "tipo": "timestamp with time zone",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
   },
   {
-    "table_name": "social_links",
-    "column_name": "url",
-    "data_type": "text",
-    "is_nullable": "NO",
-    "column_default": null
+    "tabla": "opening_hours",
+    "columna": "day_of_week",
+    "tipo": "integer(32,0)",
+    "permite_nulos": "NO",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
+  },
+  {
+    "tabla": "opening_hours",
+    "columna": "id",
+    "tipo": "uuid",
+    "permite_nulos": "NO",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
+  },
+  {
+    "tabla": "opening_hours",
+    "columna": "is_closed",
+    "tipo": "boolean",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
+  },
+  {
+    "tabla": "opening_hours",
+    "columna": "opens_at",
+    "tipo": "time without time zone",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
+  },
+  {
+    "tabla": "opening_hours",
+    "columna": "restaurant_id",
+    "tipo": "uuid",
+    "permite_nulos": "NO",
+    "tabla_referenciada": "restaurants",
+    "columna_referenciada": "id"
+  },
+  {
+    "tabla": "opening_hours",
+    "columna": "updated_at",
+    "tipo": "timestamp with time zone",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
+  },
+  {
+    "tabla": "page_views",
+    "columna": "id",
+    "tipo": "uuid",
+    "permite_nulos": "NO",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
+  },
+  {
+    "tabla": "page_views",
+    "columna": "ip_address",
+    "tipo": "text",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
+  },
+  {
+    "tabla": "page_views",
+    "columna": "referrer",
+    "tipo": "text",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
+  },
+  {
+    "tabla": "page_views",
+    "columna": "restaurant_id",
+    "tipo": "uuid",
+    "permite_nulos": "NO",
+    "tabla_referenciada": "restaurants",
+    "columna_referenciada": "id"
+  },
+  {
+    "tabla": "page_views",
+    "columna": "user_agent",
+    "tipo": "text",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
+  },
+  {
+    "tabla": "page_views",
+    "columna": "viewed_at",
+    "tipo": "timestamp with time zone",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
+  },
+  {
+    "tabla": "reservations",
+    "columna": "created_at",
+    "tipo": "timestamp with time zone",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
+  },
+  {
+    "tabla": "reservations",
+    "columna": "customer_email",
+    "tipo": "text",
+    "permite_nulos": "NO",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
+  },
+  {
+    "tabla": "reservations",
+    "columna": "customer_id",
+    "tipo": "uuid",
+    "permite_nulos": "YES",
+    "tabla_referenciada": "customers",
+    "columna_referenciada": "id"
+  },
+  {
+    "tabla": "reservations",
+    "columna": "customer_name",
+    "tipo": "text",
+    "permite_nulos": "NO",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
+  },
+  {
+    "tabla": "reservations",
+    "columna": "customer_phone",
+    "tipo": "text",
+    "permite_nulos": "NO",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
+  },
+  {
+    "tabla": "reservations",
+    "columna": "id",
+    "tipo": "uuid",
+    "permite_nulos": "NO",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
+  },
+  {
+    "tabla": "reservations",
+    "columna": "party_size",
+    "tipo": "integer(32,0)",
+    "permite_nulos": "NO",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
+  },
+  {
+    "tabla": "reservations",
+    "columna": "reservation_date",
+    "tipo": "date",
+    "permite_nulos": "NO",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
+  },
+  {
+    "tabla": "reservations",
+    "columna": "reservation_time",
+    "tipo": "time without time zone",
+    "permite_nulos": "NO",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
+  },
+  {
+    "tabla": "reservations",
+    "columna": "restaurant_id",
+    "tipo": "uuid",
+    "permite_nulos": "NO",
+    "tabla_referenciada": "restaurants",
+    "columna_referenciada": "id"
+  },
+  {
+    "tabla": "reservations",
+    "columna": "special_requests",
+    "tipo": "text",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
+  },
+  {
+    "tabla": "reservations",
+    "columna": "status",
+    "tipo": "text",
+    "permite_nulos": "NO",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
+  },
+  {
+    "tabla": "reservations",
+    "columna": "updated_at",
+    "tipo": "timestamp with time zone",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
+  },
+  {
+    "tabla": "restaurants",
+    "columna": "color_scheme",
+    "tipo": "character varying(255)",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
+  },
+  {
+    "tabla": "restaurants",
+    "columna": "cover_image_url",
+    "tipo": "text",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
+  },
+  {
+    "tabla": "restaurants",
+    "columna": "created_at",
+    "tipo": "timestamp with time zone",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
+  },
+  {
+    "tabla": "restaurants",
+    "columna": "description",
+    "tipo": "text",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
+  },
+  {
+    "tabla": "restaurants",
+    "columna": "email_notifications",
+    "tipo": "boolean",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
+  },
+  {
+    "tabla": "restaurants",
+    "columna": "font_family",
+    "tipo": "text",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
+  },
+  {
+    "tabla": "restaurants",
+    "columna": "google_my_business_link",
+    "tipo": "character varying(255)",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
+  },
+  {
+    "tabla": "restaurants",
+    "columna": "id",
+    "tipo": "uuid",
+    "permite_nulos": "NO",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
+  },
+  {
+    "tabla": "restaurants",
+    "columna": "logo_url",
+    "tipo": "text",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
+  },
+  {
+    "tabla": "restaurants",
+    "columna": "name",
+    "tipo": "text",
+    "permite_nulos": "NO",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
+  },
+  {
+    "tabla": "restaurants",
+    "columna": "primary_color",
+    "tipo": "character varying(50)",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
+  },
+  {
+    "tabla": "restaurants",
+    "columna": "restaurant_type",
+    "tipo": "character varying(50)",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
+  },
+  {
+    "tabla": "restaurants",
+    "columna": "secondary_color",
+    "tipo": "text",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
+  },
+  {
+    "tabla": "restaurants",
+    "columna": "slug",
+    "tipo": "text",
+    "permite_nulos": "NO",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
+  },
+  {
+    "tabla": "restaurants",
+    "columna": "subscription_tier",
+    "tipo": "text",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
+  },
+  {
+    "tabla": "restaurants",
+    "columna": "theme_color",
+    "tipo": "text",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
+  },
+  {
+    "tabla": "restaurants",
+    "columna": "theme_type",
+    "tipo": "integer(32,0)",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
+  },
+  {
+    "tabla": "restaurants",
+    "columna": "updated_at",
+    "tipo": "timestamp with time zone",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
+  },
+  {
+    "tabla": "restaurants",
+    "columna": "user_id",
+    "tipo": "uuid",
+    "permite_nulos": "NO",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
+  },
+  {
+    "tabla": "social_links",
+    "columna": "created_at",
+    "tipo": "timestamp with time zone",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
+  },
+  {
+    "tabla": "social_links",
+    "columna": "display_order",
+    "tipo": "integer(32,0)",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
+  },
+  {
+    "tabla": "social_links",
+    "columna": "id",
+    "tipo": "uuid",
+    "permite_nulos": "NO",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
+  },
+  {
+    "tabla": "social_links",
+    "columna": "platform",
+    "tipo": "text",
+    "permite_nulos": "NO",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
+  },
+  {
+    "tabla": "social_links",
+    "columna": "restaurant_id",
+    "tipo": "uuid",
+    "permite_nulos": "NO",
+    "tabla_referenciada": "restaurants",
+    "columna_referenciada": "id"
+  },
+  {
+    "tabla": "social_links",
+    "columna": "updated_at",
+    "tipo": "timestamp with time zone",
+    "permite_nulos": "YES",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
+  },
+  {
+    "tabla": "social_links",
+    "columna": "url",
+    "tipo": "text",
+    "permite_nulos": "NO",
+    "tabla_referenciada": null,
+    "columna_referenciada": null
   }
 ]

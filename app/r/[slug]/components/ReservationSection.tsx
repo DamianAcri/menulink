@@ -63,6 +63,25 @@ export default function ReservationSection({ restaurantId, restaurantName, theme
 
       if (error) throw error;
 
+      // Añadir cliente al CRM si no existe
+      const { data: existingCustomer } = await supabase
+        .from('customers')
+        .select('id')
+        .eq('restaurant_id', restaurantId)
+        .eq('email', formData.customer_email)
+        .maybeSingle();
+      if (!existingCustomer) {
+        const [first_name, ...rest] = formData.customer_name.trim().split(' ');
+        const last_name = rest.join(' ') || '-';
+        await supabase.from('customers').insert({
+          restaurant_id: restaurantId,
+          first_name,
+          last_name,
+          email: formData.customer_email,
+          phone: formData.customer_phone || null,
+        });
+      }
+
       // Éxito
       setSubmissionStatus('success');
       // Resetear el formulario

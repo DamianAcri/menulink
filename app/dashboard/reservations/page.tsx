@@ -25,6 +25,18 @@ export default function ReservationsPage() {
   const [restaurant, setRestaurant] = useState<any>(null);
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [dateFilter, setDateFilter] = useState<string>('');
+  const [newReservation, setNewReservation] = useState({
+    customer_name: '',
+    customer_email: '',
+    customer_phone: '',
+    party_size: 2,
+    reservation_date: '',
+    reservation_time: '',
+    special_requests: '',
+    addToCRM: true,
+  });
+  const [formError, setFormError] = useState<string | null>(null);
+  const [formSuccess, setFormSuccess] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -251,6 +263,87 @@ export default function ReservationsPage() {
     }
   };
 
+  // Handler para el formulario de nueva reserva
+  const handleReservationChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value, type } = e.target;
+    if (type === 'checkbox' && e.target instanceof HTMLInputElement) {
+      const inputElement = e.target as HTMLInputElement;
+      setNewReservation(prev => ({
+        ...prev,
+        [name]: inputElement.checked,
+      }));
+    } else {
+      setNewReservation(prev => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
+  };
+
+  const handleCreateReservation = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setFormError(null);
+    setFormSuccess(null);
+    if (!restaurant) {
+      setFormError('No se ha encontrado el restaurante.');
+      return;
+    }
+    if (!newReservation.customer_name || !newReservation.customer_email || !newReservation.reservation_date || !newReservation.reservation_time) {
+      setFormError('Nombre, email, fecha y hora son obligatorios.');
+      return;
+    }
+    // Crear la reserva
+    const { data, error } = await supabase.from('reservations').insert({
+      restaurant_id: restaurant.id,
+      customer_name: newReservation.customer_name,
+      customer_email: newReservation.customer_email,
+      customer_phone: newReservation.customer_phone,
+      party_size: newReservation.party_size,
+      reservation_date: newReservation.reservation_date,
+      reservation_time: newReservation.reservation_time,
+      special_requests: newReservation.special_requests,
+      status: 'pending',
+    }).select('*').single();
+    if (error) {
+      setFormError('Error al crear la reserva.');
+      return;
+    }
+    setFormSuccess('Reserva creada correctamente.');
+    setReservations(prev => [data, ...prev]);
+    // Si se marcó añadir al CRM, intentar añadir el cliente (si no existe)
+    if (newReservation.addToCRM) {
+      // Comprobar si ya existe el cliente
+      const { data: existing, error: findError } = await supabase
+        .from('customers')
+        .select('id')
+        .eq('restaurant_id', restaurant.id)
+        .eq('email', newReservation.customer_email)
+        .maybeSingle();
+      if (!existing) {
+        // Separar nombre y apellidos (simple)
+        const [first_name, ...rest] = newReservation.customer_name.trim().split(' ');
+        const last_name = rest.join(' ') || '-';
+        await supabase.from('customers').insert({
+          restaurant_id: restaurant.id,
+          first_name,
+          last_name,
+          email: newReservation.customer_email,
+          phone: newReservation.customer_phone || null,
+        });
+      }
+    }
+    setNewReservation({
+      customer_name: '',
+      customer_email: '',
+      customer_phone: '',
+      party_size: 2,
+      reservation_date: '',
+      reservation_time: '',
+      special_requests: '',
+      addToCRM: true,
+    });
+  };
+
   // Si no hay restaurante configurado, mostrar pantalla de welcome igual que en dashboard
   if (!isLoading && !restaurant) {
     return (
@@ -273,6 +366,26 @@ export default function ReservationsPage() {
 
   return (
     <div className="px-4">
+      {/* Formulario para crear reserva manual */}
+      <form onSubmit={handleCreateReservation} className="max-w-xl mx-auto bg-white rounded-xl shadow-sm p-4 mb-8 space-y-2">
+        <h2 className="text-lg font-semibold mb-2">Crear nueva reserva</h2>
+        <input name="customer_name" value={newReservation.customer_name} onChange={handleReservationChange} placeholder="Nombre completo" className="border px-2 py-1 w-full" />
+        <input name="customer_email" value={newReservation.customer_email} onChange={handleReservationChange} placeholder="Email" className="border px-2 py-1 w-full" />
+        <input name="customer_phone" value={newReservation.customer_phone} onChange={handleReservationChange} placeholder="Teléfono" className="border px-2 py-1 w-full" />
+        <div className="flex gap-2">
+          <input name="reservation_date" type="date" value={newReservation.reservation_date} onChange={handleReservationChange} className="border px-2 py-1 flex-1" />
+          <input name="reservation_time" type="time" value={newReservation.reservation_time} onChange={handleReservationChange} className="border px-2 py-1 flex-1" />
+        </div>
+        <input name="party_size" type="number" min={1} value={newReservation.party_size} onChange={handleReservationChange} className="border px-2 py-1 w-full" placeholder="Personas" />
+        <textarea name="special_requests" value={newReservation.special_requests} onChange={handleReservationChange} placeholder="Petición especial (opcional)" className="border px-2 py-1 w-full" />
+        <label className="flex items-center gap-2">
+          <input type="checkbox" name="addToCRM" checked={newReservation.addToCRM} onChange={handleReservationChange} />
+          Añadir cliente al CRM
+        </label>
+        <button type="submit" className="bg-blue-600 text-white px-4 py-1 rounded">Crear reserva</button>
+        {formError && <div className="text-red-600 text-sm">{formError}</div>}
+        {formSuccess && <div className="text-green-600 text-sm">{formSuccess}</div>}
+      </form>
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <h1 className="text-2xl font-bold">Reservas</h1>
         
