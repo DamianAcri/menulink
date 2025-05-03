@@ -1,4 +1,3 @@
-import { sendThankYouEmail, sendReviewRequestEmail } from './resend';
 import { sendThankYouEmailDev, sendReviewRequestEmailDev } from './mailtrap';
 
 // Determinar si estamos en desarrollo o producción
@@ -32,8 +31,7 @@ export const EmailService = {
       console.log('Enviando correo de agradecimiento en entorno de DESARROLLO usando Mailtrap');
       return sendThankYouEmailDev(customerName, customerEmail, restaurantName, restaurantEmail);
     } else {
-      console.log('Enviando correo de agradecimiento en entorno de PRODUCCIÓN usando Resend');
-      return sendThankYouEmail(customerName, customerEmail, restaurantName, restaurantEmail);
+      return sendThankYouEmailDev(customerName, customerEmail, restaurantName, restaurantEmail);
     }
   },
 
@@ -51,8 +49,7 @@ export const EmailService = {
       console.log('Enviando solicitud de reseña en entorno de DESARROLLO usando Mailtrap');
       return sendReviewRequestEmailDev(customerName, customerEmail, restaurantName, restaurantSlug, reviewLink);
     } else {
-      console.log('Enviando solicitud de reseña en entorno de PRODUCCIÓN usando Resend');
-      return sendReviewRequestEmail(customerName, customerEmail, restaurantName, restaurantSlug, reviewLink);
+      return sendReviewRequestEmailDev(customerName, customerEmail, restaurantName, restaurantSlug, reviewLink);
     }
   }
 };
