@@ -39,7 +39,7 @@ export default function Register() {
 
     try {
       // Registrar usuario con Supabase - configuración simple que funcionaba antes
-      const { data, error: signUpError } = await supabase.auth.signUp({
+      const { error: signUpError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
         options: {
@@ -54,8 +54,8 @@ export default function Register() {
 
       // Redirigir a página de confirmación
       router.push("/auth/verify-email");
-    } catch (err: any) {
-      setError(err.message || "Error al registrar la cuenta");
+    } catch (err: unknown) {
+      setError((err as Error).message || "Error al registrar la cuenta");
     } finally {
       setLoading(false);
     }

@@ -1,13 +1,11 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import Image from 'next/image';
 import { supabase } from '@/lib/supabase';
-import SocialLinks from './components/SocialLinks';
-import DeliveryLinks from './components/DeliveryLinks';
 import MenuSection from './components/MenuSection';
 import ContactSection from './components/ContactSection';
 import Header from './components/Header';
 import ReservationSection from './components/ReservationSection';
+import Link from 'next/link';
 
 // Generamos metadata estática para evitar errores
 export const metadata: Metadata = {
@@ -187,7 +185,7 @@ export default async function RestaurantPage(props: RestaurantPageProps) {
         
         {/* Footer */}
         <footer className="text-xs text-gray-400 text-center py-6">
-          <p>Creado con <a href="/" className="hover:underline font-medium" style={{ color: themeColors.primary }}>MenuLink</a></p>
+          <p>Creado con <Link href="/" className="hover:underline font-medium" style={{ color: themeColors.primary }}>MenuLink</Link></p>
         </footer>
       </main>
     );

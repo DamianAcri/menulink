@@ -1,6 +1,5 @@
 "use client";
 
-import Image from 'next/image';
 import { useRef, useEffect, useState } from 'react';
 
 type ContactInfo = {
@@ -25,7 +24,7 @@ type OpeningHour = {
 type Restaurant = {
   contact?: ContactInfo;
   opening_hours?: OpeningHour[];
-  [key: string]: any;
+  [key: string]: unknown;
 };
 
 type ContactSectionProps = {
@@ -62,7 +61,7 @@ function formatTime(timeStr: string | null): string {
     const displayHours = hours % 12 || 12;
     
     return `${displayHours}:${minutes.toString().padStart(2, '0')} ${period}`;
-  } catch (error) {
+  } catch {
     return timeStr;
   }
 }

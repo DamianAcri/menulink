@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
+import Image from 'next/image';
 
 type Section = {
   id: string;
@@ -77,10 +77,11 @@ export default function Navigation({ sections, themeColors, logoUrl, restaurantN
                 }}
               >
                 <div className={`relative ${isScrolled ? 'w-8 h-8' : 'w-10 h-10'} overflow-hidden rounded-md transition-all duration-300`}>
-                  <img 
+                  <Image 
                     src={logoUrl} 
                     alt={restaurantName} 
                     className="object-cover w-full h-full" 
+                    layout="fill"
                   />
                 </div>
               </a>

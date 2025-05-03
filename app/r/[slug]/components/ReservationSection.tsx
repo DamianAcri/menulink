@@ -94,10 +94,10 @@ export default function ReservationSection({ restaurantId, restaurantName, theme
         reservation_time: '',
         special_requests: ''
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error al crear la reserva:', error);
       setSubmissionStatus('error');
-      setErrorMessage(error.message || 'Ha ocurrido un error al procesar tu reserva. Por favor, inténtalo de nuevo.');
+      setErrorMessage((error as Error).message || 'Ha ocurrido un error al procesar tu reserva. Por favor, inténtalo de nuevo.');
     } finally {
       setIsSubmitting(false);
     }

@@ -85,7 +85,7 @@ export default function SocialLinks({ links, themeColors, variant = 'default' }:
   if (variant === 'footer') {
     return (
       <div className="flex justify-center gap-2 mb-3">
-        {sortedLinks.map((link, idx) => {
+        {sortedLinks.map((link) => {
           const platform = link.platform.toLowerCase();
           const iconFile = platformIcons[platform] || 'globe.svg';
           const tooltipText = platform.charAt(0).toUpperCase() + platform.slice(1).replace(/_/g, ' ');

@@ -33,10 +33,10 @@ export default function VerifyEmail() {
         type: 'success',
         text: 'Se ha reenviado el correo de verificación. Por favor, revisa tu bandeja de entrada.'
       });
-    } catch (err: any) {
+    } catch (err: unknown) {
       setMessage({
         type: 'error',
-        text: err.message || 'Error al reenviar el correo de verificación'
+        text: (err as Error).message || 'Error al reenviar el correo de verificación'
       });
     } finally {
       setLoading(false);

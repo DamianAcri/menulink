@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 
 export default function Home() {
@@ -268,7 +267,7 @@ export default function Home() {
           </div>
           <div className="mt-10 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
             <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-6">
-              <p className="text-gray-600 dark:text-gray-300 italic">"Gracias a MenuLink hemos aumentado nuestras ventas por WhatsApp en un 30%. Los clientes encuentran nuestro menú fácilmente desde Instagram."</p>
+              <p className="text-gray-600 dark:text-gray-300 italic">&quot;Gracias a MenuLink hemos aumentado nuestras ventas por WhatsApp en un 30%. Los clientes encuentran nuestro menú fácilmente desde Instagram.&quot;</p>
               <div className="mt-4 flex items-center">
                 <div className="flex-shrink-0 rounded-full h-10 w-10 bg-blue-100 flex items-center justify-center">
                   <span className="text-blue-800 font-bold">C</span>
@@ -280,7 +279,7 @@ export default function Home() {
               </div>
             </div>
             <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-6">
-              <p className="text-gray-600 dark:text-gray-300 italic">"La posibilidad de mostrar fotos de nuestros platillos y actualizar rápidamente los precios ha sido un cambio total para nuestro restaurante."</p>
+              <p className="text-gray-600 dark:text-gray-300 italic">&quot;La posibilidad de mostrar fotos de nuestros platillos y actualizar rápidamente los precios ha sido un cambio total para nuestro restaurante.&quot;</p>
               <div className="mt-4 flex items-center">
                 <div className="flex-shrink-0 rounded-full h-10 w-10 bg-blue-100 flex items-center justify-center">
                   <span className="text-blue-800 font-bold">M</span>
@@ -292,7 +291,7 @@ export default function Home() {
               </div>
             </div>
             <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-6 sm:col-span-2 lg:col-span-1">
-              <p className="text-gray-600 dark:text-gray-300 italic">"Implementé MenuLink en menos de 20 minutos y ahora recibimos pedidos directamente por WhatsApp. Simple y efectivo."</p>
+              <p className="text-gray-600 dark:text-gray-300 italic">&quot;Implementé MenuLink en menos de 20 minutos y ahora recibimos pedidos directamente por WhatsApp. Simple y efectivo.&quot;</p>
               <div className="mt-4 flex items-center">
                 <div className="flex-shrink-0 rounded-full h-10 w-10 bg-blue-100 flex items-center justify-center">
                   <span className="text-blue-800 font-bold">L</span>

@@ -1,4 +1,5 @@
 import React, { useRef } from 'react';
+import Image from 'next/image';
 
 interface Step1BasicInfoProps {
   formData: {
@@ -7,7 +8,7 @@ interface Step1BasicInfoProps {
     logoFile: File | null;
     logoPreview: string | null;
   };
-  handleChange: (field: string, value: any) => void;
+  handleChange: (field: string, value: string | File | null) => void;
   errors: Record<string, string>;
 }
 
@@ -92,7 +93,7 @@ const Step1BasicInfo: React.FC<Step1BasicInfoProps> = ({ formData, handleChange,
           <div className="flex items-center">
             {formData.logoPreview ? (
               <div className="relative">
-                <img
+                <Image
                   src={formData.logoPreview}
                   alt="Logo preview"
                   className="h-16 w-16 object-cover rounded-md"

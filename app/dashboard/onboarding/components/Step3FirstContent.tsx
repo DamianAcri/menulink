@@ -19,7 +19,7 @@ interface Step3FirstContentProps {
     menuItems: MenuItemType[];
     openingHours: OpeningHoursType;
   };
-  handleChange: (field: string, value: any) => void;
+  handleChange: (field: string, value: unknown) => void;
   errors: Record<string, string>;
 }
 

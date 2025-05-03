@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
+import Image from "next/image";
 
 // Interfaces para tipos de datos
 interface SocialLink {
@@ -173,11 +174,11 @@ function SocialLinksPage() {
       setTimeout(() => {
         setSaveMessage({ type: "", message: "" });
       }, 3000);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error deleting social link:", error);
       setSaveMessage({
         type: "error",
-        message: `Error al eliminar: ${error.message || "Ocurrió un problema"}`,
+        message: `Error al eliminar: ${error instanceof Error ? error.message : "Ocurrió un problema"}`,
       });
     }
   };
@@ -224,11 +225,11 @@ function SocialLinksPage() {
       setTimeout(() => {
         setSaveMessage({ type: "", message: "" });
       }, 3000);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error deleting delivery link:", error);
       setSaveMessage({
         type: "error",
-        message: `Error al eliminar: ${error.message || "Ocurrió un problema"}`,
+        message: `Error al eliminar: ${error instanceof Error ? error.message : "Ocurrió un problema"}`,
       });
     }
   };
@@ -290,11 +291,11 @@ function SocialLinksPage() {
       setTimeout(() => {
         setSaveMessage({ type: "", message: "" });
       }, 3000);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error saving social link:", error);
       setSaveMessage({
         type: "error",
-        message: `Error al guardar: ${error.message || "Ocurrió un problema"}`,
+        message: `Error al guardar: ${error instanceof Error ? error.message : "Ocurrió un problema"}`,
       });
     } finally {
       setSaving(false);
@@ -363,11 +364,11 @@ function SocialLinksPage() {
       setTimeout(() => {
         setSaveMessage({ type: "", message: "" });
       }, 3000);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error saving delivery link:", error);
       setSaveMessage({
         type: "error",
-        message: `Error al guardar: ${error.message || "Ocurrió un problema"}`,
+        message: `Error al guardar: ${error instanceof Error ? error.message : "Ocurrió un problema"}`,
       });
     } finally {
       setSaving(false);
@@ -486,7 +487,7 @@ function SocialLinksPage() {
                 <li key={link.id} className="py-4 flex items-center justify-between">
                   <div className="flex items-center">
                     <div className="flex-shrink-0 h-10 w-10 bg-gray-100 dark:bg-gray-600 rounded-full flex items-center justify-center">
-                      <img 
+                      <Image 
                         src={`/social/${platform.icon}`} 
                         alt={platform.name} 
                         className="h-6 w-6"
@@ -587,7 +588,7 @@ function SocialLinksPage() {
                 <li key={link.id} className="py-4 flex items-center justify-between">
                   <div className="flex items-center">
                     <div className="flex-shrink-0 h-10 w-10 bg-gray-100 dark:bg-gray-600 rounded-full flex items-center justify-center">
-                      <img 
+                      <Image 
                         src={`/delivery/${platform.icon}`} 
                         alt={platform.name} 
                         className="h-6 w-6"

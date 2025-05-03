@@ -41,7 +41,7 @@ export default function OnboardingPage() {
     restaurantId: null as string | null
   });
 
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<unknown>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
@@ -49,7 +49,6 @@ export default function OnboardingPage() {
       const { data: { user } } = await supabase.auth.getUser();
       setUser(user);
     };
-    
     getUser();
   }, []);
 
@@ -71,7 +70,7 @@ export default function OnboardingPage() {
   }, [formData.restaurantName]);
 
   // Función para manejar los cambios en los datos del formulario
-  const handleChange = (field: string, value: any) => {
+  const handleChange = (field: string, value: unknown) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
@@ -156,7 +155,7 @@ export default function OnboardingPage() {
     const fileName = `${Date.now()}.${fileExt}`;
     const filePath = `${path}/${fileName}`;
     
-    const { data: uploadData, error: uploadError } = await supabase.storage
+    const { error: uploadError } = await supabase.storage
       .from('menulink')
       .upload(filePath, file, { 
         upsert: true,
@@ -185,7 +184,7 @@ export default function OnboardingPage() {
         .from('restaurants')
         .insert([
           {
-            user_id: user?.id,
+            user_id: (user && typeof user === 'object' && 'id' in user) ? (user as { id: string }).id : null,
             name: formData.restaurantName,
             slug: formData.slug,
             restaurant_type: formData.restaurantType,
@@ -366,7 +365,6 @@ export default function OnboardingPage() {
           <Step2Customization 
             formData={formData} 
             handleChange={handleChange}
-            errors={errors}
           />
         )}
         

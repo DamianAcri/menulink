@@ -4,7 +4,6 @@ import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/lib/supabase";
 import { QRCodeCanvas } from "qrcode.react"; // Corregido: importar QRCodeCanvas explícitamente
 import { jsPDF } from "jspdf";
-import html2canvas from "html2canvas";
 
 interface Restaurant {
   id: string;
@@ -35,7 +34,6 @@ export default function ToolsPage() {
   
   // Refs para la descarga de elementos
   const qrCodeRef = useRef<HTMLDivElement>(null);
-  const menuPreviewRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchRestaurantData = async () => {
@@ -133,7 +131,7 @@ export default function ToolsPage() {
             logoImg.crossOrigin = 'anonymous'; // Importante para evitar errores CORS
             
             // Esperar a que el logo se cargue antes de dibujarlo
-            await new Promise<void>((resolve, reject) => {
+            await new Promise<void>((resolve) => {
               logoImg.onload = () => {
                 // Calcular posición central para el logo
                 const logoSize = qrSize * 0.25;
@@ -306,7 +304,7 @@ export default function ToolsPage() {
       console.log("Valor de email_notifications:", emailNotifications);
       
       // Guardar preferencias en supabase
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('restaurants')
         .update({
           email_notifications: emailNotifications

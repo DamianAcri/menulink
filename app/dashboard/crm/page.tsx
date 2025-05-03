@@ -36,7 +36,7 @@ export default function CRMPage() {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return;
       // Buscar el restaurante del usuario
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from('restaurants')
         .select('id')
         .eq('user_id', session.user.id)
@@ -51,7 +51,7 @@ export default function CRMPage() {
     setLoading(true);
     // Traer clientes y para cada uno, contar reservas y traer últimas 3
     (async () => {
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from('customers')
         .select('*')
         .eq('restaurant_id', restaurantId)

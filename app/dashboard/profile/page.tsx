@@ -3,11 +3,22 @@
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [restaurant, setRestaurant] = useState<any>(null);
+  const [restaurant, setRestaurant] = useState<{
+    id: string;
+    name: string;
+    description: string;
+    slug: string;
+    theme_color: string;
+    secondary_color: string;
+    font_family: string;
+    logo_url?: string;
+    cover_image_url?: string;
+  } | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -20,7 +31,6 @@ export default function ProfilePage() {
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
-  const [slugError, setSlugError] = useState("");
   const [saveMessage, setSaveMessage] = useState({ type: "", message: "" });
 
   const logoInputRef = useRef<HTMLInputElement>(null);
@@ -91,9 +101,12 @@ export default function ProfilePage() {
       // Validar que el slug solo contenga letras, números y guiones
       const isValidSlug = /^[a-z0-9\-]+$/.test(value);
       if (!isValidSlug && value) {
-        setSlugError("El slug solo puede contener letras minúsculas, números y guiones");
+        setSaveMessage({
+          type: "error",
+          message: "El slug solo puede contener letras minúsculas, números y guiones",
+        });
       } else {
-        setSlugError("");
+        setSaveMessage({ type: "", message: "" });
       }
     }
     
@@ -176,7 +189,7 @@ export default function ProfilePage() {
 
       // Verificar si el slug ya existe (excepto el del propio restaurante)
       if (formData.slug !== restaurant.slug) {
-        const { data: slugCheck, error: slugError } = await supabase
+        const { data: slugCheck } = await supabase
           .from('restaurants')
           .select('id')
           .eq('slug', formData.slug)
@@ -184,13 +197,16 @@ export default function ProfilePage() {
           .single();
         
         if (slugCheck) {
-          setSlugError("Esta URL ya está en uso. Por favor, elige otra.");
+          setSaveMessage({
+            type: "error",
+            message: "Esta URL ya está en uso. Por favor, elige otra.",
+          });
           throw new Error("Slug already exists");
         }
       }
 
       // Preparar los datos a actualizar
-      const updateData: Record<string, any> = {
+      const updateData: Record<string, unknown> = {
         name: formData.name,
         description: formData.description,
         slug: formData.slug,
@@ -230,11 +246,11 @@ export default function ProfilePage() {
       setTimeout(() => {
         setSaveMessage({ type: "", message: "" });
       }, 3000);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error saving profile:", error);
       setSaveMessage({
         type: "error",
-        message: `Error al guardar: ${error.message || "Ocurrió un problema"}`,
+        message: `Error al guardar: ${(error as Error).message || "Ocurrió un problema"}`,
       });
     } finally {
       setSaving(false);
@@ -344,11 +360,6 @@ export default function ProfilePage() {
                   className="focus:ring-blue-500 focus:border-blue-500 flex-1 block w-full rounded-none rounded-r-md sm:text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                 />
               </div>
-              {slugError && (
-                <p className="mt-2 text-sm text-red-600 dark:text-red-400">
-                  {slugError}
-                </p>
-              )}
               <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
                 Esta será la URL donde tus clientes podrán ver tu menú
               </p>
@@ -369,10 +380,12 @@ export default function ProfilePage() {
               <div className="mt-1 flex items-center">
                 {logoPreview ? (
                   <div className="relative inline-block">
-                    <img
+                    <Image
                       src={logoPreview}
                       alt="Logo preview"
                       className="h-16 w-16 object-cover rounded-md"
+                      width={64}
+                      height={64}
                     />
                     <button
                       type="button"
@@ -421,10 +434,12 @@ export default function ProfilePage() {
               <div className="mt-1">
                 {coverPreview ? (
                   <div className="relative">
-                    <img
+                    <Image
                       src={coverPreview}
                       alt="Cover preview"
                       className="h-32 w-full object-cover rounded-md"
+                      width={1200}
+                      height={400}
                     />
                     <button
                       type="button"
@@ -568,7 +583,7 @@ export default function ProfilePage() {
           </button>
           <button
             type="submit"
-            disabled={slugError !== "" || saving}
+            disabled={saving}
             className="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
           >
             {saving ? "Guardando..." : "Guardar cambios"}

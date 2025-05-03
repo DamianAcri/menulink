@@ -1,15 +1,15 @@
 import React, { useRef } from 'react';
+import Image from 'next/image';
 
 interface Step2CustomizationProps {
   formData: {
     coverFile: File | null;
     coverPreview: string | null;
   };
-  handleChange: (field: string, value: any) => void;
-  errors: Record<string, string>;
+  handleChange: (field: string, value: File | string | null) => void;
 }
 
-const Step2Customization: React.FC<Step2CustomizationProps> = ({ formData, handleChange, errors }) => {
+const Step2Customization: React.FC<Step2CustomizationProps> = ({ formData, handleChange }) => {
   const coverInputRef = useRef<HTMLInputElement>(null);
 
   const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -45,10 +45,11 @@ const Step2Customization: React.FC<Step2CustomizationProps> = ({ formData, handl
         <div className="mt-1">
           {formData.coverPreview ? (
             <div className="relative">
-              <img
+              <Image
                 src={formData.coverPreview}
                 alt="Cover preview"
                 className="h-48 w-full object-cover rounded-md"
+                layout="fill"
               />
               <button
                 type="button"

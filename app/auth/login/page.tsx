@@ -18,7 +18,7 @@ export default function Login() {
     setLoading(true);
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
@@ -29,8 +29,8 @@ export default function Login() {
 
       // Redireccionar al dashboard después del login exitoso
       router.push("/dashboard");
-    } catch (err: any) {
-      setError(err.message || "Error al iniciar sesión");
+    } catch (err: unknown) {
+      setError((err as Error).message || "Error al iniciar sesión");
     } finally {
       setLoading(false);
     }

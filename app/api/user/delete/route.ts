@@ -79,14 +79,14 @@ export async function POST(request: NextRequest) {
         
         // Eliminar categorías y platos
         const { data: categories } = await supabase
-          .from('menu_categories')
-          .select('id')
-          .eq('restaurant_id', restaurantId);
-          
-        if (categories && categories.length > 0) {
-          const categoryIds = categories.map((cat: any) => cat.id);
-          await supabase.from('menu_items').delete().in('category_id', categoryIds);
-        }
+  .from('menu_categories')
+  .select('id')
+  .eq('restaurant_id', restaurantId);
+
+if (categories && categories.length > 0) {
+  const categoryIds = categories.map((cat: { id: string }) => cat.id);
+  await supabase.from('menu_items').delete().in('category_id', categoryIds);
+}
         
         await supabase.from('menu_categories').delete().eq('restaurant_id', restaurantId);
         
@@ -170,10 +170,10 @@ export async function POST(request: NextRequest) {
       { status: 200 }
     );
     
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error general en la eliminación de cuenta:', error);
     return NextResponse.json(
-      { error: `Error del servidor: ${error.message || 'Error desconocido'}` },
+      { error: `Error del servidor: ${(error as Error).message || 'Error desconocido'}` },
       { status: 500 }
     );
   }

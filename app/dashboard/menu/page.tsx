@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { supabase, checkStoragePermissions } from "@/lib/supabase";
+import { supabase } from "@/lib/supabase";
+import Image from "next/image";
 
 // Tipos para las categorías y platos
 interface MenuCategory {
@@ -55,9 +56,6 @@ export default function MenuPage() {
   });
   const [itemImage, setItemImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-
-  const [diagnosticResult, setDiagnosticResult] = useState<string>("");
-  const [showDiagnostic, setShowDiagnostic] = useState<boolean>(false);
 
   // Cargar datos del restaurante y menú al iniciar
   useEffect(() => {
@@ -334,63 +332,6 @@ export default function MenuPage() {
     }
   };
 
-  const uploadItemImage = async (file: File, itemId: string): Promise<string> => {
-    if (!restaurantId) throw new Error("No se encontró información del restaurante");
-    
-    // Verificar la sesión de usuario antes de subir
-    const { data: { session } } = await supabase.auth.getSession();
-    console.log('Estado de sesión:', session ? 'Autenticado' : 'No autenticado');
-    console.log('ID de usuario:', session?.user?.id);
-    console.log('ID de restaurante:', restaurantId);
-    console.log('ID de item:', itemId);
-    
-    // Verificar el archivo
-    console.log('Subiendo archivo:', { 
-      nombre: file.name, 
-      tamaño: `${(file.size / 1024).toFixed(2)} KB`,
-      tipo: file.type 
-    });
-    
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${Date.now()}.${fileExt}`;
-    const filePath = `restaurants/${restaurantId}/menu/${itemId}/${fileName}`;
-    
-    console.log('Ruta destino:', filePath);
-    console.log('Bucket:', 'menulink');
-    
-    try {
-      // Intentar la subida con upsert explícito y opciones adicionales
-      const { data, error: uploadError } = await supabase.storage
-        .from('menulink')
-        .upload(filePath, file, { 
-          upsert: true,
-          cacheControl: '3600',
-          contentType: file.type // Aseguramos que el content type sea correcto
-        });
-      
-      if (uploadError) {
-        console.error('Error completo al subir imagen:', uploadError);
-        console.error('Mensaje:', uploadError.message);
-        console.error('Información adicional:', JSON.stringify(uploadError));
-        console.error('Nombre:', uploadError.name);
-        throw uploadError;
-      }
-      
-      console.log('Subida exitosa:', data);
-      
-      const { data: { publicUrl } } = supabase.storage
-        .from('menulink')
-        .getPublicUrl(filePath);
-      
-      console.log('URL pública generada:', publicUrl);
-      
-      return publicUrl;
-    } catch (error) {
-      console.error('Error en uploadItemImage:', error);
-      throw error;
-    }
-  };
-
   const handleSaveItem = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -493,35 +434,6 @@ export default function MenuPage() {
       alert("Error al guardar el plato. Por favor, inténtalo de nuevo.");
     } finally {
       setProcessingAction(false);
-    }
-  };
-
-  // Función para ejecutar diagnóstico de permisos
-  const runDiagnostic = async () => {
-    setDiagnosticResult("Ejecutando diagnóstico...");
-    setShowDiagnostic(true);
-    
-    try {
-      // Verificar permisos de almacenamiento
-      const permissionsResult = await checkStoragePermissions();
-      
-      // Verificar política RLS para el bucket
-      const { data: bucketPermission, error: bucketError } = await supabase.rpc(
-        'check_bucket_permissions',
-        { bucket_name: 'menulink' }
-      );
-      
-      // Compilar resultados
-      const results = {
-        storage: permissionsResult,
-        sessionInfo: (await supabase.auth.getSession()).data,
-        bucket: bucketError ? { error: bucketError.message } : bucketPermission
-      };
-      
-      setDiagnosticResult(JSON.stringify(results, null, 2));
-    } catch (error) {
-      console.error("Error durante el diagnóstico:", error);
-      setDiagnosticResult(`Error durante el diagnóstico: ${JSON.stringify(error)}`);
     }
   };
 
@@ -725,10 +637,12 @@ export default function MenuPage() {
                           </p>
                         </div>
                         {item.image_url ? (
-                          <img 
+                          <Image 
                             className="w-16 h-16 bg-gray-300 rounded-md object-cover" 
                             src={item.image_url} 
                             alt={item.name}
+                            width={64}
+                            height={64}
                           />
                         ) : (
                           <div className="w-16 h-16 bg-gray-300 dark:bg-gray-600 rounded-md flex items-center justify-center">
@@ -870,10 +784,12 @@ export default function MenuPage() {
                       <div className="w-32 h-32 relative">
                         {imagePreview ? (
                           <div className="relative h-full">
-                            <img 
+                            <Image 
                               src={imagePreview || ""}
                               alt="Preview" 
                               className="w-full h-full object-cover rounded-md"
+                              width={128}
+                              height={128}
                             />
                             <button
                               type="button"

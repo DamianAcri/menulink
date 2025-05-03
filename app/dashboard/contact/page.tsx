@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
-import type { PostgrestSingleResponse, PostgrestResponse, PostgrestError } from '@supabase/supabase-js';
 
 // Interfaces para tipos de datos
 interface ContactInfo {
@@ -141,7 +140,7 @@ export default function ContactPage() {
     setContactForm({ ...contactForm, [name]: value });
   };
 
-  const handleHoursChange = (index: number, field: keyof OpeningHour, value: any) => {
+  const handleHoursChange = (index: number, field: keyof OpeningHour, value: unknown) => {
     const updatedHours = [...openingHours];
     updatedHours[index] = { ...updatedHours[index], [field]: value };
     setOpeningHours(updatedHours);
@@ -267,11 +266,11 @@ export default function ContactPage() {
       setTimeout(() => {
         setSaveMessage({ type: "", message: "" });
       }, 3000);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error al guardar información:", error);
       setSaveMessage({
         type: "error",
-        message: `Error al guardar: ${error.message || "Ocurrió un problema"}`,
+        message: `Error al guardar: ${(error as Error).message || "Ocurrió un problema"}`,
       });
     } finally {
       setSaving(false);

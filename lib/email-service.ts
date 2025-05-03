@@ -10,9 +10,9 @@ export type EmailResponse = {
   data?: {
     id?: string;
     messageId?: string;
-    [key: string]: any;
+    [key: string]: unknown;
   };
-  error?: any;
+  error?: unknown;
 };
 
 /**

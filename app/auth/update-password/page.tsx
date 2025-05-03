@@ -53,8 +53,8 @@ export default function UpdatePassword() {
         router.push("/auth/login");
       }, 2000);
       
-    } catch (err: any) {
-      setError(err.message || "Error al actualizar la contraseña");
+    } catch (err: unknown) {
+      setError((err as Error).message || "Error al actualizar la contraseña");
     } finally {
       setLoading(false);
     }

@@ -7,8 +7,6 @@ import { useRouter } from "next/navigation";
 export default function ConfigPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
-  const [emailNotifications, setEmailNotifications] = useState(true);
   const [language, setLanguage] = useState("es");
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [deleteInput, setDeleteInput] = useState("");
@@ -62,9 +60,6 @@ export default function ConfigPage() {
         }
       }
       
-      // Solo parsear JSON si la respuesta es exitosa
-      const result = await response.json();
-      
       // Cerrar sesión y redirigir
       await supabase.auth.signOut();
       
@@ -86,7 +81,6 @@ export default function ConfigPage() {
   useState(() => {
     // Verificar preferencia de modo oscuro guardada
     const savedDarkMode = localStorage.getItem('darkMode') === 'true';
-    setDarkMode(savedDarkMode);
     if (savedDarkMode) {
       document.documentElement.classList.add('dark');
     }
@@ -159,7 +153,7 @@ export default function ConfigPage() {
                   Esta acción no se puede deshacer. Se eliminarán permanentemente todos tus datos.
                 </p>
                 <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-                  Para confirmar, escribe "ELIMINAR" en el campo a continuación:
+                  Para confirmar, escribe &quot;ELIMINAR&quot; en el campo a continuación:
                 </p>
                 <div className="flex items-center">
                   <input

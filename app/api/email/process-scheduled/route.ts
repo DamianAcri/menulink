@@ -9,11 +9,6 @@ interface Restaurant {
   google_my_business_link: string | null;
 }
 
-interface EmailLogReservation {
-  customer_name: string;
-  restaurants: Restaurant;
-}
-
 interface ScheduledEmail {
   id: string;
   reservation_id: string;
@@ -80,7 +75,7 @@ export async function POST(request: NextRequest) {
       total: scheduledEmails.length,
       sent: 0,
       failed: 0,
-      details: [] as any[]
+      details: [] as unknown[]
     };
 
     // Procesar cada correo programado
@@ -124,7 +119,7 @@ export async function POST(request: NextRequest) {
         );
 
         if (!sendResult.success) {
-          throw new Error(sendResult.error?.message || 'Error al enviar el correo');
+          throw new Error((sendResult.error as { message?: string })?.message || 'Error al enviar el correo');
         }
 
         // Actualizar el estado en la base de datos
@@ -149,11 +144,11 @@ export async function POST(request: NextRequest) {
           messageId
         });
 
-      } catch (emailError: any) {
+      } catch (emailError: unknown) {
         console.error('Error al procesar correo programado:', emailError);
         
         // Determinar el mensaje de error
-        const errorMessage = emailError.message || 'Error desconocido';
+        const errorMessage = (emailError as Error).message || 'Error desconocido';
         
         // Marcar como fallido pero no reintentar automáticamente
         await supabase
@@ -178,7 +173,7 @@ export async function POST(request: NextRequest) {
       processed: results
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error en el procesamiento de correos programados:', error);
     return NextResponse.json(
       { error: 'Error interno del servidor' },

@@ -1,15 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
-import { Bar, Line, Pie } from "react-chartjs-2";
+import { Line, Pie } from "react-chartjs-2";
 import {
   Chart as ChartJS,
   CategoryScale,
   LinearScale,
   PointElement,
   LineElement,
-  BarElement,
   ArcElement,
   Title,
   Tooltip,
@@ -22,7 +21,6 @@ ChartJS.register(
   LinearScale,
   PointElement,
   LineElement,
-  BarElement,
   ArcElement,
   Title,
   Tooltip,
@@ -83,12 +81,7 @@ export default function StatsPage() {
   const [reservationsError, setReservationsError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'views' | 'reservations'>('views');
 
-  useEffect(() => {
-    fetchPageViews();
-    fetchReservations();
-  }, [timeRange]);
-
-  const fetchPageViews = async () => {
+  const fetchPageViews = useCallback(async () => {
     try {
       setLoading(true);
       
@@ -129,16 +122,16 @@ export default function StatsPage() {
 
       setPageViews(data || []);
       setError(null);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error fetching page views:', err);
-      setError(err.message || 'Error loading statistics data');
+      setError((err as Error).message || 'Error loading statistics data');
       setPageViews([]);
     } finally {
       setLoading(false);
     }
-  };
+  }, [timeRange]);
 
-  const fetchReservations = async () => {
+  const fetchReservations = useCallback(async () => {
     try {
       setReservationsLoading(true);
       
@@ -199,14 +192,19 @@ export default function StatsPage() {
 
       setReservations(reservationsData || []);
       setReservationsError(null);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error fetching reservations:', err);
-      setReservationsError(err.message || 'Error loading reservations data');
+      setReservationsError((err as Error).message || 'Error loading reservations data');
       setReservations([]);
     } finally {
       setReservationsLoading(false);
     }
-  };
+  }, [timeRange]);
+
+  useEffect(() => {
+    fetchPageViews();
+    fetchReservations();
+  }, [timeRange, fetchPageViews, fetchReservations]);
 
   // Process data for visualization
   const processViewsByDate = () => {

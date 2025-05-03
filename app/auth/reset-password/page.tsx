@@ -26,8 +26,8 @@ export default function ResetPassword() {
       }
 
       setSuccess(true);
-    } catch (err: any) {
-      setError(err.message || "Error al enviar el correo de recuperación");
+    } catch (err: unknown) {
+      setError((err as Error).message || "Error al enviar el correo de recuperación");
     } finally {
       setLoading(false);
     }

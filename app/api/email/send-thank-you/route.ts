@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 3. Verificar si ya se envió un correo de agradecimiento para esta reserva
-    const { data: existingEmail, error: emailCheckError } = await supabase
+    const { data: existingEmail } = await supabase
       .from('email_logs')
       .select('*')
       .eq('reservation_id', reservationId)
@@ -131,7 +131,7 @@ export async function POST(request: NextRequest) {
       emailId
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error en el endpoint de envío de correo de agradecimiento:', error);
     return NextResponse.json(
       { error: 'Error interno del servidor' },
