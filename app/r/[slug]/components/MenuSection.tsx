@@ -12,6 +12,13 @@ type MenuItem = {
   is_featured: boolean;
   is_available: boolean;
   display_order: number;
+  ingredients?: string;
+  allergens?: string[] | string;
+  spice_level?: number;
+  is_vegetarian?: boolean;
+  is_vegan?: boolean;
+  is_gluten_free?: boolean;
+  discount_percentage?: string;
 };
 
 type MenuCategory = {
@@ -35,6 +42,7 @@ type MenuSectionProps = {
 export default function MenuSection({ categories, themeColors }: MenuSectionProps) {
   // Estado para controlar las animaciones al hacer scroll
   const [visibleItems, setVisibleItems] = useState<Set<string>>(new Set());
+  const [modalItem, setModalItem] = useState<MenuItem | null>(null);
   const observerRef = useRef<IntersectionObserver | null>(null);
   const elementsRef = useRef<Map<string, HTMLElement>>(new Map());
 
@@ -87,6 +95,62 @@ export default function MenuSection({ categories, themeColors }: MenuSectionProp
       ?.filter(item => item.is_featured && item.is_available !== false)
       .sort((a, b) => a.display_order - b.display_order) || []
   );
+
+  // Modal de detalle de plato
+  const renderModal = () => {
+    if (!modalItem) return null;
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" onClick={() => setModalItem(null)}>
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg max-w-md w-full p-6 relative" onClick={e => e.stopPropagation()}>
+          <button className="absolute top-2 right-2 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200" onClick={() => setModalItem(null)}>
+            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+          </button>
+          {modalItem.image_url && (
+            <div className="mb-4 w-full aspect-[16/9] relative rounded-md overflow-hidden">
+              <Image src={modalItem.image_url} alt={modalItem.name} fill className="object-cover" />
+            </div>
+          )}
+          <h2 className="text-2xl font-bold mb-2" style={{ color: themeColors.primary }}>{modalItem.name}</h2>
+          {modalItem.description && <p className="mb-2 text-gray-600 dark:text-gray-300">{modalItem.description}</p>}
+          {modalItem.ingredients && <p className="mb-2 text-sm"><span className="font-semibold">Ingredientes:</span> {modalItem.ingredients}</p>}
+          {modalItem.allergens && (
+            <p className="mb-2 text-sm">
+              <span className="font-semibold">Alérgenos:</span> {
+                Array.isArray(modalItem.allergens)
+                  ? modalItem.allergens.join(', ')
+                  : typeof modalItem.allergens === 'string' && modalItem.allergens.includes(',')
+                    ? modalItem.allergens.split(',').map(a => a.trim()).join(', ')
+                    : modalItem.allergens
+              }
+            </p>
+          )}
+          {modalItem.spice_level ? (
+            <div className="mb-2 flex items-center text-sm">
+              <span className="font-semibold mr-2">Picante:</span>
+              {[1,2,3,4,5].map(star => (
+                <span key={star} className={star <= (modalItem.spice_level || 0) ? 'text-red-500' : 'text-gray-300'}>★</span>
+              ))}
+              <span className="ml-2">{modalItem.spice_level}/5</span>
+            </div>
+          ) : null}
+          <div className="flex flex-wrap gap-2 mb-2">
+            {modalItem.is_vegetarian && <span className="px-2 py-1 bg-green-100 text-green-700 rounded text-xs">Vegetariano</span>}
+            {modalItem.is_vegan && <span className="px-2 py-1 bg-green-200 text-green-800 rounded text-xs">Vegano</span>}
+            {modalItem.is_gluten_free && <span className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded text-xs">Sin gluten</span>}
+          </div>
+          <div className="flex items-center gap-4 mt-4">
+            <span className="text-lg font-bold" style={{ color: themeColors.primary }}>{modalItem.price?.toFixed ? modalItem.price.toFixed(2) : modalItem.price}€</span>
+            {modalItem.discount_percentage && modalItem.discount_percentage !== '0' && (
+              <span className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded">{modalItem.discount_percentage}% dto.</span>
+            )}
+            {modalItem.is_featured && (
+              <span className="text-xs px-2 py-1 bg-yellow-100 text-yellow-800 rounded ml-2">Destacado</span>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <section className="py-16">
@@ -150,6 +214,7 @@ export default function MenuSection({ categories, themeColors }: MenuSectionProp
                               : 'opacity-0 translate-y-8'
                           }`}
                 style={{ transitionDelay: `${Math.min(idx * 150, 1000)}ms` }}
+                onClick={() => setModalItem(item)}
               >
                 {item.image_url ? (
                   <div className="relative aspect-[16/9] w-full overflow-hidden">
@@ -242,12 +307,18 @@ export default function MenuSection({ categories, themeColors }: MenuSectionProp
                 const itemId = `${categoryId}-item-${item.id}`;
                 return (
                   <div key={item.id} id={itemId} ref={(el) => registerElement(itemId, el)}
-                    className={`bg-white rounded-xl p-4 shadow-md flex flex-col gap-2 transition-all duration-500 border border-gray-100 hover:border-gray-200 ${visibleItems.has(itemId) ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
-                    style={{ transitionDelay: `${Math.min(idx * 100, 800)}ms` }}>
+                    className={`bg-white rounded-xl p-4 shadow-md flex flex-col gap-2 transition-all duration-500 border border-gray-100 hover:border-gray-200 ${visibleItems.has(itemId) ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'} cursor-pointer`}
+                    style={{ transitionDelay: `${Math.min(idx * 100, 800)}ms` }}
+                    onClick={() => setModalItem(item)}>
                     <div className="flex justify-between items-center">
                       <h4 className="font-semibold text-lg text-gray-900">{item.name}</h4>
                       <span className="font-bold text-base px-3 py-1 rounded-full bg-gray-50" style={{ color: themeColors.primary }}>{typeof item.price === 'number' ? `${item.price.toFixed(2)}€` : item.price}</span>
                     </div>
+                    {item.image_url && (
+                      <div className="w-full aspect-[16/9] relative rounded-md overflow-hidden mb-2">
+                        <Image src={item.image_url} alt={item.name} fill className="object-cover" />
+                      </div>
+                    )}
                     {item.description && (
                       <p className="text-gray-500 text-sm mt-1">{item.description}</p>
                     )}
@@ -258,6 +329,7 @@ export default function MenuSection({ categories, themeColors }: MenuSectionProp
           </div>
         );
       })}
+      {renderModal()}
     </section>
   );
 }

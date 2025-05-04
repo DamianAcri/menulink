@@ -24,6 +24,13 @@ interface MenuItem {
   is_available: boolean;
   display_order: number;
   created_at?: string;
+  ingredients?: string | null;
+  allergens?: string | null;
+  spice_level?: number | null;
+  is_vegetarian?: boolean | null;
+  is_vegan?: boolean | null;
+  is_gluten_free?: boolean | null;
+  discount_percentage?: string | null;
 }
 
 export default function MenuPage() {
@@ -53,6 +60,13 @@ export default function MenuPage() {
     is_featured: false,
     is_available: true,
     image_url: "",
+    ingredients: "",
+    allergens: "",
+    spice_level: 0,
+    is_vegetarian: false,
+    is_vegan: false,
+    is_gluten_free: false,
+    discount_percentage: ""
   });
   const [itemImage, setItemImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -110,7 +124,10 @@ export default function MenuPage() {
             if (menuItemsError) {
               console.error("Error fetching menu items:", menuItemsError);
             } else {
-              setMenuItems(menuItemsData || []);
+              setMenuItems((menuItemsData || []).map((item: MenuItem) => ({
+                ...item,
+                allergens: Array.isArray(item.allergens) ? item.allergens.join(', ') : (item.allergens || '')
+              })));
             }
           }
         }
@@ -276,6 +293,13 @@ export default function MenuPage() {
       is_featured: false,
       is_available: true,
       image_url: "",
+      ingredients: "",
+      allergens: "",
+      spice_level: 0,
+      is_vegetarian: false,
+      is_vegan: false,
+      is_gluten_free: false,
+      discount_percentage: ""
     });
     setItemImage(null);
     setImagePreview(null);
@@ -292,6 +316,13 @@ export default function MenuPage() {
       is_featured: item.is_featured,
       is_available: item.is_available,
       image_url: item.image_url || "",
+      ingredients: item.ingredients || "",
+      allergens: item.allergens || "",
+      spice_level: item.spice_level || 0,
+      is_vegetarian: item.is_vegetarian || false,
+      is_vegan: item.is_vegan || false,
+      is_gluten_free: item.is_gluten_free || false,
+      discount_percentage: item.discount_percentage || ""
     });
     setItemImage(null);
     setImagePreview(item.image_url);
@@ -369,6 +400,13 @@ export default function MenuPage() {
             is_featured: itemForm.is_featured,
             is_available: itemForm.is_available,
             image_url: imageUrl,
+            ingredients: itemForm.ingredients || null,
+            allergens: itemForm.allergens ? itemForm.allergens.split(',').map(a => a.trim()).filter(Boolean) : null,
+            spice_level: itemForm.spice_level || null,
+            is_vegetarian: itemForm.is_vegetarian || null,
+            is_vegan: itemForm.is_vegan || null,
+            is_gluten_free: itemForm.is_gluten_free || null,
+            discount_percentage: itemForm.discount_percentage || null
           })
           .eq('id', currentItem.id);
         if (error) throw error;
@@ -382,6 +420,13 @@ export default function MenuPage() {
                 is_featured: itemForm.is_featured,
                 is_available: itemForm.is_available,
                 image_url: imageUrl,
+                ingredients: itemForm.ingredients || null,
+                allergens: itemForm.allergens || '',
+                spice_level: itemForm.spice_level || null,
+                is_vegetarian: itemForm.is_vegetarian || null,
+                is_vegan: itemForm.is_vegan || null,
+                is_gluten_free: itemForm.is_gluten_free || null,
+                discount_percentage: itemForm.discount_percentage || null
               }
             : item
         ));
@@ -401,6 +446,13 @@ export default function MenuPage() {
             is_available: itemForm.is_available,
             image_url: null,
             display_order: newDisplayOrder,
+            ingredients: itemForm.ingredients || null,
+            allergens: itemForm.allergens ? itemForm.allergens.split(',').map(a => a.trim()).filter(Boolean) : null,
+            spice_level: itemForm.spice_level || null,
+            is_vegetarian: itemForm.is_vegetarian || null,
+            is_vegan: itemForm.is_vegan || null,
+            is_gluten_free: itemForm.is_gluten_free || null,
+            discount_percentage: itemForm.discount_percentage || null
           })
           .select()
           .single();
@@ -429,7 +481,10 @@ export default function MenuPage() {
           // Usar el registro actualizado para el estado local
           newItem = updatedData as MenuItem;
         }
-        setMenuItems([...menuItems, newItem]);
+        setMenuItems([...menuItems, {
+          ...newItem,
+          allergens: Array.isArray(newItem.allergens) ? newItem.allergens.join(', ') : (newItem.allergens || '')
+        }]);
       }
       setShowItemModal(false);
     } catch (error) {
@@ -827,7 +882,6 @@ export default function MenuPage() {
                         className="hidden"
                       />
                     </div>
-                    {/* ...resto del formulario igual que antes... */}
                     <div className="text-left">
                       <label htmlFor="item-name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                         Nombre
@@ -861,48 +915,130 @@ export default function MenuPage() {
                       </label>
                       <div className="mt-1 relative rounded-md shadow-sm">
                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                          <span className="text-gray-500 dark:text-gray-400 sm:text-sm">$</span>
+                          <span className="text-gray-500 dark:text-gray-400 sm:text-sm">€</span>
                         </div>
                         <input
-                          type="number"
+                          type="text"
                           id="item-price"
-                          step="0.01"
-                          min="0"
                           required
                           value={itemForm.price}
-                          onChange={(e) => setItemForm({...itemForm, price: e.target.value})}
+                          onChange={e => {
+                            // Permitir solo números y un punto decimal
+                            let val = e.target.value.replace(/[^\d.]/g, '');
+                            // Solo un punto decimal
+                            const parts = val.split('.');
+                            if (parts.length > 2) val = parts[0] + '.' + parts.slice(1).join('');
+                            setItemForm({...itemForm, price: val});
+                          }}
                           className="block w-full pl-7 pr-12 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white"
-                          placeholder="0.00"
+                          placeholder="Ej: 10.00"
+                          inputMode="decimal"
+                          autoComplete="off"
                         />
                       </div>
                     </div>
-                    <div className="grid grid-cols-1 gap-y-4 sm:grid-cols-2 sm:gap-x-6 text-left">
-                      <div className="flex items-center">
-                        <input
-                          id="is_featured"
-                          name="is_featured"
-                          type="checkbox"
-                          checked={itemForm.is_featured}
-                          onChange={(e) => setItemForm({...itemForm, is_featured: e.target.checked})}
-                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded"
-                        />
-                        <label htmlFor="is_featured" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
-                          Destacar este plato
-                        </label>
+                    <div className="text-left">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Nivel de picante
+                      </label>
+                      <div className="flex items-center space-x-1">
+                        {[1,2,3,4,5].map((star) => (
+                          <button
+                            key={star}
+                            type="button"
+                            aria-label={`Picante: ${star} estrellas`}
+                            className={`text-xl ${star <= (itemForm.spice_level || 0) ? 'text-red-500' : 'text-gray-300'}`}
+                            onClick={() => setItemForm({...itemForm, spice_level: itemForm.spice_level === star ? 0 : star})}
+                          >
+                            ★
+                          </button>
+                        ))}
+                        <span className="ml-2 text-xs text-gray-500">{itemForm.spice_level ? `${itemForm.spice_level}/5` : 'Sin picante'}</span>
                       </div>
-                      <div className="flex items-center">
+                    </div>
+                    <div className="flex items-center mt-2">
+                      <input
+                        id="is_featured"
+                        name="is_featured"
+                        type="checkbox"
+                        checked={itemForm.is_featured}
+                        onChange={e => setItemForm({...itemForm, is_featured: e.target.checked})}
+                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded"
+                      />
+                      <label htmlFor="is_featured" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
+                        Destacar este plato
+                      </label>
+                    </div>
+                    <div className="text-left">
+                      <label htmlFor="item-ingredients" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Ingredientes (opcional)
+                      </label>
+                      <input
+                        type="text"
+                        id="item-ingredients"
+                        value={itemForm.ingredients}
+                        onChange={e => setItemForm({...itemForm, ingredients: e.target.value})}
+                        className="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white"
+                        placeholder="Ej: Lechuga, pollo, parmesano, salsa césar"
+                      />
+                    </div>
+                    <div className="text-left">
+                      <label htmlFor="item-allergens" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Alérgenos (separados por coma)
+                      </label>
+                      <input
+                        type="text"
+                        id="item-allergens"
+                        value={itemForm.allergens}
+                        onChange={e => setItemForm({...itemForm, allergens: e.target.value})}
+                        className="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white"
+                        placeholder="Ej: gluten, huevo, leche"
+                      />
+                    </div>
+                    <div className="flex flex-wrap gap-4 mt-2">
+                      <label className="inline-flex items-center text-sm">
                         <input
-                          id="is_available"
-                          name="is_available"
                           type="checkbox"
-                          checked={itemForm.is_available}
-                          onChange={(e) => setItemForm({...itemForm, is_available: e.target.checked})}
-                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded"
+                          checked={!!itemForm.is_vegetarian}
+                          onChange={e => setItemForm({...itemForm, is_vegetarian: e.target.checked})}
+                          className="h-4 w-4 text-green-600 border-gray-300 rounded"
                         />
-                        <label htmlFor="is_available" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
-                          Disponible
-                        </label>
-                      </div>
+                        <span className="ml-2">Vegetariano</span>
+                      </label>
+                      <label className="inline-flex items-center text-sm">
+                        <input
+                          type="checkbox"
+                          checked={!!itemForm.is_vegan}
+                          onChange={e => setItemForm({...itemForm, is_vegan: e.target.checked})}
+                          className="h-4 w-4 text-green-600 border-gray-300 rounded"
+                        />
+                        <span className="ml-2">Vegano</span>
+                      </label>
+                      <label className="inline-flex items-center text-sm">
+                        <input
+                          type="checkbox"
+                          checked={!!itemForm.is_gluten_free}
+                          onChange={e => setItemForm({...itemForm, is_gluten_free: e.target.checked})}
+                          className="h-4 w-4 text-green-600 border-gray-300 rounded"
+                        />
+                        <span className="ml-2">Sin gluten</span>
+                      </label>
+                    </div>
+                    <div className="text-left mt-2">
+                      <label htmlFor="item-discount" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Descuento (%) (opcional)
+                      </label>
+                      <input
+                        type="number"
+                        id="item-discount"
+                        value={itemForm.discount_percentage}
+                        onChange={e => setItemForm({...itemForm, discount_percentage: e.target.value})}
+                        className="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white"
+                        placeholder="Ej: 10"
+                        min="0"
+                        max="100"
+                        step="0.01"
+                      />
                     </div>
                     <div className="mt-5 sm:mt-6 sm:grid sm:grid-cols-2 sm:gap-3">
                       <button

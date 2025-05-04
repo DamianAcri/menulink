@@ -4,6 +4,13 @@ interface MenuItemType {
   name: string;
   price: string;
   description: string;
+  ingredients?: string;
+  allergens?: string;
+  spice_level?: number;
+  is_vegetarian?: boolean;
+  is_vegan?: boolean;
+  is_gluten_free?: boolean;
+  discount_percentage?: string;
 }
 
 interface OpeningHoursType {
@@ -35,7 +42,7 @@ const daysOfWeekLabels = {
 
 const Step3FirstContent: React.FC<Step3FirstContentProps> = ({ formData, handleChange, errors }) => {
   // Funciones para manejar cambios en los platos del menú
-  const handleMenuItemChange = (index: number, field: keyof MenuItemType, value: string) => {
+  const handleMenuItemChange = (index: number, field: keyof MenuItemType, value: string | boolean | number) => {
     const updatedItems = [...formData.menuItems];
     updatedItems[index] = { ...updatedItems[index], [field]: value };
     handleChange('menuItems', updatedItems);
@@ -136,12 +143,114 @@ const Step3FirstContent: React.FC<Step3FirstContentProps> = ({ formData, handleC
                   Precio (€)
                 </label>
                 <input
-                  type="number"
+                  type="text"
                   id={`item-price-${index}`}
                   value={item.price}
-                  onChange={(e) => handleMenuItemChange(index, 'price', e.target.value)}
+                  onChange={e => {
+                    let val = e.target.value.replace(/[^\d.]/g, '');
+                    const parts = val.split('.');
+                    if (parts.length > 2) val = parts[0] + '.' + parts.slice(1).join('');
+                    handleMenuItemChange(index, 'price', val);
+                  }}
                   className="mt-1 shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md"
-                  placeholder="Ej: 12.50"
+                  placeholder="Ej: 10.00"
+                  inputMode="decimal"
+                  autoComplete="off"
+                />
+              </div>
+            </div>
+            <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label htmlFor={`item-ingredients-${index}`} className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Ingredientes (opcional)
+                </label>
+                <input
+                  type="text"
+                  id={`item-ingredients-${index}`}
+                  value={item.ingredients || ''}
+                  onChange={(e) => handleMenuItemChange(index, 'ingredients', e.target.value)}
+                  className="mt-1 shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md"
+                  placeholder="Ej: Lechuga, pollo, parmesano, salsa césar"
+                />
+              </div>
+              <div>
+                <label htmlFor={`item-allergens-${index}`} className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Alérgenos (separados por coma)
+                </label>
+                <input
+                  type="text"
+                  id={`item-allergens-${index}`}
+                  value={item.allergens || ''}
+                  onChange={(e) => handleMenuItemChange(index, 'allergens', e.target.value)}
+                  className="mt-1 shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md"
+                  placeholder="Ej: gluten, huevo, leche"
+                />
+              </div>
+            </div>
+            <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Nivel de picante
+                </label>
+                <div className="flex items-center space-x-1">
+                  {[1,2,3,4,5].map((star) => (
+                    <button
+                      key={star}
+                      type="button"
+                      aria-label={`Picante: ${star} estrellas`}
+                      className={`text-xl ${item.spice_level === star ? 'text-red-500' : 'text-gray-300'}`}
+                      onClick={() => handleMenuItemChange(index, 'spice_level', star)}
+                    >
+                      ★
+                    </button>
+                  ))}
+                  <span className="ml-2 text-xs text-gray-500">{item.spice_level ? `${item.spice_level}/5` : 'Sin picante'}</span>
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-4 mt-2">
+                <label className="inline-flex items-center text-sm">
+                  <input
+                    type="checkbox"
+                    checked={!!item.is_vegetarian}
+                    onChange={e => handleMenuItemChange(index, 'is_vegetarian', e.target.checked)}
+                    className="h-4 w-4 text-green-600 border-gray-300 rounded"
+                  />
+                  <span className="ml-2">Vegetariano</span>
+                </label>
+                <label className="inline-flex items-center text-sm">
+                  <input
+                    type="checkbox"
+                    checked={!!item.is_vegan}
+                    onChange={e => handleMenuItemChange(index, 'is_vegan', e.target.checked)}
+                    className="h-4 w-4 text-green-600 border-gray-300 rounded"
+                  />
+                  <span className="ml-2">Vegano</span>
+                </label>
+                <label className="inline-flex items-center text-sm">
+                  <input
+                    type="checkbox"
+                    checked={!!item.is_gluten_free}
+                    onChange={e => handleMenuItemChange(index, 'is_gluten_free', e.target.checked)}
+                    className="h-4 w-4 text-green-600 border-gray-300 rounded"
+                  />
+                  <span className="ml-2">Sin gluten</span>
+                </label>
+              </div>
+            </div>
+            <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label htmlFor={`item-discount-${index}`} className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Descuento (%) (opcional)
+                </label>
+                <input
+                  type="number"
+                  id={`item-discount-${index}`}
+                  value={item.discount_percentage || ''}
+                  onChange={(e) => handleMenuItemChange(index, 'discount_percentage', e.target.value)}
+                  className="mt-1 shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md"
+                  placeholder="Ej: 10"
+                  min="0"
+                  max="100"
                   step="0.01"
                 />
               </div>

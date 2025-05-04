@@ -25,7 +25,7 @@ export default function OnboardingPage() {
     
     // Paso 3: Primeros contenidos
     menuItems: [
-      { name: "", price: "", description: "" }
+      { name: "", price: "", description: "", allergens: "" }
     ],
     openingHours: {
       monday: { isOpen: false, opensAt: "09:00", closesAt: "18:00" },
@@ -253,7 +253,8 @@ export default function OnboardingPage() {
           price: parseFloat(item.price.toString()),
           description: item.description || null,
           display_order: index + 1,
-          is_available: true
+          is_available: true,
+          allergens: item.allergens ? item.allergens.split(',').map((a: string) => a.trim()).filter(Boolean) : null
         }));
       
       if (menuItemsToInsert.length > 0) {

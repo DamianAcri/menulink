@@ -29,6 +29,32 @@ type RestaurantPageProps = {
   params: Promise<{ slug: string }>
 }
 
+// Define los tipos para los datos anidados
+interface MenuItem {
+  id: string;
+  name: string;
+  description?: string | null;
+  price: number;
+  image_url?: string | null;
+  is_featured: boolean;
+  is_available: boolean;
+  display_order: number;
+  ingredients?: string | null;
+  allergens?: string[] | null;
+  spice_level?: number | null;
+  is_vegetarian?: boolean | null;
+  is_vegan?: boolean | null;
+  is_gluten_free?: boolean | null;
+  discount_percentage?: string | null;
+}
+interface MenuCategory {
+  id: string;
+  name: string;
+  description?: string | null;
+  display_order: number;
+  menu_items: MenuItem[];
+}
+
 export default async function RestaurantPage(props: RestaurantPageProps) {
   try {
     const { slug } = await props.params;
@@ -50,7 +76,14 @@ export default async function RestaurantPage(props: RestaurantPageProps) {
             image_url,
             is_featured,
             is_available,
-            display_order
+            display_order,
+            ingredients,
+            allergens,
+            spice_level,
+            is_vegetarian,
+            is_vegan,
+            is_gluten_free,
+            discount_percentage
           )
         ),
         social_links(
@@ -123,6 +156,21 @@ export default async function RestaurantPage(props: RestaurantPageProps) {
       contact: contactInfo || {},
       opening_hours: openingHours || []
     };
+
+    // Normalizar datos para evitar errores en la UI
+    if (restaurant && restaurant.menu_categories) {
+      restaurant.menu_categories = (restaurant.menu_categories as MenuCategory[]).map((cat) => ({
+        ...cat,
+        menu_items: Array.isArray(cat.menu_items) ? cat.menu_items.map((item) => ({
+          ...item,
+          allergens: Array.isArray(item?.allergens)
+            ? item.allergens
+            : typeof item?.allergens === 'string' && (item.allergens as string).includes(',')
+              ? (item.allergens as string).split(',').map((a: string) => a.trim()).filter(Boolean)
+              : item.allergens ? [item.allergens as string] : [],
+        })) : [],
+      }));
+    }
 
     await trackPageView(restaurant.id);
 
