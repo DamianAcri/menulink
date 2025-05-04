@@ -207,86 +207,31 @@ export default function ReservationsPage() {
 
     setIsLoading(true);
     try {
-      console.log("Consultando reservas para restaurante ID:", restaurantId);
-
-      // Obtener la sesión actual para usar el token de autenticación
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      console.log("Sesión actual:", session ? "Autenticado" : "No autenticado");
-
-      // Asegurarse de que estamos trabajando con una instancia de cliente con la autenticación correcta
-      const supabaseWithAuth = session ? supabase : supabase;
-
-      // Depurar las políticas de RLS para la tabla de reservas
-      console.log(
-        "Intentando acceder a tabla de reservas con las siguientes credenciales:"
-      );
-      console.log("- Usuario autenticado: ", !!session?.user);
-      console.log("- Usuario ID: ", session?.user?.id);
-
-      // Consulta explícita con información completa
-      const { data, error } = await supabaseWithAuth
+      // Log para depuración
+      console.log('Filtro de estado actual:', statusFilter);
+      let query = supabase
         .from("reservations")
         .select("*")
         .eq("restaurant_id", restaurantId);
-
-      console.log(
-        "Consulta SQL aproximada:",
-        `SELECT * FROM reservations WHERE restaurant_id = '${restaurantId}'`
-      );
-
-      console.log("Resultado de consulta de reservas (raw):", data);
-      console.log("Error de consulta de reservas:", error);
-
-      // Si hay un error, intentar una consulta alternativa usando RPC si existe
-      if (error || !data || data.length === 0) {
-        console.log("Intentando consulta alternativa con RPC...");
-        try {
-          const { data: rpcData, error: rpcError } = await supabaseWithAuth.rpc(
-            "get_restaurant_reservations",
-            { restaurant_id_param: restaurantId }
-          );
-
-          console.log("Resultado de RPC:", rpcData);
-          console.log("Error de RPC:", rpcError);
-
-          if (!rpcError && rpcData && rpcData.length > 0) {
-            const sortedReservations: Reservation[] = rpcData.sort(
-              (a: Reservation, b: Reservation) => {
-                const dateCompare =
-                  new Date(a.reservation_date).getTime() -
-                  new Date(b.reservation_date).getTime();
-                if (dateCompare !== 0) return dateCompare;
-                return a.reservation_time.localeCompare(b.reservation_time);
-              }
-            );
-
-            console.log("Reservas ordenadas desde RPC:", sortedReservations);
-            setReservations(sortedReservations);
-            setIsLoading(false);
-            return;
-          }
-        } catch (rpcError: unknown) {
-          console.log("Error en consulta RPC:", rpcError);
-        }
+      // Solo permitir valores válidos
+      const validStatuses = ["pending", "confirmed", "cancelled", "completed"];
+      if (statusFilter !== "all" && validStatuses.includes(statusFilter)) {
+        query = query.eq("status", statusFilter);
       }
-
+      if (dateFilter) {
+        query = query.eq("reservation_date", dateFilter);
+      }
+      const { data, error } = await query;
+      console.log('Reservas devueltas por Supabase:', data);
       if (error) throw error;
-
-      // Ordenamos las reservas en el cliente
+      // Ordenar por fecha y hora
       const sortedReservations = (data || []).sort((a, b) => {
-        // Primero por fecha
         const dateCompare =
           new Date(a.reservation_date).getTime() -
           new Date(b.reservation_date).getTime();
         if (dateCompare !== 0) return dateCompare;
-
-        // Si las fechas son iguales, ordenar por hora
         return a.reservation_time.localeCompare(b.reservation_time);
       });
-
-      console.log("Reservas ordenadas:", sortedReservations);
       setReservations(sortedReservations);
     } catch (error: unknown) {
       console.error("Error al cargar reservas:", error);
@@ -627,7 +572,9 @@ export default function ReservationsPage() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span
-                        className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full border ${getStatusColor(reservation.status)}`}
+                        className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full border ${getStatusColor(
+                          reservation.status
+                        )}`}
                       >
                         {getStatusText(reservation.status)}
                       </span>
