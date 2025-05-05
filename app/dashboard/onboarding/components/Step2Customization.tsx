@@ -5,6 +5,8 @@ interface Step2CustomizationProps {
   formData: {
     coverFile: File | null;
     coverPreview: string | null;
+    templateType?: string;
+    reservationMode: string;
   };
   handleChange: (field: string, value: File | string | null) => void;
 }
@@ -29,13 +31,170 @@ const Step2Customization: React.FC<Step2CustomizationProps> = ({ formData, handl
   };
 
   return (
-    <div className="space-y-6">
-      <h2 className="text-xl font-medium text-gray-900 dark:text-white">
-        Personalización inicial
-      </h2>
-      <p className="text-sm text-gray-500 dark:text-gray-400">
-        Ahora vamos a darle un poco de personalidad visual a tu página.
-      </p>
+    <div className="space-y-8">
+      <div>
+        <h2 className="text-xl font-medium text-gray-900 dark:text-white">
+          Personalización inicial
+        </h2>
+        <p className="text-sm text-gray-500 dark:text-gray-400">
+          Ahora vamos a darle un poco de personalidad visual a tu página.
+        </p>
+      </div>
+
+      {/* Selección de plantilla */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          Diseño de la página
+        </label>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+          Elige el diseño que mejor se adapte al estilo de tu restaurante
+        </p>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Plantilla Tradicional */}
+          <div 
+            className={`border rounded-lg overflow-hidden cursor-pointer transition-all hover:shadow-md ${
+              formData.templateType === 'traditional' ? 'ring-2 ring-blue-500' : 'hover:border-gray-400'
+            }`}
+            onClick={() => handleChange('templateType', 'traditional')}
+          >
+            <div className="aspect-video w-full relative">
+              <Image 
+                src="/templates/traditional.jpg" 
+                alt="Diseño tradicional" 
+                layout="fill"
+                objectFit="cover"
+              />
+            </div>
+            <div className="p-3">
+              <div className="flex items-center">
+                <input
+                  type="radio"
+                  checked={formData.templateType === 'traditional'}
+                  onChange={() => handleChange('templateType', 'traditional')}
+                  className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                />
+                <label className="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Tradicional
+                </label>
+              </div>
+              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                Ideal para restaurantes clásicos y familiares
+              </p>
+            </div>
+          </div>
+          
+          {/* Plantilla Minimalista */}
+          <div 
+            className={`border rounded-lg overflow-hidden cursor-pointer transition-all hover:shadow-md ${
+              formData.templateType === 'minimalist' ? 'ring-2 ring-blue-500' : 'hover:border-gray-400'
+            }`}
+            onClick={() => handleChange('templateType', 'minimalist')}
+          >
+            <div className="aspect-video w-full relative">
+              <Image 
+                src="/templates/minimalist.jpg" 
+                alt="Diseño minimalista" 
+                layout="fill"
+                objectFit="cover"
+              />
+            </div>
+            <div className="p-3">
+              <div className="flex items-center">
+                <input
+                  type="radio"
+                  checked={formData.templateType === 'minimalist'}
+                  onChange={() => handleChange('templateType', 'minimalist')}
+                  className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                />
+                <label className="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Minimalista
+                </label>
+              </div>
+              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                Perfecto para cafés modernos y bares
+              </p>
+            </div>
+          </div>
+          
+          {/* Plantilla Visual/Elegante */}
+          <div 
+            className={`border rounded-lg overflow-hidden cursor-pointer transition-all hover:shadow-md ${
+              formData.templateType === 'visual' ? 'ring-2 ring-blue-500' : 'hover:border-gray-400'
+            }`}
+            onClick={() => handleChange('templateType', 'visual')}
+          >
+            <div className="aspect-video w-full relative">
+              <Image 
+                src="/templates/visual.jpg" 
+                alt="Diseño visual" 
+                layout="fill"
+                objectFit="cover"
+              />
+            </div>
+            <div className="p-3">
+              <div className="flex items-center">
+                <input
+                  type="radio"
+                  checked={formData.templateType === 'visual'}
+                  onChange={() => handleChange('templateType', 'visual')}
+                  className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                />
+                <label className="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Visual
+                </label>
+              </div>
+              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                Ideal para restaurantes gourmet y de autor
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      {/* Formulario de reservas */}
+      <div>
+        <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+          Formulario de Reservas
+        </h3>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+          ¿Deseas incluir un formulario de reservas en tu página?
+        </p>
+        
+        <div className="mt-4">
+          <div className="space-y-4">
+            <div className="flex items-center">
+              <input
+                id="reservation-enabled"
+                name="reservation-mode"
+                type="radio"
+                checked={formData.reservationMode === 'form'}
+                onChange={() => handleChange('reservationMode', 'form')}
+                className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+              />
+              <label htmlFor="reservation-enabled" className="ml-3 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Sí, incluir formulario de reservas
+              </label>
+            </div>
+            <div className="flex items-center">
+              <input
+                id="reservation-disabled"
+                name="reservation-mode"
+                type="radio"
+                checked={formData.reservationMode === 'disabled'}
+                onChange={() => handleChange('reservationMode', 'disabled')}
+                className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+              />
+              <label htmlFor="reservation-disabled" className="ml-3 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                No, no incluir formulario de reservas
+              </label>
+            </div>
+          </div>
+          <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+            Podrás cambiar esta configuración más tarde desde la sección de Configuración en tu Dashboard.
+          </p>
+        </div>
+      </div>
 
       {/* Imagen de portada */}
       <div>

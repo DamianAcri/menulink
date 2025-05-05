@@ -16,6 +16,7 @@ export default function ProfilePage() {
     theme_color: string;
     secondary_color: string;
     font_family: string;
+    theme_type?: number;
     logo_url?: string;
     cover_image_url?: string;
   } | null>(null);
@@ -26,6 +27,7 @@ export default function ProfilePage() {
     themeColor: "#3B82F6",
     secondaryColor: "#1E40AF",
     fontFamily: "Inter, sans-serif",
+    templateType: "traditional",
   });
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
@@ -73,6 +75,7 @@ export default function ProfilePage() {
           themeColor: restaurantData.theme_color || "#3B82F6",
           secondaryColor: restaurantData.secondary_color || "#1E40AF",
           fontFamily: restaurantData.font_family || "Inter, sans-serif",
+          templateType: convertNumberToTemplateType(restaurantData.theme_type), // Convertir el número a string
         });
 
         if (restaurantData.logo_url) {
@@ -91,6 +94,24 @@ export default function ProfilePage() {
 
     fetchRestaurant();
   }, []);
+
+  // Función para convertir número a tipo de plantilla
+  const convertNumberToTemplateType = (themeTypeNumber?: number): string => {
+    switch (themeTypeNumber) {
+      case 2: return "minimalist";
+      case 3: return "visual";
+      default: return "traditional"; // caso 1 o undefined
+    }
+  };
+
+  // Función para convertir tipo de plantilla a número
+  const convertTemplateTypeToNumber = (templateType: string): number => {
+    switch (templateType) {
+      case "minimalist": return 2;
+      case "visual": return 3;
+      default: return 1; // "traditional" por defecto
+    }
+  };
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -213,6 +234,7 @@ export default function ProfilePage() {
         theme_color: formData.themeColor,
         secondary_color: formData.secondaryColor,
         font_family: formData.fontFamily,
+        theme_type: convertTemplateTypeToNumber(formData.templateType)
       };
 
       // Subir el logo si se ha cambiado
@@ -255,6 +277,10 @@ export default function ProfilePage() {
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleTemplateTypeChange = (templateType: string) => {
+    setFormData((prev) => ({ ...prev, templateType }));
   };
 
   if (loading) {
@@ -477,6 +503,127 @@ export default function ProfilePage() {
               <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
                 Imagen destacada para tu página (recomendado: 1200x400px)
               </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-gray-800 shadow sm:rounded-lg p-6">
+          <h3 className="text-lg font-medium leading-6 text-gray-900 dark:text-white mb-4">
+            Diseño de la página
+          </h3>
+
+          <div className="grid grid-cols-1 gap-y-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Selecciona el diseño para tu página
+              </label>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                Cada diseño tiene un estilo diferente que se adapta a distintos tipos de negocios
+              </p>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Plantilla Tradicional */}
+                <div 
+                  className={`border rounded-lg overflow-hidden cursor-pointer transition-all hover:shadow-md ${
+                    formData.templateType === 'traditional' ? 'ring-2 ring-blue-500' : 'hover:border-gray-400'
+                  }`}
+                  onClick={() => handleTemplateTypeChange('traditional')}
+                >
+                  <div className="aspect-video w-full relative">
+                    <Image 
+                      src="/templates/traditional.jpg" 
+                      alt="Diseño tradicional" 
+                      layout="fill"
+                      objectFit="cover"
+                    />
+                  </div>
+                  <div className="p-3">
+                    <div className="flex items-center">
+                      <input
+                        type="radio"
+                        name="templateType"
+                        checked={formData.templateType === 'traditional'}
+                        onChange={() => handleTemplateTypeChange('traditional')}
+                        className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                      />
+                      <label className="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Tradicional
+                      </label>
+                    </div>
+                    <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                      Ideal para restaurantes clásicos y familiares
+                    </p>
+                  </div>
+                </div>
+                
+                {/* Plantilla Minimalista */}
+                <div 
+                  className={`border rounded-lg overflow-hidden cursor-pointer transition-all hover:shadow-md ${
+                    formData.templateType === 'minimalist' ? 'ring-2 ring-blue-500' : 'hover:border-gray-400'
+                  }`}
+                  onClick={() => handleTemplateTypeChange('minimalist')}
+                >
+                  <div className="aspect-video w-full relative">
+                    <Image 
+                      src="/templates/minimalist.jpg" 
+                      alt="Diseño minimalista" 
+                      layout="fill"
+                      objectFit="cover"
+                    />
+                  </div>
+                  <div className="p-3">
+                    <div className="flex items-center">
+                      <input
+                        type="radio"
+                        name="templateType"
+                        checked={formData.templateType === 'minimalist'}
+                        onChange={() => handleTemplateTypeChange('minimalist')}
+                        className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                      />
+                      <label className="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Minimalista
+                      </label>
+                    </div>
+                    <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                      Perfecto para cafés modernos y bares
+                    </p>
+                  </div>
+                </div>
+                
+                {/* Plantilla Visual/Elegante */}
+                <div 
+                  className={`border rounded-lg overflow-hidden cursor-pointer transition-all hover:shadow-md ${
+                    formData.templateType === 'visual' ? 'ring-2 ring-blue-500' : 'hover:border-gray-400'
+                  }`}
+                  onClick={() => handleTemplateTypeChange('visual')}
+                >
+                  <div className="aspect-video w-full relative">
+                    <Image 
+                      src="/templates/visual.jpg" 
+                      alt="Diseño visual" 
+                      layout="fill"
+                      objectFit="cover"
+                    />
+                  </div>
+                  <div className="p-3">
+                    <div className="flex items-center">
+                      <input
+                        type="radio"
+                        name="templateType"
+                        checked={formData.templateType === 'visual'}
+                        onChange={() => handleTemplateTypeChange('visual')}
+                        className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                      />
+                      <label className="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Visual
+                      </label>
+                    </div>
+                    <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                      Ideal para restaurantes gourmet y de autor
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>

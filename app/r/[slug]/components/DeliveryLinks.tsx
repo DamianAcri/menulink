@@ -27,8 +27,18 @@ const DELIVERY_PLATFORMS = {
   }
 };
 
+// Interface to match the database structure for delivery_links
+interface DeliveryLink {
+  id: string;
+  restaurant_id: string;
+  platform: string;
+  url: string;
+  display_order: number;
+  created_at?: string;
+}
+
 type DeliveryLinksProps = {
-  delivery_links?: Record<string, string>;
+  links?: DeliveryLink[];
   themeColors: {
     primary: string;
     secondary: string;
@@ -37,7 +47,7 @@ type DeliveryLinksProps = {
   };
 };
 
-export default function DeliveryLinks({ delivery_links = {}, themeColors }: DeliveryLinksProps) {
+export default function DeliveryLinks({ links = [], themeColors }: DeliveryLinksProps) {
   const [visibleLinks, setVisibleLinks] = useState<Set<string>>(new Set());
   const [mounted, setMounted] = useState(false);
 
@@ -45,18 +55,18 @@ export default function DeliveryLinks({ delivery_links = {}, themeColors }: Deli
     setMounted(true);
     // Añade animación de entrada con un ligero retraso para cada botón
     const timer = setTimeout(() => {
-      Object.keys(delivery_links).forEach((platform, index) => {
+      links.forEach((link, index) => {
         setTimeout(() => {
-          setVisibleLinks(prev => new Set([...prev, platform]));
+          setVisibleLinks(prev => new Set([...prev, link.id]));
         }, index * 150);
       });
     }, 300);
 
     return () => clearTimeout(timer);
-  }, [delivery_links]);
+  }, [links]);
 
   // No renderizar nada si no hay enlaces
-  if (!delivery_links || Object.keys(delivery_links).length === 0) {
+  if (!links || links.length === 0) {
     return null;
   }
 
@@ -78,6 +88,9 @@ export default function DeliveryLinks({ delivery_links = {}, themeColors }: Deli
     return luminance > 0.7;
   }
 
+  // Sort links by display_order
+  const sortedLinks = [...links].sort((a, b) => a.display_order - b.display_order);
+
   return (
     <div className="py-8 w-full">
       <h2 className="text-center font-bold text-lg mb-6" style={{ color: themeColors.primary }}>
@@ -85,19 +98,19 @@ export default function DeliveryLinks({ delivery_links = {}, themeColors }: Deli
       </h2>
       
       <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 max-w-2xl mx-auto px-4">
-        {Object.entries(delivery_links).map(([platform, url], index) => {
+        {sortedLinks.map((link, index) => {
           // Verifica si la plataforma es válida
-          const platformInfo = DELIVERY_PLATFORMS[platform as keyof typeof DELIVERY_PLATFORMS];
+          const platformInfo = DELIVERY_PLATFORMS[link.platform as keyof typeof DELIVERY_PLATFORMS];
           if (!platformInfo) return null;
           
-          const isVisible = visibleLinks.has(platform);
+          const isVisible = visibleLinks.has(link.id);
           // Determina el color de texto según el fondo
           const textColor = isColorLight(themeColors.primary) ? '#1f2937' : '#fff';
           
           return (
             <a
-              key={platform}
-              href={url}
+              key={link.id}
+              href={link.url}
               target="_blank"
               rel="noopener noreferrer"
               className={`flex items-center justify-center gap-3 w-full sm:w-auto px-6 py-3.5 rounded-xl 

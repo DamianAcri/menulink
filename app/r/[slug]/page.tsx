@@ -6,6 +6,12 @@ import ContactSection from './components/ContactSection';
 import Header from './components/Header';
 import ReservationSection from './components/ReservationSection';
 import Link from 'next/link';
+import MinimalistLayout from './layouts/MinimalistLayout';
+import TraditionalLayout from './layouts/TraditionalLayout';
+import VisualLayout from './layouts/VisualLayout';
+import Navigation from './components/Navigation';
+import DeliveryLinks from './components/DeliveryLinks';
+import SocialLinks from './components/SocialLinks';
 
 export const metadata: Metadata = {
   title: 'Menú Digital | MenuLink',
@@ -197,36 +203,49 @@ export default async function RestaurantPage(props: RestaurantPageProps) {
       : restaurant.logo_url
         ? `${supabaseUrl}/storage/v1/object/public/${bucket}/${restaurant.logo_url}`
         : undefined;
+    
+    // Determine which template to use based on theme_type number
+    let templateType = 'traditional';
+    
+    // Convert the numeric theme_type to string template name
+    // (1 = traditional, 2 = minimalist, 3 = visual)
+    switch (restaurant.theme_type) {
+      case 2:
+        templateType = 'minimalist';
+        break;
+      case 3:
+        templateType = 'visual';
+        break;
+      case 1:
+      default:
+        templateType = 'traditional';
+        break;
+    }
 
-    return (
-      <main className="min-h-screen" style={{ background: '#fff', color: themeColors.text, fontFamily }}>
-        <div className="max-w-3xl mx-auto px-4 py-8">
-          <Header
-            name={restaurant.name}
-            description={restaurant.description}
-            logo_url={logoUrl}
-            cover_image_url={coverUrl}
-            themeColors={themeColors}
-          />
-          <MenuSection 
-            categories={restaurant.menu_categories} 
-            themeColors={themeColors} 
-          />
-          <ReservationSection
-            restaurantId={restaurant.id}
-            restaurantName={restaurant.name}
-            themeColors={themeColors}
-          />
-          <ContactSection 
-            restaurant={restaurantWithDetails} 
-            themeColors={themeColors} 
-          />
-        </div>
-        <footer className="text-xs text-gray-400 text-center py-6">
-          <p>Creado con <Link href="/" className="hover:underline font-medium" style={{ color: themeColors.primary }}>MenuLink</Link></p>
-        </footer>
-      </main>
-    );
+    // Check if reservations are enabled based on the reservation_mode
+    // If reservation_mode is 'disabled' or 'none', then reservations are disabled
+    const showReservationForm = restaurant.reservation_mode !== 'disabled' && restaurant.reservation_mode !== 'none';
+
+    // Common props for all layouts
+    const layoutProps = {
+      restaurant: restaurantWithDetails,
+      coverUrl,
+      logoUrl,
+      themeColors,
+      fontFamily,
+      showReservationForm // Pass the new prop to layouts
+    };
+
+    // Render the appropriate template based on templateType
+    switch (templateType) {
+      case 'minimalist':
+        return <MinimalistLayout {...layoutProps} />;
+      case 'visual':
+        return <VisualLayout {...layoutProps} />;
+      case 'traditional':
+      default:
+        return <TraditionalLayout {...layoutProps} />;
+    }
   } catch (error) {
     console.error('Error al cargar la página del restaurante:', error);
     return (

@@ -12,9 +12,18 @@ type ReservationSectionProps = {
     background: string;
     text: string;
   };
+  showReservationForm?: boolean; // New prop to conditionally show the form
 };
 
-export default function ReservationSection({ restaurantId, restaurantName, themeColors }: ReservationSectionProps) {
+export default function ReservationSection({ 
+  restaurantId, 
+  restaurantName, 
+  themeColors, 
+  showReservationForm = true // Default to true for backward compatibility
+}: ReservationSectionProps) {
+  // If the reservation form is disabled, return null to not render anything
+  if (!showReservationForm) return null;
+  
   const [formData, setFormData] = useState({
     customer_name: '',
     customer_email: '',

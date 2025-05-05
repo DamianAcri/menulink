@@ -22,6 +22,8 @@ export default function OnboardingPage() {
     // Paso 2: Personalización
     coverFile: null as File | null,
     coverPreview: null as string | null,
+    templateType: "traditional" as string, // Default template is traditional
+    reservationMode: "form" as string, // Default: mostrar formulario de reservas
     
     // Paso 3: Primeros contenidos
     menuItems: [
@@ -125,6 +127,9 @@ export default function OnboardingPage() {
         }
         break;
       case 2:
+        if (!formData.templateType) {
+          errors.templateType = "Debes seleccionar un diseño para tu página";
+        }
         // La imagen de portada no es obligatoria
         break;
       case 3:
@@ -191,7 +196,9 @@ export default function OnboardingPage() {
             theme_color: '#3B82F6', // Color azul por defecto
             secondary_color: '#1E40AF',
             font_family: 'Inter, sans-serif',
-            subscription_tier: 'free'
+            subscription_tier: 'free',
+            reservation_mode: formData.reservationMode, // Guardar la configuración del formulario de reservas
+            theme_type: convertTemplateTypeToNumber(formData.templateType) // Guardar el tipo de plantilla como número
           }
         ])
         .select()
@@ -296,6 +303,16 @@ export default function OnboardingPage() {
       alert('Ha ocurrido un error al guardar los datos. Por favor, inténtalo de nuevo.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Función para convertir el tipo de plantilla a número 
+  // (1 = traditional, 2 = minimalist, 3 = visual)
+  const convertTemplateTypeToNumber = (templateType: string): number => {
+    switch (templateType) {
+      case 'minimalist': return 2;
+      case 'visual': return 3;
+      default: return 1; // 'traditional' por defecto
     }
   };
 

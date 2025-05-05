@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export default function ConfigPage() {
   const router = useRouter();
@@ -10,6 +11,9 @@ export default function ConfigPage() {
   const [language, setLanguage] = useState("es");
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [deleteInput, setDeleteInput] = useState("");
+  const [restaurant, setRestaurant] = useState<any>(null);
+  const [reservationMode, setReservationMode] = useState("form");
+  const [savingSettings, setSavingSettings] = useState(false);
   
   // Función para cambiar el idioma
   const handleLanguageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -76,6 +80,69 @@ export default function ConfigPage() {
       setDeleteConfirmOpen(false);
     }
   };
+
+  // Cargar datos del restaurante
+  useEffect(() => {
+    const fetchRestaurantData = async () => {
+      try {
+        // Obtener el usuario actual
+        const { data: { user } } = await supabase.auth.getUser();
+        
+        if (!user) {
+          router.push('/auth/login');
+          return;
+        }
+        
+        // Buscar el restaurante del usuario
+        const { data: restaurantData, error } = await supabase
+          .from('restaurants')
+          .select('*')
+          .eq('user_id', user.id)
+          .single();
+        
+        if (error) {
+          console.error('Error al cargar datos del restaurante:', error);
+          return;
+        }
+        
+        // Actualizar el estado
+        setRestaurant(restaurantData);
+        setReservationMode(restaurantData.reservation_mode || 'form');
+        
+      } catch (error) {
+        console.error('Error al cargar la página de configuración:', error);
+      }
+    };
+    
+    fetchRestaurantData();
+  }, [router]);
+
+  // Función para guardar configuración
+  const handleSaveSettings = async () => {
+    if (!restaurant) return;
+    
+    setSavingSettings(true);
+    
+    try {
+      const { error } = await supabase
+        .from('restaurants')
+        .update({
+          reservation_mode: reservationMode
+        })
+        .eq('id', restaurant.id);
+      
+      if (error) {
+        throw error;
+      }
+      
+      toast.success('Configuración guardada correctamente');
+    } catch (error) {
+      console.error('Error al guardar configuración:', error);
+      toast.error('Error al guardar la configuración');
+    } finally {
+      setSavingSettings(false);
+    }
+  };
   
   // Inicializar preferencias cuando el componente se monta
   useState(() => {
@@ -111,6 +178,44 @@ export default function ConfigPage() {
               <option value="fr">Français</option>
               <option value="de">Deutsch</option>
             </select>
+          </div>
+          
+          {/* Configuración del formulario de reservas */}
+          <div>
+            <h3 className="text-md font-medium text-gray-900 dark:text-white mb-2">Formulario de Reservas</h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+              Decide si quieres mostrar un formulario de reservas en tu página
+            </p>
+            
+            <div className="space-y-2">
+              <div className="flex items-center">
+                <input
+                  id="reservation-enabled"
+                  name="reservation-mode"
+                  type="radio"
+                  checked={reservationMode === 'form'}
+                  onChange={() => setReservationMode('form')}
+                  className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                />
+                <label htmlFor="reservation-enabled" className="ml-3 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Activar - Mostrar el formulario de reservas a los clientes
+                </label>
+              </div>
+              
+              <div className="flex items-center">
+                <input
+                  id="reservation-disabled"
+                  name="reservation-mode"
+                  type="radio"
+                  checked={reservationMode === 'disabled'}
+                  onChange={() => setReservationMode('disabled')}
+                  className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                />
+                <label htmlFor="reservation-disabled" className="ml-3 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Desactivar - Ocultar el formulario de reservas
+                </label>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -232,9 +337,11 @@ export default function ConfigPage() {
       <div className="mt-8 flex justify-end">
         <button
           type="button"
+          onClick={handleSaveSettings}
+          disabled={savingSettings}
           className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
         >
-          Guardar cambios
+          {savingSettings ? 'Guardando...' : 'Guardar cambios'}
         </button>
       </div>
     </div>
