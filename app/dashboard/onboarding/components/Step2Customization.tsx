@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import Image from 'next/image';
 
 interface Step2CustomizationProps {
@@ -7,8 +7,10 @@ interface Step2CustomizationProps {
     coverPreview: string | null;
     templateType?: string;
     reservationMode: string;
+    maxPartySize?: number;
+    defaultTimeSlots?: boolean;
   };
-  handleChange: (field: string, value: File | string | null) => void;
+  handleChange: (field: string, value: File | string | number | boolean | null) => void;
 }
 
 const Step2Customization: React.FC<Step2CustomizationProps> = ({ formData, handleChange }) => {
@@ -62,7 +64,9 @@ const Step2Customization: React.FC<Step2CustomizationProps> = ({ formData, handl
               <Image 
                 src="/templates/traditional.jpg" 
                 alt="Diseño tradicional" 
-                layout="fill"
+                width={300}
+                height={200}
+                layout="responsive"
                 objectFit="cover"
               />
             </div>
@@ -95,7 +99,9 @@ const Step2Customization: React.FC<Step2CustomizationProps> = ({ formData, handl
               <Image 
                 src="/templates/minimalist.jpg" 
                 alt="Diseño minimalista" 
-                layout="fill"
+                width={300}
+                height={200}
+                layout="responsive"
                 objectFit="cover"
               />
             </div>
@@ -128,7 +134,9 @@ const Step2Customization: React.FC<Step2CustomizationProps> = ({ formData, handl
               <Image 
                 src="/templates/visual.jpg" 
                 alt="Diseño visual" 
-                layout="fill"
+                width={300}
+                height={200}
+                layout="responsive"
                 objectFit="cover"
               />
             </div>
@@ -155,7 +163,7 @@ const Step2Customization: React.FC<Step2CustomizationProps> = ({ formData, handl
       {/* Formulario de reservas */}
       <div>
         <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-          Formulario de Reservas
+          Sistema de Reservas
         </h3>
         <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
           ¿Deseas incluir un formulario de reservas en tu página?
@@ -190,6 +198,63 @@ const Step2Customization: React.FC<Step2CustomizationProps> = ({ formData, handl
               </label>
             </div>
           </div>
+          
+          {formData.reservationMode === 'form' && (
+            <div className="mt-6 bg-gray-50 dark:bg-gray-800 p-4 rounded-md border border-gray-200 dark:border-gray-700">
+              <h4 className="font-medium text-gray-900 dark:text-white text-sm mb-3">
+                Configuración inicial del sistema de reservas
+              </h4>
+              
+              <div className="mb-4">
+                <label htmlFor="max-party-size" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Tamaño máximo de grupo que aceptas
+                </label>
+                <div className="flex items-center">
+                  <select
+                    id="max-party-size"
+                    value={formData.maxPartySize || 10}
+                    onChange={(e) => handleChange('maxPartySize', parseInt(e.target.value))}
+                    className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-24 sm:text-sm border-gray-300 rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                  >
+                    {[...Array(20)].map((_, i) => (
+                      <option key={i + 1} value={i + 1}>{i + 1} personas</option>
+                    ))}
+                  </select>
+                </div>
+                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                  Este es el número máximo de personas por reserva que podrán seleccionar los clientes
+                </p>
+              </div>
+
+              <div className="mt-4">
+                <div className="flex items-center">
+                  <input
+                    id="default-slots"
+                    name="default-slots"
+                    type="checkbox"
+                    checked={formData.defaultTimeSlots !== false}
+                    onChange={(e) => handleChange('defaultTimeSlots', e.target.checked)}
+                    className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                  />
+                  <label htmlFor="default-slots" className="ml-3 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Crear horarios de reserva predeterminados
+                  </label>
+                </div>
+                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400 ml-7">
+                  Crearemos automáticamente franjas horarias comunes para reservas (13:00-15:30 y 20:00-23:00)
+                  que podrás personalizar más tarde en tu dashboard.
+                </p>
+              </div>
+              
+              <div className="mt-4 border-t border-gray-200 dark:border-gray-700 pt-4">
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Podrás configurar los horarios específicos para cada día de la semana, capacidad por horario 
+                  y otros ajustes en la sección de Configuración después de completar el registro.
+                </p>
+              </div>
+            </div>
+          )}
+          
           <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
             Podrás cambiar esta configuración más tarde desde la sección de Configuración en tu Dashboard.
           </p>
@@ -203,11 +268,11 @@ const Step2Customization: React.FC<Step2CustomizationProps> = ({ formData, handl
         </label>
         <div className="mt-1">
           {formData.coverPreview ? (
-            <div className="relative">
+            <div className="relative w-full h-48">
               <Image
                 src={formData.coverPreview}
                 alt="Cover preview"
-                className="h-48 w-full object-cover rounded-md"
+                className="object-cover rounded-md"
                 layout="fill"
               />
               <button

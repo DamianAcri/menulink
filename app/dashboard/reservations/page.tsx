@@ -46,6 +46,20 @@ export default function ReservationsPage() {
   const [formError, setFormError] = useState<string | null>(null);
   const [formSuccess, setFormSuccess] = useState<string | null>(null);
 
+  // Nuevos estados para la gestión de franjas horarias
+  const [showTimeSlotsSection, setShowTimeSlotsSection] = useState(false);
+  const [timeSlots, setTimeSlots] = useState<any[]>([]);
+  const [selectedDay, setSelectedDay] = useState(1); // Lunes por defecto
+  const [isEditingSlot, setIsEditingSlot] = useState(false);
+  const [editingSlot, setEditingSlot] = useState<any>(null);
+  const [newSlot, setNewSlot] = useState({
+    start_time: "13:00",
+    end_time: "14:30",
+    max_reservations: 4,
+    max_party_size: 10,
+    is_active: true
+  });
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -202,6 +216,13 @@ export default function ReservationsPage() {
     }
   }, [statusFilter, dateFilter, restaurant]);
 
+  // Efecto para cargar los time slots cuando se muestra la sección
+  useEffect(() => {
+    if (showTimeSlotsSection && restaurant) {
+      loadTimeSlots();
+    }
+  }, [showTimeSlotsSection, restaurant, selectedDay]);
+
   const fetchReservations = async (restaurantId: string) => {
     if (!restaurantId) return;
 
@@ -240,6 +261,173 @@ export default function ReservationsPage() {
       setIsLoading(false);
     }
   };
+
+  // Función para cargar los time slots
+  const loadTimeSlots = async () => {
+    if (!restaurant) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from("reservation_time_slots")
+        .select("*")
+        .eq("restaurant_id", restaurant.id)
+        .eq("day_of_week", selectedDay)
+        .order("start_time");
+      
+      if (error) throw error;
+      
+      setTimeSlots(data || []);
+    } catch (error) {
+      console.error("Error al cargar horarios disponibles:", error);
+      toast.error("Error al cargar horarios");
+    }
+  };
+
+  // Función para manejar cambios en el formulario de time slot
+  const handleSlotChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value, type } = e.target;
+    
+    if (type === "checkbox") {
+      const checked = (e.target as HTMLInputElement).checked;
+      setNewSlot(prev => ({ ...prev, [name]: checked }));
+    } else if (type === "number") {
+      // Convertir a número solo si el campo tiene valor, sino usar un valor predeterminado
+      // para evitar el error NaN
+      const numValue = value === '' ? '' : parseInt(value);
+      setNewSlot(prev => ({ ...prev, [name]: numValue }));
+    } else {
+      setNewSlot(prev => ({ ...prev, [name]: value }));
+    }
+  };
+
+  // Función para manejar cambios en el formulario de edición de slot
+  const handleEditSlotChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value, type } = e.target;
+    
+    if (type === "checkbox") {
+      const checked = (e.target as HTMLInputElement).checked;
+      setEditingSlot((prev: any) => ({ ...prev, [name]: checked }));
+    } else if (type === "number") {
+      // Convertir a número solo si el campo tiene valor, sino usar un valor predeterminado
+      // para evitar el error NaN
+      const numValue = value === '' ? '' : parseInt(value);
+      setEditingSlot((prev: any) => ({ ...prev, [name]: numValue }));
+    } else {
+      setEditingSlot((prev: any) => ({ ...prev, [name]: value }));
+    }
+  };
+
+  // Función para añadir nuevo time slot
+  const addTimeSlot = async () => {
+    if (!restaurant) return;
+    
+    // Asegurarse de que los valores numéricos son válidos antes de enviar
+    const dataToInsert = {
+      restaurant_id: restaurant.id,
+      day_of_week: selectedDay,
+      start_time: newSlot.start_time,
+      end_time: newSlot.end_time,
+      max_reservations: Number(newSlot.max_reservations) || 1, // Usar 1 como valor predeterminado si es vacío o NaN
+      max_party_size: Number(newSlot.max_party_size) || 1,
+      is_active: newSlot.is_active
+    };
+    
+    try {
+      const { data, error } = await supabase
+        .from("reservation_time_slots")
+        .insert(dataToInsert)
+        .select();
+      
+      if (error) throw error;
+      
+      toast.success("Horario añadido correctamente");
+      loadTimeSlots();
+      
+      // Resetear el formulario
+      setNewSlot({
+        start_time: "13:00",
+        end_time: "14:30",
+        max_reservations: 4,
+        max_party_size: 10,
+        is_active: true
+      });
+    } catch (error) {
+      console.error("Error al crear horario:", error);
+      toast.error("Error al crear horario");
+    }
+  };
+
+  // Función para preparar edición de slot
+  const prepareEditSlot = (slot: any) => {
+    setEditingSlot({ ...slot });
+    setIsEditingSlot(true);
+  };
+
+  // Función para cancelar edición
+  const cancelEditSlot = () => {
+    setIsEditingSlot(false);
+    setEditingSlot(null);
+  };
+
+  // Función para guardar cambios en slot
+  const saveSlotChanges = async () => {
+    if (!editingSlot || !editingSlot.id || !restaurant) return;
+    
+    // Asegurarse de que los valores numéricos son válidos antes de enviar
+    const dataToUpdate = {
+      start_time: editingSlot.start_time,
+      end_time: editingSlot.end_time,
+      max_reservations: Number(editingSlot.max_reservations) || 1,
+      max_party_size: Number(editingSlot.max_party_size) || 1,
+      is_active: editingSlot.is_active
+    };
+    
+    try {
+      // Simplificamos la consulta para evitar el error con app.current_restaurant
+      const { error } = await supabase
+        .from("reservation_time_slots")
+        .update(dataToUpdate)
+        .eq("id", editingSlot.id)
+        .eq("restaurant_id", restaurant.id);
+      
+      if (error) throw error;
+      
+      toast.success("Horario actualizado correctamente");
+      setIsEditingSlot(false);
+      setEditingSlot(null);
+      loadTimeSlots();
+    } catch (error) {
+      console.error("Error al actualizar horario:", error);
+      toast.error("Error al actualizar horario");
+    }
+  };
+
+  // Función para eliminar slot
+  const deleteTimeSlot = async (slotId: string) => {
+    const confirmDelete = window.confirm("¿Estás seguro de que deseas eliminar este horario? Las reservas existentes para este horario no se verán afectadas.");
+    
+    if (!confirmDelete) return;
+    
+    try {
+      const { error } = await supabase
+        .from("reservation_time_slots")
+        .delete()
+        .eq("id", slotId);
+      
+      if (error) throw error;
+      
+      toast.success("Horario eliminado correctamente");
+      loadTimeSlots();
+    } catch (error) {
+      console.error("Error al eliminar horario:", error);
+      toast.error("Error al eliminar horario");
+    }
+  };
+
+  // Nombres de los días de la semana
+  const dayNames = [
+    "Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"
+  ];
 
   // Handler para el formulario de nueva reserva
   const handleReservationChange = (
@@ -437,6 +625,311 @@ export default function ReservationsPage() {
           <div className="text-green-600 text-sm">{formSuccess}</div>
         )}
       </form>
+
+      {/* Botón para mostrar/ocultar la sección de gestión de horarios */}
+      <div className="mb-6">
+        <button
+          onClick={() => setShowTimeSlotsSection(!showTimeSlotsSection)}
+          className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+        >
+          {showTimeSlotsSection ? 'Ocultar gestión de horarios' : 'Gestionar horarios de reserva'}
+          <svg xmlns="http://www.w3.org/2000/svg" className={`ml-2 h-5 w-5 transform ${showTimeSlotsSection ? 'rotate-180' : ''}`} viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+          </svg>
+        </button>
+      </div>
+
+      {/* Sección de gestión de horarios */}
+      {showTimeSlotsSection && (
+        <div className="mb-8 bg-white rounded-xl shadow-sm overflow-hidden">
+          <div className="px-4 py-5 border-b border-gray-200">
+            <h3 className="text-lg font-medium leading-6 text-gray-900">
+              Gestión de horarios disponibles
+            </h3>
+            <p className="mt-1 text-sm text-gray-500">
+              Configura los horarios en los que tus clientes podrán hacer reservas
+            </p>
+          </div>
+
+          <div className="px-4 py-5">
+            {/* Selector de día */}
+            <div className="mb-6">
+              <label htmlFor="day-selector" className="block text-sm font-medium text-gray-700">
+                Seleccionar día
+              </label>
+              <select
+                id="day-selector"
+                value={selectedDay}
+                onChange={(e) => setSelectedDay(parseInt(e.target.value))}
+                className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+              >
+                {dayNames.map((dayName, index) => (
+                  <option key={index} value={index}>
+                    {dayName}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Tabla de horarios existentes */}
+            <div className="bg-white overflow-hidden border border-gray-200 rounded-md mb-6">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Hora inicio
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Hora fin
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Capacidad
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Personas
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Estado
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Acciones
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {timeSlots.length > 0 ? (
+                    timeSlots.map((slot) => (
+                      <tr key={slot.id}>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {slot.start_time.substring(0, 5)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {slot.end_time.substring(0, 5)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {slot.max_reservations} reservas
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {slot.max_party_size} personas
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm">
+                          <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${slot.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                            {slot.is_active ? 'Activo' : 'Inactivo'}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                          <button
+                            onClick={() => prepareEditSlot(slot)}
+                            className="text-blue-600 hover:text-blue-900 mr-3"
+                          >
+                            Editar
+                          </button>
+                          <button
+                            onClick={() => deleteTimeSlot(slot.id)}
+                            className="text-red-600 hover:text-red-900"
+                          >
+                            Eliminar
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={6} className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
+                        No hay horarios configurados para {dayNames[selectedDay]}
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Formulario para editar time slot */}
+            {isEditingSlot && editingSlot && (
+              <div className="bg-blue-50 p-4 rounded-md mb-6">
+                <h4 className="font-medium text-blue-900 mb-3">Editar horario</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label htmlFor="edit-start-time" className="block text-sm font-medium text-gray-700">
+                      Hora de inicio
+                    </label>
+                    <input
+                      type="time"
+                      id="edit-start-time"
+                      name="start_time"
+                      value={editingSlot.start_time}
+                      onChange={handleEditSlotChange}
+                      className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label htmlFor="edit-end-time" className="block text-sm font-medium text-gray-700">
+                      Hora de fin
+                    </label>
+                    <input
+                      type="time"
+                      id="edit-end-time"
+                      name="end_time"
+                      value={editingSlot.end_time}
+                      onChange={handleEditSlotChange}
+                      className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label htmlFor="edit-max-reservations" className="block text-sm font-medium text-gray-700">
+                      Capacidad (número de reservas)
+                    </label>
+                    <input
+                      type="number"
+                      id="edit-max-reservations"
+                      name="max_reservations"
+                      min="1"
+                      value={editingSlot.max_reservations}
+                      onChange={handleEditSlotChange}
+                      className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label htmlFor="edit-max-party-size" className="block text-sm font-medium text-gray-700">
+                      Tamaño máximo de grupo
+                    </label>
+                    <input
+                      type="number"
+                      id="edit-max-party-size"
+                      name="max_party_size"
+                      min="1"
+                      value={editingSlot.max_party_size}
+                      onChange={handleEditSlotChange}
+                      className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    />
+                  </div>
+                </div>
+                
+                <div className="mt-3">
+                  <label className="inline-flex items-center">
+                    <input
+                      type="checkbox"
+                      name="is_active"
+                      checked={editingSlot.is_active}
+                      onChange={handleEditSlotChange}
+                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    />
+                    <span className="ml-2 text-sm text-gray-700">Activo</span>
+                  </label>
+                </div>
+                
+                <div className="mt-4 flex justify-end">
+                  <button
+                    type="button"
+                    onClick={cancelEditSlot}
+                    className="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 mr-3"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="button"
+                    onClick={saveSlotChanges}
+                    className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  >
+                    Guardar cambios
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Formulario para añadir nuevo time slot */}
+            <div className="bg-gray-50 p-4 rounded-md">
+              <h4 className="font-medium text-gray-900 mb-3">Añadir nuevo horario para {dayNames[selectedDay]}</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="start-time" className="block text-sm font-medium text-gray-700">
+                    Hora de inicio
+                  </label>
+                  <input
+                    type="time"
+                    id="start-time"
+                    name="start_time"
+                    value={newSlot.start_time}
+                    onChange={handleSlotChange}
+                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  />
+                </div>
+                
+                <div>
+                  <label htmlFor="end-time" className="block text-sm font-medium text-gray-700">
+                    Hora de fin
+                  </label>
+                  <input
+                    type="time"
+                    id="end-time"
+                    name="end_time"
+                    value={newSlot.end_time}
+                    onChange={handleSlotChange}
+                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  />
+                </div>
+                
+                <div>
+                  <label htmlFor="max-reservations" className="block text-sm font-medium text-gray-700">
+                    Capacidad (número de reservas)
+                  </label>
+                  <input
+                    type="number"
+                    id="max-reservations"
+                    name="max_reservations"
+                    min="1"
+                    value={newSlot.max_reservations}
+                    onChange={handleSlotChange}
+                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  />
+                </div>
+                
+                <div>
+                  <label htmlFor="max-party-size" className="block text-sm font-medium text-gray-700">
+                    Tamaño máximo de grupo
+                  </label>
+                  <input
+                    type="number"
+                    id="max-party-size"
+                    name="max_party_size"
+                    min="1"
+                    value={newSlot.max_party_size}
+                    onChange={handleSlotChange}
+                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  />
+                </div>
+              </div>
+              
+              <div className="mt-3">
+                <label className="inline-flex items-center">
+                  <input
+                    type="checkbox"
+                    name="is_active"
+                    checked={newSlot.is_active}
+                    onChange={handleSlotChange}
+                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <span className="ml-2 text-sm text-gray-700">Activo</span>
+                </label>
+              </div>
+              
+              <div className="mt-4">
+                <button
+                  type="button"
+                  onClick={addTimeSlot}
+                  className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                >
+                  Añadir horario
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <h1 className="text-2xl font-bold">Reservas</h1>
 
@@ -720,7 +1213,7 @@ export default function ReservationsPage() {
       if (error) throw error;
 
       // Ahora newStatus es del tipo correcto, no necesitamos hacer casting
-      setReservations((prev) =>
+      setReservations((prev: Reservation[]) =>
         prev.map((res) =>
           res.id === reservationId ? { ...res, status: newStatus } : res
         )

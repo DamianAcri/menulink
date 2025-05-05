@@ -24,6 +24,8 @@ export default function OnboardingPage() {
     coverPreview: null as string | null,
     templateType: "traditional" as string, // Default template is traditional
     reservationMode: "form" as string, // Default: mostrar formulario de reservas
+    maxPartySize: 10, // Tamaño máximo de grupo por defecto
+    defaultTimeSlots: true, // Crear horarios de reserva predeterminados por defecto
     
     // Paso 3: Primeros contenidos
     menuItems: [
@@ -179,6 +181,94 @@ export default function OnboardingPage() {
     return publicUrl;
   };
 
+  // Función para crear time slots de reserva predeterminados
+  const createDefaultReservationTimeSlots = async (restaurantId: string) => {
+    // Definir franjas horarias predeterminadas para comida y cena
+    const defaultSlots = [
+      // Comida (13:00 - 15:30)
+      { startTime: '13:00', endTime: '14:30', maxReservations: 4 },
+      { startTime: '14:00', endTime: '15:30', maxReservations: 4 },
+      // Cena (20:00 - 23:00)
+      { startTime: '20:00', endTime: '21:30', maxReservations: 4 },
+      { startTime: '21:00', endTime: '22:30', maxReservations: 4 },
+      { startTime: '22:00', endTime: '23:30', maxReservations: 4 },
+    ];
+    
+    // Crear slots para cada día de la semana que tenga horarios abiertos
+    interface TimeSlot {
+      restaurant_id: string;
+      day_of_week: number;
+      start_time: string;
+      end_time: string;
+      max_reservations: number;
+      max_party_size: number;
+      is_active: boolean;
+    }
+    
+    const timeSlotsToInsert: TimeSlot[] = [];
+    
+    // Mapear los días de la semana a números (0-6, donde 0 es domingo)
+    const daysOfWeekMap = {
+      sunday: 0,
+      monday: 1,
+      tuesday: 2,
+      wednesday: 3,
+      thursday: 4,
+      friday: 5,
+      saturday: 6
+    };
+    
+    // Solo crear slots para los días que el restaurante esté abierto
+    for (const [day, hours] of Object.entries(formData.openingHours)) {
+      if (hours.isOpen) {
+        const dayOfWeek = daysOfWeekMap[day as keyof typeof daysOfWeekMap];
+        
+        // Añadir los slots predeterminados para este día
+        defaultSlots.forEach(slot => {
+          timeSlotsToInsert.push({
+            restaurant_id: restaurantId,
+            day_of_week: dayOfWeek,
+            start_time: slot.startTime,
+            end_time: slot.endTime,
+            max_reservations: slot.maxReservations,
+            max_party_size: formData.maxPartySize || 10, // Valor por defecto de 10 si no se proporciona
+            is_active: true
+          });
+        });
+      }
+    }
+    
+    // Si no hay días abiertos configurados, crear slots para los días laborables comunes
+    if (timeSlotsToInsert.length === 0) {
+      // Lunes a sábado (1-6), excluyendo domingo (0)
+      [1, 2, 3, 4, 5, 6].forEach(dayOfWeek => {
+        defaultSlots.forEach(slot => {
+          timeSlotsToInsert.push({
+            restaurant_id: restaurantId,
+            day_of_week: dayOfWeek,
+            start_time: slot.startTime,
+            end_time: slot.endTime,
+            max_reservations: slot.maxReservations,
+            max_party_size: formData.maxPartySize || 10,
+            is_active: true
+          });
+        });
+      });
+    }
+    
+    // Insertar todos los time slots
+    if (timeSlotsToInsert.length > 0) {
+      const { error } = await supabase
+        .from('reservation_time_slots')
+        .insert(timeSlotsToInsert);
+      
+      if (error) {
+        console.error('Error al crear slots de reserva predeterminados:', error);
+        throw error;
+      }
+    }
+  };
+
   // Función para completar el onboarding y guardar los datos
   const completeOnboarding = async () => {
     setLoading(true);
@@ -289,14 +379,19 @@ export default function OnboardingPage() {
         .from('opening_hours')
         .insert(openingHoursToInsert);
       
-      // 6. Marcar al usuario como no nuevo (quitar la bandera is_new_user)
+      // 6. Si el formulario de reservas está habilitado y se solicitan time slots predeterminados, crearlos
+      if (formData.reservationMode === 'form' && formData.defaultTimeSlots) {
+        await createDefaultReservationTimeSlots(restaurantId);
+      }
+      
+      // 7. Marcar al usuario como no nuevo (quitar la bandera is_new_user)
       await supabase.auth.updateUser({
         data: {
           is_new_user: false
         }
       });
       
-      // 7. Mover a la pantalla de vista previa
+      // 8. Mover a la pantalla de vista previa
       setCurrentStep(4);
     } catch (error) {
       console.error('Error en onboarding:', error);

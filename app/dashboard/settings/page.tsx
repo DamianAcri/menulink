@@ -15,6 +15,11 @@ export default function ConfigPage() {
   const [reservationMode, setReservationMode] = useState("form");
   const [savingSettings, setSavingSettings] = useState(false);
   
+  // Nuevos estados para la configuración de reservas
+  const [maxPartySize, setMaxPartySize] = useState(10);
+  const [timeSlots, setTimeSlots] = useState<{day: number, slots: {start: string, end: string, maxCapacity: number}[]}[]>([]);
+  const [selectedDay, setSelectedDay] = useState(1); // Lunes por defecto
+  
   // Función para cambiar el idioma
   const handleLanguageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setLanguage(e.target.value);
@@ -81,7 +86,7 @@ export default function ConfigPage() {
     }
   };
 
-  // Cargar datos del restaurante
+  // Cargar datos del restaurante y configuración de reservas
   useEffect(() => {
     const fetchRestaurantData = async () => {
       try {
@@ -109,6 +114,21 @@ export default function ConfigPage() {
         setRestaurant(restaurantData);
         setReservationMode(restaurantData.reservation_mode || 'form');
         
+        // Cargar configuración de reservas
+        if (restaurantData.id) {
+          // Cargar el tamaño máximo de grupo
+          const { data: slotData } = await supabase
+            .from('reservation_time_slots')
+            .select('max_party_size')
+            .eq('restaurant_id', restaurantData.id)
+            .limit(1)
+            .single();
+          
+          if (slotData?.max_party_size) {
+            setMaxPartySize(slotData.max_party_size);
+          }
+        }
+        
       } catch (error) {
         console.error('Error al cargar la página de configuración:', error);
       }
@@ -124,6 +144,7 @@ export default function ConfigPage() {
     setSavingSettings(true);
     
     try {
+      // Actualizar configuración general
       const { error } = await supabase
         .from('restaurants')
         .update({
@@ -131,8 +152,24 @@ export default function ConfigPage() {
         })
         .eq('id', restaurant.id);
       
-      if (error) {
-        throw error;
+      if (error) throw error;
+      
+      // Actualizar tamaño máximo de grupo en todos los slots
+      // Cambiar el método para actualizar cada slot en lugar de filtrar por restaurant_id 
+      // (que no funciona en PATCH con la política de seguridad actual)
+      const { data: allSlots, error: fetchError } = await supabase
+        .from('reservation_time_slots')
+        .select('id')
+        .eq('restaurant_id', restaurant.id);
+        
+      if (fetchError) throw fetchError;
+      
+      // Actualizar cada slot individualmente por ID
+      for (const slot of allSlots || []) {
+        await supabase
+          .from('reservation_time_slots')
+          .update({ max_party_size: maxPartySize })
+          .eq('id', slot.id);
       }
       
       toast.success('Configuración guardada correctamente');
@@ -143,6 +180,14 @@ export default function ConfigPage() {
       setSavingSettings(false);
     }
   };
+
+  // Función para ir a la página de gestión completa de reservas
+  const goToReservationsPage = () => {
+    router.push('/dashboard/reservations');
+  };
+
+  // Obtener slots para el día seleccionado
+  const selectedDaySlots = timeSlots.find(day => day.day === selectedDay)?.slots || [];
   
   // Inicializar preferencias cuando el componente se monta
   useState(() => {
@@ -152,6 +197,11 @@ export default function ConfigPage() {
       document.documentElement.classList.add('dark');
     }
   });
+
+  // Nombres de los días de la semana
+  const dayNames = [
+    "Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"
+  ];
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -182,12 +232,12 @@ export default function ConfigPage() {
           
           {/* Configuración del formulario de reservas */}
           <div>
-            <h3 className="text-md font-medium text-gray-900 dark:text-white mb-2">Formulario de Reservas</h3>
+            <h3 className="text-md font-medium text-gray-900 dark:text-white mb-2">Sistema de Reservas</h3>
             <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-              Decide si quieres mostrar un formulario de reservas en tu página
+              Decide cómo quieres gestionar las reservas de tu restaurante
             </p>
             
-            <div className="space-y-2">
+            <div className="space-y-2 mb-6">
               <div className="flex items-center">
                 <input
                   id="reservation-enabled"
@@ -216,6 +266,46 @@ export default function ConfigPage() {
                 </label>
               </div>
             </div>
+            
+            {reservationMode === 'form' && (
+              <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600 mt-4">
+                <h4 className="text-md font-medium text-gray-900 dark:text-white mb-3">Configuración básica de reservas</h4>
+                
+                <div className="mb-4">
+                  <label htmlFor="max-party-size" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Tamaño máximo de grupo
+                  </label>
+                  <div className="flex items-center">
+                    <input
+                      type="number"
+                      id="max-party-size"
+                      min="1"
+                      max="50"
+                      value={maxPartySize}
+                      onChange={(e) => setMaxPartySize(parseInt(e.target.value) || 1)}
+                      className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-20 sm:text-sm border-gray-300 rounded-md dark:bg-gray-800 dark:border-gray-600 dark:text-white"
+                    />
+                    <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">personas</span>
+                  </div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    Este es el número máximo de personas que un cliente puede seleccionar al hacer una reserva
+                  </p>
+                </div>
+                
+                <div className="flex justify-between items-center">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    Para gestionar los horarios disponibles, ir a la página de reservas
+                  </p>
+                  <button 
+                    type="button"
+                    onClick={goToReservationsPage}
+                    className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  >
+                    Gestionar horarios
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
