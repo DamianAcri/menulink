@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 interface MenuItemType {
   name: string;
@@ -25,6 +25,8 @@ interface Step3FirstContentProps {
   formData: {
     menuItems: MenuItemType[];
     openingHours: OpeningHoursType;
+    reservationMode?: string;
+    reservationTimeSlots?: Record<string, any[]>;
   };
   handleChange: (field: string, value: unknown) => void;
   errors: Record<string, string>;
@@ -74,6 +76,52 @@ const Step3FirstContent: React.FC<Step3FirstContentProps> = ({ formData, handleC
       }
     };
     handleChange('openingHours', updatedHours);
+  };
+
+  // NUEVO: Estado local para las franjas de reserva y modo de reserva
+  const [reservationMode, setReservationMode] = useState(formData.reservationMode || 'form');
+  const [timeSlots, setTimeSlots] = useState(formData.reservationTimeSlots || {
+    monday: [], tuesday: [], wednesday: [], thursday: [], friday: [], saturday: [], sunday: []
+  });
+
+  // Manejar cambios en el modo de reserva
+  const handleReservationModeChange = (mode: string) => {
+    setReservationMode(mode);
+    handleChange('reservationMode', mode);
+  };
+
+  // Manejar cambios en las franjas de reserva
+  const handleTimeSlotChange = (day: string, slots: any[]) => {
+    const updated = { ...timeSlots, [day]: slots };
+    setTimeSlots(updated);
+    handleChange('reservationTimeSlots', updated);
+  };
+
+  // Añadir franja a un día
+  const addTimeSlot = (day: string) => {
+    const slots = [...(timeSlots[day] || [])];
+    slots.push({
+      start_time: '',
+      end_time: '',
+      max_reservations: 5,
+      max_party_size: 10,
+      is_active: true
+    });
+    handleTimeSlotChange(day, slots);
+  };
+
+  // Eliminar franja de un día
+  const removeTimeSlot = (day: string, idx: number) => {
+    const slots = [...(timeSlots[day] || [])];
+    slots.splice(idx, 1);
+    handleTimeSlotChange(day, slots);
+  };
+
+  // Actualizar campo de una franja
+  const updateTimeSlotField = (day: string, idx: number, field: string, value: any) => {
+    const slots = [...(timeSlots[day] || [])];
+    slots[idx] = { ...slots[idx], [field]: value };
+    handleTimeSlotChange(day, slots);
   };
 
   return (
@@ -271,6 +319,97 @@ const Step3FirstContent: React.FC<Step3FirstContentProps> = ({ formData, handleC
           </div>
         ))}
       </div>
+
+      {/* NUEVO: Selector de modo de reserva */}
+      <div className="space-y-2">
+        <h3 className="text-lg font-medium text-gray-900 dark:text-white">Modo de reservas</h3>
+        <div className="flex gap-4">
+          <button
+            type="button"
+            className={`px-4 py-2 rounded-lg border ${reservationMode === 'form' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700'}`}
+            onClick={() => handleReservationModeChange('form')}
+          >
+            Formulario online (recomendado)
+          </button>
+          <button
+            type="button"
+            className={`px-4 py-2 rounded-lg border ${reservationMode === 'external' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700'}`}
+            onClick={() => handleReservationModeChange('external')}
+          >
+            Solo por mensaje o llamada
+          </button>
+        </div>
+        <p className="text-xs text-gray-500 mt-1">
+          Si eliges solo mensaje/llamada, el formulario de reservas no se mostrará en tu página pública.
+        </p>
+      </div>
+
+      {/* NUEVO: Editor de franjas de reserva tipo Calendly */}
+      {reservationMode === 'form' && (
+        <div className="space-y-4">
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white">Franjas de reserva</h3>
+          <p className="text-xs text-gray-500 mb-2">Define las horas en las que aceptas reservas y los límites por franja. Ejemplo: 13:00-15:00, máximo 5 reservas, máximo 10 personas por reserva.</p>
+          <div className="grid gap-4 md:grid-cols-2">
+            {Object.keys(daysOfWeekLabels).map((day) => (
+              <div key={day} className="border dark:border-gray-700 p-3 rounded-md">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-medium text-gray-700 dark:text-gray-300">{daysOfWeekLabels[day as keyof typeof daysOfWeekLabels]}</span>
+                  <button
+                    type="button"
+                    className="text-blue-600 text-xs hover:underline"
+                    onClick={() => addTimeSlot(day)}
+                  >
+                    Añadir franja
+                  </button>
+                </div>
+                {(timeSlots[day] || []).length === 0 && (
+                  <div className="text-xs text-gray-400">No hay franjas para este día</div>
+                )}
+                {(timeSlots[day] || []).map((slot, idx) => (
+                  <div key={idx} className="flex flex-wrap gap-2 items-center mb-2 bg-gray-50 dark:bg-gray-800 p-2 rounded">
+                    <input
+                      type="time"
+                      value={slot.start_time}
+                      onChange={e => updateTimeSlotField(day, idx, 'start_time', e.target.value)}
+                      className="border px-2 py-1 rounded text-xs"
+                    />
+                    <span className="text-xs">a</span>
+                    <input
+                      type="time"
+                      value={slot.end_time}
+                      onChange={e => updateTimeSlotField(day, idx, 'end_time', e.target.value)}
+                      className="border px-2 py-1 rounded text-xs"
+                    />
+                    <span className="text-xs">Máx. reservas</span>
+                    <input
+                      type="number"
+                      min={1}
+                      value={slot.max_reservations}
+                      onChange={e => updateTimeSlotField(day, idx, 'max_reservations', parseInt(e.target.value))}
+                      className="border px-2 py-1 rounded text-xs w-16"
+                    />
+                    <span className="text-xs">Máx. personas</span>
+                    <input
+                      type="number"
+                      min={1}
+                      value={slot.max_party_size}
+                      onChange={e => updateTimeSlotField(day, idx, 'max_party_size', parseInt(e.target.value))}
+                      className="border px-2 py-1 rounded text-xs w-16"
+                    />
+                    <button
+                      type="button"
+                      className="text-red-500 text-xs ml-2"
+                      onClick={() => removeTimeSlot(day, idx)}
+                    >
+                      Eliminar
+                    </button>
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Sección de horarios */}
       <div className="space-y-4">

@@ -115,6 +115,8 @@ export default function ReservationsPage() {
         }
 
         // Prueba específica para la reserva que sabemos que existe
+        // Elimina o comenta este bloque de prueba para evitar errores 406
+        /*
         try {
           console.log("Buscando reserva por ID específico...");
           const { data: specificReservation, error: specificError } =
@@ -122,13 +124,14 @@ export default function ReservationsPage() {
               .from("reservations")
               .select("*")
               .eq("id", "968ff243-5b14-4cf0-92b9-4e182db78c2d")
-              .single();
+              .maybeSingle(); // Usar maybeSingle si realmente necesitas este test
 
           console.log("Reserva específica:", specificReservation);
           console.log("Error al buscar reserva específica:", specificError);
         } catch (e) {
           console.log("Error en consulta específica:", e);
         }
+        */
       } catch (error: unknown) {
         console.error("Error en página de reservas:", error);
         toast.error("Error al cargar datos");

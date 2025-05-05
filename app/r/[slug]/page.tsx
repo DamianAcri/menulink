@@ -59,6 +59,7 @@ export default async function RestaurantPage(props: RestaurantPageProps) {
   try {
     const { slug } = await props.params;
 
+    // Modificación aquí: usando .maybeSingle() en lugar de .single()
     const { data: restaurant, error } = await supabase
       .from('restaurants')
       .select(`
@@ -100,7 +101,7 @@ export default async function RestaurantPage(props: RestaurantPageProps) {
         )
       `)
       .eq('slug', slug)
-      .single();
+      .maybeSingle(); // Cambio de .single() a .maybeSingle()
 
     if (process.env.NODE_ENV === 'development' && !restaurant) {
       console.error('Error de Supabase:', error);
@@ -139,11 +140,12 @@ export default async function RestaurantPage(props: RestaurantPageProps) {
     metadata.title = `${restaurant.name} | MenuLink`;
     metadata.description = restaurant.description || `Menú digital de ${restaurant.name}`;
 
+    // También modificamos esta consulta para usar .maybeSingle()
     const { data: contactInfo } = await supabase
       .from('contact_info')
       .select('*')
       .eq('restaurant_id', restaurant.id)
-      .single();
+      .maybeSingle();
 
     const { data: openingHours } = await supabase
       .from('opening_hours')
