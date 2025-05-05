@@ -9,8 +9,8 @@ interface Customer {
   first_name: string;
   last_name: string;
   email: string;
-  phone?: string;
-  notes?: string;
+  phone?: string | null;  // Updated to allow null
+  notes?: string | null;   // Updated to allow null
   created_at?: string;
   reservation_count?: number;
   last_reservations?: { id: string; reservation_date: string; reservation_time: string; status: string }[];
@@ -155,16 +155,81 @@ export default function CRMPage() {
   const saveEdit = async () => {
     if (!editId) return;
     const { first_name, last_name, email, phone, notes } = editForm;
-    const { error } = await supabase
-      .from('customers')
-      .update({ first_name, last_name, email, phone, notes })
-      .eq('id', editId);
-    if (!error) {
-      setCustomers(cs => cs.map(c => c.id === editId ? { ...c, ...editForm } : c));
-      setSuccess('Cliente actualizado');
+    // Clear previous messages
+    setError(null);
+    setSuccess(null);
+    
+    // Validate required fields
+    if (!first_name || !email) {
+      setError('Nombre y email son obligatorios.');
+      return;
+    }
+    
+    // last_name is required in the database, enforce a default empty string if undefined
+    const sanitizedLastName = last_name || '';
+    
+    // Validate phone (minimum 7 digits if provided)
+    if (phone && phone.replace(/\D/g, '').length < 7) {
+      setError('El teléfono debe tener al menos 7 dígitos.');
+      return;
+    }
+    
+    // Check if email exists for another customer
+    if (email !== customers.find(c => c.id === editId)?.email) {
+      const { data: existingEmail } = await supabase
+        .from('customers')
+        .select('id')
+        .eq('restaurant_id', restaurantId)
+        .eq('email', email)
+        .neq('id', editId)
+        .maybeSingle();
+        
+      if (existingEmail) {
+        setError('Ya existe otro cliente con ese email.');
+        return;
+      }
+    }
+    
+    try {
+      const { error } = await supabase
+        .from('customers')
+        .update({ 
+          first_name, 
+          last_name: sanitizedLastName, // Use sanitized value
+          email, 
+          phone, 
+          notes,
+          restaurant_id: restaurantId, // Ensure restaurant_id is included
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', editId);
+      
+      if (error) {
+        console.error("Error updating customer:", error);
+        setError('Error al actualizar el cliente.');
+        return;
+      }
+      
+      // Update customers list with edited data with proper type handling
+      setCustomers(cs => cs.map(c => {
+        if (c.id === editId) {
+          return {
+            ...c,
+            first_name,
+            last_name: sanitizedLastName, // Use sanitized value
+            email,
+            phone: phone || null,
+            notes: notes || null
+          };
+        }
+        return c;
+      }));
+      
+      setSuccess('Cliente actualizado correctamente');
       setEditId(null);
-    } else {
-      setError('Error al actualizar');
+    } catch (err) {
+      console.error("Exception during customer update:", err);
+      setError('Error al actualizar el cliente.');
     }
   };
   // Eliminación
