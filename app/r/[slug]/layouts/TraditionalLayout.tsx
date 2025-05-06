@@ -9,6 +9,8 @@ import ReservationSection from '../components/ReservationSection';
 import SocialLinks from '../components/SocialLinks';
 import DeliveryLinks from '../components/DeliveryLinks';
 import { useState, useEffect } from 'react';
+import Navigation from '../components/Navigation';
+import SessionTracker from '../components/SessionTracker';
 
 interface TraditionalLayoutProps {
   restaurant: any;
@@ -22,6 +24,8 @@ interface TraditionalLayoutProps {
   };
   fontFamily: string;
   showReservationForm?: boolean;
+  enableLanguageSelector?: boolean;
+  defaultLanguage?: string;
 }
 
 export default function TraditionalLayout({
@@ -30,13 +34,35 @@ export default function TraditionalLayout({
   logoUrl,
   themeColors,
   fontFamily,
-  showReservationForm = true
+  showReservationForm = true,
+  enableLanguageSelector = false,
+  defaultLanguage = 'en',
 }: TraditionalLayoutProps) {
   const [activeSection, setActiveSection] = useState('menu');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
+  // Secciones para Navigation
+  const sections = [
+    { id: 'menu', label: 'Menú' },
+    ...(showReservationForm ? [{ id: 'reserva', label: 'Reservas' }] : []),
+    { id: 'contacto', label: 'Contacto' },
+    ...(restaurant.delivery_links && restaurant.delivery_links.length > 0 ? [{ id: 'delivery', label: 'Delivery' }] : []),
+  ];
+
   return (
     <main className="min-h-screen bg-white" style={{ color: themeColors.text, fontFamily: 'Georgia, serif' }}>
+      {/* Session tracking component */}
+      <SessionTracker restaurantId={restaurant.id} />
+      
+      {/* Selector de idioma y navegación */}
+      <Navigation
+        sections={sections}
+        themeColors={themeColors}
+        logoUrl={logoUrl}
+        restaurantName={restaurant.name}
+        enableLanguageSelector={enableLanguageSelector}
+        defaultLanguage={defaultLanguage}
+      />
       {/* LAYOUT TRADICIONAL - Texto distintivo para confirmar que se ha aplicado */}
       <div className="fixed top-0 left-0 z-50 bg-red-700 text-white text-xs px-2 py-1">LAYOUT TRADICIONAL</div>
       
@@ -232,6 +258,8 @@ export default function TraditionalLayout({
                 ...themeColors,
                 text: '#333333'
               }} 
+              restaurantId={restaurant.id}
+              layoutName="traditional"
             />
           </div>
         </section>
@@ -341,6 +369,8 @@ export default function TraditionalLayout({
                 <DeliveryLinks 
                   links={restaurant.delivery_links} 
                   themeColors={themeColors} 
+                  restaurantId={restaurant.id}
+                  layoutName="traditional"
                 />
               </div>
             </section>
@@ -373,6 +403,8 @@ export default function TraditionalLayout({
                     ...themeColors,
                     primary: '#ffffff'
                   }}
+                  restaurantId={restaurant.id}
+                  layoutName="traditional"
                 />
               </div>
             )}

@@ -5,6 +5,7 @@ import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import type { User } from '@supabase/supabase-js';
+import i18n from '@/lib/i18n';
 
 export default function DashboardLayout({
   children,
@@ -16,6 +17,30 @@ export default function DashboardLayout({
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [currentLang, setCurrentLang] = useState('es');
+
+  useEffect(() => {
+    // Solo en cliente: sincronizar idioma con localStorage
+    if (typeof window !== 'undefined') {
+      const lang = localStorage.getItem('lang') || 'es';
+      setCurrentLang(lang);
+    }
+  }, []);
+
+  useEffect(() => {
+    i18n.changeLanguage(currentLang);
+  }, [currentLang]);
+
+  useEffect(() => {
+    // Escuchar cambios en localStorage para actualizar el idioma en caliente
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === 'lang' && e.newValue) {
+        setCurrentLang(e.newValue);
+      }
+    };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, []);
 
   useEffect(() => {
     const checkUser = async () => {
@@ -195,7 +220,7 @@ export default function DashboardLayout({
         </svg>
       )},
       { name: "Contacto", href: "/dashboard/contact", icon: (
-        <svg className="mr-3 h-6 w-6" xmlns="http://www.w.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg className="mr-3 h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
         </svg>
       )},

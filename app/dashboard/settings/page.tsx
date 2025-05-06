@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
+import i18n from "@/lib/i18n";
 
 export default function ConfigPage() {
   const router = useRouter();
@@ -14,6 +16,8 @@ export default function ConfigPage() {
   const [restaurant, setRestaurant] = useState<any>(null);
   const [reservationMode, setReservationMode] = useState("form");
   const [savingSettings, setSavingSettings] = useState(false);
+  const [enableLanguageSelector, setEnableLanguageSelector] = useState(false);
+  const { t } = useTranslation();
   
   // Nuevos estados para la configuración de reservas
   const [maxPartySize, setMaxPartySize] = useState(10);
@@ -23,7 +27,8 @@ export default function ConfigPage() {
   // Función para cambiar el idioma
   const handleLanguageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setLanguage(e.target.value);
-    // Implementar la lógica para cambiar el idioma
+    i18n.changeLanguage(e.target.value);
+    localStorage.setItem('lang', e.target.value);
   };
   
   // Función para cambiar contraseña
@@ -113,6 +118,10 @@ export default function ConfigPage() {
         // Actualizar el estado
         setRestaurant(restaurantData);
         setReservationMode(restaurantData.reservation_mode || 'form');
+        setLanguage(restaurantData.language || 'en');
+        setEnableLanguageSelector(!!restaurantData.enable_language_selector);
+        i18n.changeLanguage(restaurantData.language || 'en');
+        localStorage.setItem('lang', restaurantData.language || 'en');
         
         // Cargar configuración de reservas
         if (restaurantData.id) {
@@ -148,7 +157,9 @@ export default function ConfigPage() {
       const { error } = await supabase
         .from('restaurants')
         .update({
-          reservation_mode: reservationMode
+          reservation_mode: reservationMode,
+          language: language,
+          enable_language_selector: enableLanguageSelector
         })
         .eq('id', restaurant.id);
       
@@ -205,17 +216,17 @@ export default function ConfigPage() {
 
   return (
     <div className="max-w-4xl mx-auto">
-      <h1 className="text-2xl font-bold mb-8">Configuración</h1>
+      <h1 className="text-2xl font-bold mb-8">{t('settings_title', 'Configuración')}</h1>
       
       <div className="bg-white dark:bg-gray-800 shadow overflow-hidden rounded-lg">
         <div className="px-4 py-5 sm:px-6 border-b border-gray-200 dark:border-gray-700">
-          <h2 className="text-lg font-medium text-gray-900 dark:text-white">Preferencias Generales</h2>
+          <h2 className="text-lg font-medium text-gray-900 dark:text-white">{t('general_preferences', 'Preferencias Generales')}</h2>
         </div>
         
         <div className="px-4 py-5 sm:p-6 space-y-6">
           {/* Selección de idioma */}
           <div>
-            <label htmlFor="language" className="block text-md font-medium text-gray-900 dark:text-white">Idioma</label>
+            <label htmlFor="language" className="block text-md font-medium text-gray-900 dark:text-white">{t('dashboard_language', 'Idioma del dashboard')}</label>
             <select
               id="language"
               name="language"
@@ -223,12 +234,31 @@ export default function ConfigPage() {
               value={language}
               onChange={handleLanguageChange}
             >
-              <option value="es">Español</option>
               <option value="en">English</option>
+              <option value="es">Español</option>
               <option value="fr">Français</option>
-              <option value="de">Deutsch</option>
             </select>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              {t('dashboard_language_help', 'Este idioma se usará en todo el panel de administración y, si no activas el selector público, también en la web pública.')}
+            </p>
           </div>
+          {/* Selector de idioma público */}
+          <div className="flex items-center mt-4">
+            <input
+              id="enable-language-selector"
+              name="enable-language-selector"
+              type="checkbox"
+              checked={enableLanguageSelector}
+              onChange={e => setEnableLanguageSelector(e.target.checked)}
+              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+            />
+            <label htmlFor="enable-language-selector" className="ml-2 block text-sm text-gray-900 dark:text-gray-300">
+              {t('enable_public_language_selector', 'Permitir a los clientes elegir idioma en la web pública')}
+            </label>
+          </div>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+            {t('public_language_selector_help', 'Si activas esta opción, aparecerá un pequeño selector de idioma en la web pública (abajo a la izquierda). Si no, la web pública usará el idioma del dashboard.')}
+          </p>
           
           {/* Configuración del formulario de reservas */}
           <div>

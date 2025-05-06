@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import { useRef, useEffect, useState } from 'react';
+import { supabase } from '@/lib/supabase';
 
 type MenuItem = {
   id: string;
@@ -37,9 +38,19 @@ type MenuSectionProps = {
     background: string;
     text: string;
   };
+  restaurantId: string;
+  layoutName?: string; // Añadir el nombre del layout para tracking
 };
 
-export default function MenuSection({ categories, themeColors }: MenuSectionProps) {
+function getDeviceType() {
+  if (typeof window === 'undefined') return 'unknown';
+  const ua = navigator.userAgent;
+  if (/Mobile|Android|iP(hone|od)|IEMobile|BlackBerry|Opera Mini/i.test(ua)) return 'mobile';
+  if (/Tablet|iPad/i.test(ua)) return 'tablet';
+  return 'desktop';
+}
+
+export default function MenuSection({ categories, themeColors, restaurantId, layoutName = 'unknown' }: MenuSectionProps) {
   // Estado para controlar las animaciones al hacer scroll
   const [visibleItems, setVisibleItems] = useState<Set<string>>(new Set());
   const [modalItem, setModalItem] = useState<MenuItem | null>(null);
@@ -95,6 +106,54 @@ export default function MenuSection({ categories, themeColors }: MenuSectionProp
       ?.filter(item => item.is_featured && item.is_available !== false)
       .sort((a, b) => a.display_order - b.display_order) || []
   );
+
+  // Registrar click en Supabase
+  const trackClick = async (type: 'menu_item' | 'category', id: string) => {
+    try {
+      // Get session ID from localStorage
+      const sessionId = typeof window !== 'undefined' ?
+        localStorage.getItem('menulink_session_id') || 'unknown' : 'unknown';
+      
+      console.log('Tracking menu click:', {
+        type,
+        itemId: id,
+        restaurantId,
+        sessionId,
+        layoutName
+      });
+      
+      // Get UTM parameters from URL
+      const utmSource = typeof window !== 'undefined' ?
+        new URLSearchParams(window.location.search).get('utm_source') || null : null;
+      const utmMedium = typeof window !== 'undefined' ?
+        new URLSearchParams(window.location.search).get('utm_medium') || null : null;
+      const utmCampaign = typeof window !== 'undefined' ?
+        new URLSearchParams(window.location.search).get('utm_campaign') || null : null;
+      
+      const { data, error } = await supabase.from('button_clicks').insert({
+        restaurant_id: restaurantId,
+        button_type: type,
+        menu_item_id: type === 'menu_item' ? id : null,
+        clicked_at: new Date().toISOString(),
+        device_type: getDeviceType(),
+        layout_name: layoutName, // Layout name
+        referrer: typeof document !== 'undefined' ? document.referrer || null : null,
+        user_session_id: sessionId, // Add session ID
+        utm_source: utmSource,
+        utm_medium: utmMedium,
+        utm_campaign: utmCampaign
+      }).select();
+      
+      if (error) {
+        console.error('Supabase error tracking menu click:', error);
+      } else {
+        console.log('Menu click tracked successfully:', data);
+      }
+    } catch (e) {
+      // No mostrar error al usuario
+      console.error('Error al registrar click:', e);
+    }
+  };
 
   // Modal de detalle de plato
   const renderModal = () => {
@@ -214,7 +273,7 @@ export default function MenuSection({ categories, themeColors }: MenuSectionProp
                               : 'opacity-0 translate-y-8'
                           }`}
                 style={{ transitionDelay: `${Math.min(idx * 150, 1000)}ms` }}
-                onClick={() => setModalItem(item)}
+                onClick={() => { setModalItem(item); trackClick('menu_item', item.id); }}
               >
                 {item.image_url ? (
                   <div className="relative aspect-[16/9] w-full overflow-hidden">
@@ -290,7 +349,7 @@ export default function MenuSection({ categories, themeColors }: MenuSectionProp
             {/* Título de categoría con línea decorativa */}
             <div className="flex items-center gap-4 justify-center mb-6">
               <div className="flex-1 h-px bg-gray-200" />
-              <h3 className="text-gray-700 text-base font-semibold flex items-center gap-4" style={{ color: themeColors.secondary }}>{category.name}</h3>
+              <h3 className="text-gray-700 text-base font-semibold flex items-center gap-4" style={{ color: themeColors.secondary }} onClick={() => trackClick('category', category.id)}>{category.name}</h3>
               <div className="flex-1 h-px bg-gray-200" />
             </div>
             
@@ -309,7 +368,7 @@ export default function MenuSection({ categories, themeColors }: MenuSectionProp
                   <div key={item.id} id={itemId} ref={(el) => registerElement(itemId, el)}
                     className={`bg-white rounded-xl p-4 shadow-md flex flex-col gap-2 transition-all duration-500 border border-gray-100 hover:border-gray-200 ${visibleItems.has(itemId) ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'} cursor-pointer`}
                     style={{ transitionDelay: `${Math.min(idx * 100, 800)}ms` }}
-                    onClick={() => setModalItem(item)}>
+                    onClick={() => { setModalItem(item); trackClick('menu_item', item.id); }}>
                     <div className="flex justify-between items-center">
                       <h4 className="font-semibold text-lg text-gray-900">{item.name}</h4>
                       <span className="font-bold text-base px-3 py-1 rounded-full bg-gray-50" style={{ color: themeColors.primary }}>{typeof item.price === 'number' ? `${item.price.toFixed(2)}€` : item.price}</span>

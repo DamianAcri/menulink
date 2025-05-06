@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
+import { supabase } from '@/lib/supabase';
 
 // Definición de plataformas de delivery
 const DELIVERY_PLATFORMS = {
@@ -45,9 +46,19 @@ type DeliveryLinksProps = {
     background: string;
     text: string;
   };
+  restaurantId: string; // Añadir el ID del restaurante como prop
+  layoutName?: string; // Nombre del layout para tracking
 };
 
-export default function DeliveryLinks({ links = [], themeColors }: DeliveryLinksProps) {
+function getDeviceType() {
+  if (typeof window === 'undefined') return 'unknown';
+  const ua = navigator.userAgent;
+  if (/Mobile|Android|iP(hone|od)|IEMobile|BlackBerry|Opera Mini/i.test(ua)) return 'mobile';
+  if (/Tablet|iPad/i.test(ua)) return 'tablet';
+  return 'desktop';
+}
+
+export default function DeliveryLinks({ links = [], themeColors, restaurantId, layoutName = 'unknown' }: DeliveryLinksProps) {
   const [visibleLinks, setVisibleLinks] = useState<Set<string>>(new Set());
   const [mounted, setMounted] = useState(false);
 
@@ -88,6 +99,44 @@ export default function DeliveryLinks({ links = [], themeColors }: DeliveryLinks
     return luminance > 0.7;
   }
 
+  // Registrar el click en delivery
+  const trackClick = async (_platform: string, linkId: string) => {
+    try {
+      const sessionId = localStorage.getItem('menulink_session_id') || 'unknown';
+      
+      console.log('Tracking delivery click:', {
+        platform: 'delivery',
+        linkId,
+        restaurantId,
+        sessionId,
+        layoutName
+      });
+      
+      const { data, error } = await supabase.from('button_clicks').insert({
+        restaurant_id: restaurantId,
+        button_type: 'delivery',
+        delivery_link_id: linkId,
+        clicked_at: new Date().toISOString(),
+        device_type: getDeviceType(),
+        referrer: typeof document !== 'undefined' ? document.referrer || null : null,
+        layout_name: layoutName,
+        user_session_id: sessionId,
+        utm_source: typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('utm_source') || null : null,
+        utm_medium: typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('utm_medium') || null : null,
+        utm_campaign: typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('utm_campaign') || null : null
+      }).select();
+      
+      if (error) {
+        console.error('Supabase error tracking click:', error);
+      } else {
+        console.log('Click tracked successfully:', data);
+      }
+    } catch (e) {
+      // No mostrar error al usuario
+      console.error('Error al registrar click:', e);
+    }
+  };
+
   // Sort links by display_order
   const sortedLinks = [...links].sort((a, b) => a.display_order - b.display_order);
 
@@ -122,6 +171,7 @@ export default function DeliveryLinks({ links = [], themeColors }: DeliveryLinks
                 color: textColor,
                 transitionDelay: `${index * 0.15}s`
               }}
+              onClick={() => trackClick(link.platform, link.id)}
             >
               <div className="relative w-5 h-5">
                 <Image

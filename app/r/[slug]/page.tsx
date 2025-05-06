@@ -64,7 +64,21 @@ interface MenuCategory {
 export default async function RestaurantPage(props: RestaurantPageProps) {
   try {
     const { slug } = await props.params;
+    
+    // Comprobar valores de conexión (sin mostrar claves completas por seguridad)
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    console.log('Supabase URL configurada:', supabaseUrl ? 'Sí' : 'No');
+    console.log('Slug recibido:', slug);
 
+    // Primera prueba: comprobar si podemos hacer una consulta básica
+    const testQuery = await supabase.from('restaurants').select('count').limit(1);
+    console.log('Test de conexión básica:', testQuery.error ? 'Error' : 'OK');
+    
+    if (testQuery.error) {
+      console.error('Error de conexión básica:', testQuery.error);
+    }
+
+    // Realizar la consulta principal con el slug
     const { data: restaurant, error } = await supabase
       .from('restaurants')
       .select(`
@@ -106,39 +120,71 @@ export default async function RestaurantPage(props: RestaurantPageProps) {
         )
       `)
       .eq('slug', slug)
-      .single();
+      .maybeSingle();
+    
+    console.log('Resultado de la consulta:', {
+      encontrado: !!restaurant,
+      error: error ? error.message : null
+    });
 
-    if (process.env.NODE_ENV === 'development' && !restaurant) {
-      console.error('Error de Supabase:', error);
-      return (
-        <div className="min-h-screen bg-gray-100 dark:bg-gray-900 p-6">
-          <div className="max-w-3xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-            <h1 className="text-2xl font-bold text-red-600 dark:text-red-400 mb-4">Restaurante no encontrado</h1>
-            <div className="bg-gray-100 dark:bg-gray-700 rounded p-4 mb-4">
-              <p className="font-mono text-sm">Slug buscado: <strong>{slug}</strong></p>
-            </div>
-            <div className="space-y-4">
-              <div>
-                <h2 className="font-semibold mb-2">Posibles causas:</h2>
-                <ul className="list-disc list-inside space-y-1 text-gray-700 dark:text-gray-300">
-                  <li>El restaurante no existe en la base de datos</li>
-                  <li>El slug está mal escrito o usa otro formato</li>
-                  <li>Problemas con la conexión a Supabase</li>
-                </ul>
+    // Si no encontramos el restaurante, mostrar error o redirigir a 404
+    if (!restaurant) {
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Error de Supabase:', error || 'No se encontró el restaurante');
+        
+        // Intentar una búsqueda simple para ver si hay restaurantes disponibles
+        const { data: allRestaurants, error: listError } = await supabase
+          .from('restaurants')
+          .select('slug, name')
+          .limit(5);
+        
+        console.log('Restaurantes encontrados en la base de datos:', 
+          allRestaurants ? allRestaurants.length : 0);
+        
+        if (listError) {
+          console.error('Error al listar restaurantes:', listError);
+        } else if (allRestaurants && allRestaurants.length > 0) {
+          console.log('Algunos slugs disponibles:', allRestaurants.map(r => r.slug).join(', '));
+        }
+
+        return (
+          <div className="min-h-screen bg-gray-100 dark:bg-gray-900 p-6">
+            <div className="max-w-3xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+              <h1 className="text-2xl font-bold text-red-600 dark:text-red-400 mb-4">Restaurante no encontrado</h1>
+              <div className="bg-gray-100 dark:bg-gray-700 rounded p-4 mb-4">
+                <p className="font-mono text-sm">Slug buscado: <strong>{slug}</strong></p>
+                <p className="font-mono text-sm mt-2">URL de Supabase configurada: <strong>{supabaseUrl ? 'Sí' : 'No'}</strong></p>
+                {testQuery.error && (
+                  <p className="font-mono text-sm text-red-600 mt-2">Error de conexión: {testQuery.error.message}</p>
+                )}
+                {allRestaurants && allRestaurants.length > 0 && (
+                  <div className="mt-4">
+                    <p className="font-mono text-sm">Slugs disponibles en la base de datos:</p>
+                    <ul className="list-disc pl-5 mt-1">
+                      {allRestaurants.map(r => (
+                        <li key={r.slug} className="font-mono text-xs">
+                          {r.slug} ({r.name})
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </div>
-              <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
-                <h2 className="font-semibold mb-2">Error de Supabase:</h2>
-                <pre className="bg-gray-100 dark:bg-gray-700 p-3 rounded overflow-auto text-xs">
-                  {JSON.stringify(error, null, 2)}
-                </pre>
+              <div className="space-y-4">
+                <div>
+                  <h2 className="font-semibold mb-2">Posibles causas:</h2>
+                  <ul className="list-disc list-inside space-y-1 text-gray-700 dark:text-gray-300">
+                    <li>El restaurante no existe en la base de datos</li>
+                    <li>El slug está mal escrito o usa otro formato</li>
+                    <li>Problemas con la conexión a Supabase</li>
+                    <li>Variables de entorno no configuradas correctamente</li>
+                  </ul>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      );
-    }
-
-    if (!restaurant) {
+        );
+      }
       notFound();
     }
 
@@ -149,7 +195,7 @@ export default async function RestaurantPage(props: RestaurantPageProps) {
       .from('contact_info')
       .select('*')
       .eq('restaurant_id', restaurant.id)
-      .single();
+      .maybeSingle();
 
     const { data: openingHours } = await supabase
       .from('opening_hours')
@@ -189,7 +235,6 @@ export default async function RestaurantPage(props: RestaurantPageProps) {
 
     const fontFamily = restaurant.font_family || 'Inter, sans-serif';
 
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const bucket = 'menulink';
 
     const coverUrl = restaurant.cover_image_url?.startsWith('http')
@@ -233,7 +278,9 @@ export default async function RestaurantPage(props: RestaurantPageProps) {
       logoUrl,
       themeColors,
       fontFamily,
-      showReservationForm // Pass the new prop to layouts
+      showReservationForm,
+      enableLanguageSelector: !!restaurant.enable_language_selector,
+      defaultLanguage: restaurant.language || 'en',
     };
 
     // Render the appropriate template based on templateType

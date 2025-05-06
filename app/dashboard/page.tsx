@@ -16,10 +16,20 @@ export default function Dashboard() {
     menuItems: 0,
     categories: 0,
   });
+  
+  // Agregamos una variable para refrescar los datos cuando sea necesario
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
+  // Función para forzar una recarga de datos
+  const refreshData = () => {
+    setRefreshTrigger(prev => prev + 1);
+  };
+
+  // Efecto que se ejecuta al montar el componente o al cambiar refreshTrigger
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setLoading(true);
         // Obtener el usuario actual
         const {
           data: { user },
@@ -84,6 +94,18 @@ export default function Dashboard() {
     };
 
     fetchData();
+  }, [refreshTrigger]); // Agregar refreshTrigger como dependencia
+
+  // Verificar si debemos refrescar los datos al enfocar la ventana
+  useEffect(() => {
+    const handleFocus = () => {
+      refreshData(); // Recargar datos cuando la ventana reciba el foco
+    };
+
+    window.addEventListener('focus', handleFocus);
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+    };
   }, []);
 
   // Si no hay restaurante configurado, mostrar pantalla de bienvenida

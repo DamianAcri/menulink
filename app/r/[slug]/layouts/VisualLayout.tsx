@@ -9,6 +9,7 @@ import SocialLinks from '../components/SocialLinks';
 import DeliveryLinks from '../components/DeliveryLinks';
 import Navigation from '../components/Navigation';
 import { useState, useEffect } from 'react';
+import SessionTracker from '../components/SessionTracker';
 
 interface VisualLayoutProps {
   restaurant: any;
@@ -22,6 +23,8 @@ interface VisualLayoutProps {
   };
   fontFamily: string;
   showReservationForm?: boolean;
+  enableLanguageSelector?: boolean;
+  defaultLanguage?: string;
 }
 
 export default function VisualLayout({
@@ -30,7 +33,9 @@ export default function VisualLayout({
   logoUrl,
   themeColors,
   fontFamily,
-  showReservationForm = true
+  showReservationForm = true,
+  enableLanguageSelector = false,
+  defaultLanguage = 'en',
 }: VisualLayoutProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -65,9 +70,27 @@ export default function VisualLayout({
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, [activeSection]);
+
+  const sections = [
+    { id: 'menu', label: 'Menú' },
+    ...(showReservationForm ? [{ id: 'reserva', label: 'Reservas' }] : []),
+    { id: 'contacto', label: 'Contacto' },
+    ...(restaurant.delivery_links && restaurant.delivery_links.length > 0 ? [{ id: 'delivery', label: 'Delivery' }] : []),
+  ];
   
   return (
     <main className="min-h-screen bg-gradient-to-br from-gray-900 to-black" style={{ fontFamily }}>
+      {/* Session tracking component */}
+      <SessionTracker restaurantId={restaurant.id} />
+      
+      <Navigation
+        sections={sections}
+        themeColors={themeColors}
+        logoUrl={logoUrl}
+        restaurantName={restaurant.name}
+        enableLanguageSelector={enableLanguageSelector}
+        defaultLanguage={defaultLanguage}
+      />
       {/* LAYOUT VISUAL - Texto distintivo para confirmar que se ha aplicado */}
       <div className="fixed top-0 left-0 z-50 bg-black text-white text-xs px-2 py-1">LAYOUT VISUAL</div>
       
@@ -325,6 +348,8 @@ export default function VisualLayout({
                 primary: '#c084fc', // purple-400
                 text: '#ffffff'
               }} 
+              restaurantId={restaurant.id}
+              layoutName="visual"
             />
           </div>
         </div>
@@ -445,6 +470,8 @@ export default function VisualLayout({
                   primary: '#fbbf24', // amber-400
                   text: '#ffffff'
                 }}
+                restaurantId={restaurant.id}
+                layoutName="visual"
               />
             </div>
           </div>
@@ -472,6 +499,8 @@ export default function VisualLayout({
                     ...themeColors,
                     primary: '#ffffff'
                   }}
+                  restaurantId={restaurant.id}
+                  layoutName="visual"
                 />
               </div>
             )}

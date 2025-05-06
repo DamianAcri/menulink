@@ -7,6 +7,8 @@ import ContactSection from '../components/ContactSection';
 import ReservationSection from '../components/ReservationSection';
 import SocialLinks from '../components/SocialLinks';
 import DeliveryLinks from '../components/DeliveryLinks';
+import Navigation from '../components/Navigation';
+import SessionTracker from '../components/SessionTracker';
 import { useState, useEffect } from 'react';
 
 interface MinimalistLayoutProps {
@@ -21,6 +23,8 @@ interface MinimalistLayoutProps {
   };
   fontFamily: string;
   showReservationForm?: boolean;
+  enableLanguageSelector?: boolean;
+  defaultLanguage?: string;
 }
 
 export default function MinimalistLayout({
@@ -29,7 +33,9 @@ export default function MinimalistLayout({
   logoUrl,
   themeColors,
   fontFamily,
-  showReservationForm = true
+  showReservationForm = true,
+  enableLanguageSelector = false,
+  defaultLanguage = 'en',
 }: MinimalistLayoutProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('menu');
@@ -54,8 +60,26 @@ export default function MinimalistLayout({
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const sections = [
+    { id: 'menu', label: 'Menú' },
+    ...(showReservationForm ? [{ id: 'reserva', label: 'Reservas' }] : []),
+    { id: 'contacto', label: 'Contacto' },
+    ...(restaurant.delivery_links && restaurant.delivery_links.length > 0 ? [{ id: 'delivery', label: 'Delivery' }] : []),
+  ];
+
   return (
     <main className="min-h-screen bg-white" style={{ color: themeColors.text, fontFamily }}>
+      {/* Session tracking component */}
+      <SessionTracker restaurantId={restaurant.id} />
+      
+      <Navigation
+        sections={sections}
+        themeColors={themeColors}
+        logoUrl={logoUrl}
+        restaurantName={restaurant.name}
+        enableLanguageSelector={enableLanguageSelector}
+        defaultLanguage={defaultLanguage}
+      />
       {/* LAYOUT MINIMALISTA - Texto distintivo para confirmar que se ha aplicado */}
       <div className="fixed top-0 left-0 z-50 bg-black text-white text-xs px-2 py-1">LAYOUT MINIMALISTA</div>
       
@@ -209,6 +233,8 @@ export default function MinimalistLayout({
           <MenuSection 
             categories={restaurant.menu_categories} 
             themeColors={themeColors} 
+            restaurantId={restaurant.id}
+            layoutName="minimalist"
           />
         </section>
         
@@ -244,6 +270,8 @@ export default function MinimalistLayout({
               <DeliveryLinks 
                 links={restaurant.delivery_links}
                 themeColors={themeColors}
+                restaurantId={restaurant.id}
+                layoutName="minimalist"
               />
             </div>
           </section>
@@ -259,6 +287,8 @@ export default function MinimalistLayout({
               <SocialLinks 
                 links={restaurant.social_links}
                 themeColors={themeColors}
+                restaurantId={restaurant.id}
+                layoutName="minimalist"
               />
             </div>
           )}

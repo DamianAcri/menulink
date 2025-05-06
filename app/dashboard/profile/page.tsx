@@ -118,6 +118,30 @@ export default function ProfilePage() {
   ) => {
     const { name, value } = e.target;
     
+    // Si se está editando el nombre, generar un slug automáticamente
+    if (name === "name") {
+      // Generar el slug a partir del nombre (misma lógica que en el formulario de creación)
+      const generatedSlug = value
+        .trim()
+        .toLowerCase()
+        .replace(/\s+/g, "-")
+        .replace(/[^\w\-]+/g, "")
+        .replace(/\-\-+/g, "-");
+      
+      // Actualizar tanto el nombre como el slug
+      setFormData((prev) => ({ 
+        ...prev, 
+        name: value,
+        slug: generatedSlug
+      }));
+      
+      // Limpiar cualquier mensaje de error previo sobre el slug
+      setSaveMessage({ type: "", message: "" });
+      
+      // Terminamos aquí para evitar que se procese dos veces
+      return;
+    }
+    
     if (name === "slug") {
       // Validar que el slug solo contenga letras, números y guiones
       const isValidSlug = /^[a-z0-9\-]+$/.test(value);

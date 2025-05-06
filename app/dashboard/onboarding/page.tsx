@@ -7,6 +7,34 @@ import Step1BasicInfo from "./components/Step1BasicInfo";
 import Step2Customization from "./components/Step2Customization";
 import Step3FirstContent from "./components/Step3FirstContent";
 import PreviewComplete from "./components/PreviewComplete";
+import { useTranslation } from "react-i18next";
+import i18n from "@/lib/i18n";
+
+function LanguageModal({ open, onSelect }: { open: boolean; onSelect: (lang: string) => void }) {
+  const { t } = useTranslation();
+  if (!open) return null;
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+      <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-8 max-w-xs w-full text-center">
+        <h2 className="text-lg font-bold mb-4">{t('seleccionar_idioma')}</h2>
+        <div className="flex justify-center gap-4 mb-4">
+          <button onClick={() => onSelect('es')} className="focus:outline-none">
+            <span role="img" aria-label="Español" className="text-3xl">🇪🇸</span>
+            <div className="text-xs mt-1">{t('espanol')}</div>
+          </button>
+          <button onClick={() => onSelect('en')} className="focus:outline-none">
+            <span role="img" aria-label="English" className="text-3xl">🇬🇧</span>
+            <div className="text-xs mt-1">{t('ingles')}</div>
+          </button>
+          <button onClick={() => onSelect('fr')} className="focus:outline-none">
+            <span role="img" aria-label="Français" className="text-3xl">🇫🇷</span>
+            <div className="text-xs mt-1">{t('frances')}</div>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function OnboardingPage() {
   const router = useRouter();
@@ -47,6 +75,10 @@ export default function OnboardingPage() {
 
   const [user, setUser] = useState<unknown>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [showLangModal, setShowLangModal] = useState(false);
+  const { t } = useTranslation();
+  const [language, setLanguage] = useState('en');
+  const [enableLanguageSelector, setEnableLanguageSelector] = useState(false);
 
   useEffect(() => {
     const getUser = async () => {
@@ -55,6 +87,27 @@ export default function OnboardingPage() {
     };
     getUser();
   }, []);
+
+  useEffect(() => {
+    const savedLang = localStorage.getItem('lang');
+    if (!savedLang) {
+      const navLang = navigator.language.slice(0, 2);
+      if (["es", "en", "fr"].includes(navLang)) {
+        setShowLangModal(true);
+      } else {
+        i18n.changeLanguage('es');
+        localStorage.setItem('lang', 'es');
+      }
+    } else {
+      i18n.changeLanguage(savedLang);
+    }
+  }, []);
+
+  const handleSelectLang = (lang: string) => {
+    i18n.changeLanguage(lang);
+    localStorage.setItem('lang', lang);
+    setShowLangModal(false);
+  };
 
   // Cuando se cambia el nombre del restaurante, generar automáticamente un slug
   useEffect(() => {
@@ -288,7 +341,9 @@ export default function OnboardingPage() {
             font_family: 'Inter, sans-serif',
             subscription_tier: 'free',
             reservation_mode: formData.reservationMode, // Guardar la configuración del formulario de reservas
-            theme_type: convertTemplateTypeToNumber(formData.templateType) // Guardar el tipo de plantilla como número
+            theme_type: convertTemplateTypeToNumber(formData.templateType), // Guardar el tipo de plantilla como número
+            language: language,
+            enable_language_selector: enableLanguageSelector
           }
         ])
         .select()
@@ -418,13 +473,48 @@ export default function OnboardingPage() {
 
   return (
     <div className="max-w-4xl mx-auto">
+      <LanguageModal open={showLangModal} onSelect={handleSelectLang} />
       {/* Header con pasos de progreso */}
       {currentStep < 4 && (
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-center text-gray-900 dark:text-white">
             Configura tu restaurante en MenuLink
           </h1>
-          
+          <div className="mt-4 flex flex-col md:flex-row md:items-center md:justify-center gap-4">
+            <div>
+              <label htmlFor="language" className="block text-md font-medium text-gray-900 dark:text-white">Idioma del dashboard</label>
+              <select
+                id="language"
+                name="language"
+                className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                value={language}
+                onChange={e => setLanguage(e.target.value)}
+              >
+                <option value="en">English</option>
+                <option value="es">Español</option>
+                <option value="fr">Français</option>
+              </select>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                Este idioma se usará en todo el panel de administración y, si no activas el selector público, también en la web pública.
+              </p>
+            </div>
+            <div className="flex items-center mt-2 md:mt-0">
+              <input
+                id="enable-language-selector"
+                name="enable-language-selector"
+                type="checkbox"
+                checked={enableLanguageSelector}
+                onChange={e => setEnableLanguageSelector(e.target.checked)}
+                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              />
+              <label htmlFor="enable-language-selector" className="ml-2 block text-sm text-gray-900 dark:text-gray-300">
+                Permitir a los clientes elegir idioma en la web pública
+              </label>
+            </div>
+          </div>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 text-center">
+            Si activas esta opción, aparecerá un pequeño selector de idioma en la web pública (abajo a la izquierda). Si no, la web pública usará el idioma del dashboard.
+          </p>
           <div className="mt-8">
             <nav aria-label="Progress">
               <ol className="flex items-center justify-between">
