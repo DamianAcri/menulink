@@ -11,6 +11,7 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -83,17 +84,32 @@ export default function Login() {
               <label htmlFor="password" className="sr-only">
                 Contraseña
               </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete="current-password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                placeholder="Contraseña"
-              />
+              <div className="relative">
+                <input
+                  id="password"
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  autoComplete="current-password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm pr-10"
+                  placeholder="Contraseña"
+                />
+                <button
+                  type="button"
+                  tabIndex={-1}
+                  onClick={() => setShowPassword((v) => !v)}
+                  className="absolute inset-y-0 right-0 flex items-center px-3 focus:outline-none"
+                  aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                >
+                  {showPassword ? (
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-5.523 0-10-4.477-10-10a9.956 9.956 0 012.197-6.262m1.414-1.414A9.956 9.956 0 0112 3c5.523 0 10 4.477 10 10a9.956 9.956 0 01-1.197 4.262m-1.414 1.414A9.956 9.956 0 0112 21c-5.523 0-10-4.477-10-10a9.956 9.956 0 011.197-4.262m1.414-1.414L21 21" /></svg>
+                  ) : (
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0zm7.5 0a9.77 9.77 0 01-1.7 5.5A9.956 9.956 0 0112 21a9.956 9.956 0 01-8.8-3.5A9.77 9.77 0 011.5 12a9.77 9.77 0 011.7-5.5A9.956 9.956 0 0112 3a9.956 9.956 0 018.8 3.5A9.77 9.77 0 0122.5 12z" /></svg>
+                  )}
+                </button>
+              </div>
             </div>
           </div>
 

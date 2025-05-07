@@ -247,7 +247,7 @@ export default function DashboardLayout({
         </div>
         <main className="flex-1 relative overflow-y-auto focus:outline-none p-4 md:p-6">
           {children}
-          <Toaster position="bottom-right" richColors />
+          <Toaster position="bottom-right" closeButton style={{ zIndex: 9999 }} />
         </main>
       </div>
     </div>
