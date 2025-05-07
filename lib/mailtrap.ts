@@ -98,3 +98,54 @@ export async function sendReviewRequestEmailDev(
     return { success: false, error };
   }
 }
+
+export async function sendOwnerNewReservationEmailDev(ownerEmail: string, ownerName: string, reservation: any, dashboardLink: string) {
+  return mailtrapTransport.sendMail({
+    from: 'MenuLink <mailer@menulink.app>',
+    to: ownerEmail,
+    subject: `Nueva reserva recibida en ${ownerName}`,
+    html: `
+      <h2>Nueva reserva recibida</h2>
+      <p><b>Cliente:</b> ${reservation.customer_name}</p>
+      <p><b>Email:</b> ${reservation.customer_email}</p>
+      <p><b>Teléfono:</b> ${reservation.customer_phone}</p>
+      <p><b>Fecha:</b> ${reservation.reservation_date} a las ${reservation.reservation_time?.substring(0,5)}</p>
+      <p><b>Personas:</b> ${reservation.party_size}</p>
+      <p><b>Petición especial:</b> ${reservation.special_requests || '-'}</p>
+      <p><a href="${dashboardLink}" style="background:#3b82f6;color:white;padding:10px 20px;border-radius:4px;text-decoration:none;">Gestionar reserva</a></p>
+      <p style="color:#888;font-size:12px;">Este correo es solo informativo. Gestiona la reserva desde tu panel MenuLink.</p>
+    `
+  });
+}
+
+export async function sendClientPendingReservationEmailDev(clientEmail: string, clientName: string, restaurantName: string, reservation: any) {
+  return mailtrapTransport.sendMail({
+    from: 'MenuLink <mailer@menulink.app>',
+    to: clientEmail,
+    subject: `Tu reserva en ${restaurantName} está pendiente de confirmación`,
+    html: `
+      <h2>¡Reserva recibida!</h2>
+      <p>Hola ${clientName},</p>
+      <p>Hemos recibido tu solicitud de reserva en <b>${restaurantName}</b> para el día <b>${reservation.reservation_date}</b> a las <b>${reservation.reservation_time?.substring(0,5)}</b>.</p>
+      <p>En cuanto el restaurante confirme tu reserva, te avisaremos por email.</p>
+      <p style="color:#888;font-size:12px;">No respondas a este correo. Si tienes dudas, contacta directamente con el restaurante.</p>
+    `
+  });
+}
+
+export async function sendClientReservationStatusEmailDev(clientEmail: string, clientName: string, restaurantName: string, reservation: any, status: 'confirmed' | 'cancelled') {
+  const statusText = status === 'confirmed' ? 'confirmada' : 'rechazada';
+  const color = status === 'confirmed' ? '#22c55e' : '#ef4444';
+  return mailtrapTransport.sendMail({
+    from: 'MenuLink <mailer@menulink.app>',
+    to: clientEmail,
+    subject: `Tu reserva en ${restaurantName} ha sido ${statusText}`,
+    html: `
+      <h2 style="color:${color}">Tu reserva ha sido ${statusText}</h2>
+      <p>Hola ${clientName},</p>
+      <p>La reserva para el día <b>${reservation.reservation_date}</b> a las <b>${reservation.reservation_time?.substring(0,5)}</b> ha sido <b>${statusText}</b> por el restaurante <b>${restaurantName}</b>.</p>
+      <p>${status === 'confirmed' ? '¡Te esperamos!' : 'Puedes reservar otro día cuando quieras.'}</p>
+      <p style="color:#888;font-size:12px;">No respondas a este correo. Si tienes dudas, contacta directamente con el restaurante.</p>
+    `
+  });
+}

@@ -84,6 +84,11 @@ export default function ReservationsPage() {
     return matchesSearch && matchesStatus && matchesDate;
   });
 
+  // Eliminar duplicados por id (garantiza que cada reserva solo aparece una vez)
+  const uniqueReservations = Array.from(
+    new Map(filteredReservations.map(r => [r.id, r])).values()
+  );
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -512,6 +517,21 @@ export default function ReservationsPage() {
       setFormError("Error al crear la reserva.");
       return;
     }
+
+    // Enviar correo de nueva reserva (al restaurante y cliente)
+    if (data && data.id) {
+      try {
+        await fetch('/api/email/new-reservation', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ reservationId: data.id })
+        });
+      } catch (err) {
+        // No bloquear el flujo si falla el correo
+        console.error('Error enviando correo de nueva reserva:', err);
+      }
+    }
+
     setFormSuccess("Reserva creada correctamente.");
     setReservations((prev) => [data, ...prev]);
     // Si se marcó añadir al CRM, intentar añadir el cliente (si no existe)
@@ -943,12 +963,12 @@ export default function ReservationsPage() {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {filteredReservations.length === 0 ? (
+                    {uniqueReservations.length === 0 ? (
                       <tr>
                         <td colSpan={5} className="h-24 text-center">No se encontraron reservas.</td>
                       </tr>
                     ) : (
-                      filteredReservations.map((reservation) => (
+                      uniqueReservations.map((reservation) => (
                         <tr key={reservation.id} className="hover:bg-gray-50">
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="text-sm font-medium text-gray-900">{formatDate(reservation.reservation_date)}</div>
@@ -1108,7 +1128,6 @@ export default function ReservationsPage() {
 
       if (error) throw error;
 
-      // Ahora newStatus es del tipo correcto, no necesitamos hacer casting
       setReservations((prev: Reservation[]) =>
         prev.map((res) =>
           res.id === reservationId ? { ...res, status: newStatus } : res
@@ -1117,16 +1136,27 @@ export default function ReservationsPage() {
 
       toast.success("Estado de reserva actualizado");
 
+      // Enviar correo de confirmación o cancelación al cliente
+      if (newStatus === "confirmed" || newStatus === "cancelled") {
+        try {
+          await fetch("/api/email/reservation-status", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ reservationId, status: newStatus })
+          });
+        } catch (emailError) {
+          console.error("Error enviando correo de estado de reserva:", emailError);
+        }
+      }
+
       // El resto de tu código permanece igual
       if (newStatus === "completed") {
         try {
           const response = await fetch("/api/email/send-thank-you", {
             method: "POST",
-
             headers: {
               "Content-Type": "application/json",
             },
-
             body: JSON.stringify({ reservationId }),
           });
 

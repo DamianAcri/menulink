@@ -246,7 +246,7 @@ export default function ReservationSection({
         .eq('restaurant_id', restaurantId)
         .eq('email', formData.customer_email)
         .maybeSingle();
-        
+      
       if (!existingCustomer) {
         const [first_name, ...rest] = formData.customer_name.trim().split(' ');
         const last_name = rest.join(' ') || '-';
@@ -257,6 +257,20 @@ export default function ReservationSection({
           email: formData.customer_email,
           phone: formData.customer_phone || null,
         });
+      }
+
+      // Enviar correo de nueva reserva (al restaurante y cliente)
+      if (data && data[0] && data[0].id) {
+        try {
+          await fetch('/api/email/new-reservation', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ reservationId: data[0].id })
+          });
+        } catch (err) {
+          // No bloquear el flujo si falla el correo
+          console.error('Error enviando correo de nueva reserva:', err);
+        }
       }
 
       // Éxito

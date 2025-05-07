@@ -1,4 +1,4 @@
-import { sendThankYouEmailDev, sendReviewRequestEmailDev } from './mailtrap';
+import { sendThankYouEmailDev, sendReviewRequestEmailDev, sendOwnerNewReservationEmailDev, sendClientPendingReservationEmailDev, sendClientReservationStatusEmailDev } from './mailtrap';
 
 // Determinar si estamos en desarrollo o producción
 const isDevelopment = process.env.NODE_ENV === 'development';
@@ -51,5 +51,26 @@ export const EmailService = {
     } else {
       return sendReviewRequestEmailDev(customerName, customerEmail, restaurantName, restaurantSlug, reviewLink);
     }
+  },
+
+  /**
+   * Envía un correo de nueva reserva al dueño del restaurante
+   */
+  sendOwnerNewReservationEmail: async ({ ownerEmail, ownerName, reservation, dashboardLink }: { ownerEmail: string, ownerName: string, reservation: any, dashboardLink: string }) => {
+    return sendOwnerNewReservationEmailDev(ownerEmail, ownerName, reservation, dashboardLink);
+  },
+
+  /**
+   * Envía un correo de reserva pendiente al cliente
+   */
+  sendClientPendingReservationEmail: async ({ clientEmail, clientName, restaurantName, reservation }: { clientEmail: string, clientName: string, restaurantName: string, reservation: any }) => {
+    return sendClientPendingReservationEmailDev(clientEmail, clientName, restaurantName, reservation);
+  },
+
+  /**
+   * Envía un correo con el estado de la reserva al cliente
+   */
+  sendClientReservationStatusEmail: async ({ clientEmail, clientName, restaurantName, reservation, status }: { clientEmail: string, clientName: string, restaurantName: string, reservation: any, status: 'confirmed' | 'cancelled' }) => {
+    return sendClientReservationStatusEmailDev(clientEmail, clientName, restaurantName, reservation, status);
   }
 };
