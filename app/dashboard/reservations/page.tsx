@@ -3,6 +3,9 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
+import { Calendar as CalendarIcon, Clock, Plus, Settings, Users, Filter, Search, X, MoreHorizontal, Check } from "lucide-react";
+import { format, isSameDay, isToday, parseISO } from "date-fns";
+import { es } from "date-fns/locale/es";
 
 type Reservation = {
   id: string;
@@ -58,6 +61,27 @@ export default function ReservationsPage() {
     max_reservations: 4,
     max_party_size: 10,
     is_active: true
+  });
+
+  // UI state for tabs and calendar
+  const [activeTab, setActiveTab] = useState<'calendar' | 'list'>('calendar');
+  const [calendarDate, setCalendarDate] = useState<Date>(new Date());
+
+  // Estado para mostrar el diálogo de nueva reserva
+  const [showNewReservationDialog, setShowNewReservationDialog] = useState(false);
+  // Estado y lógica de búsqueda en el listado
+  const [searchTerm, setSearchTerm] = useState("");
+  // Filtrado de reservas para el listado
+  const filteredReservations = reservations.filter((reservation) => {
+    const matchesSearch =
+      reservation.customer_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      reservation.customer_email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      reservation.customer_phone.includes(searchTerm);
+    const matchesStatus =
+      statusFilter === "all" || reservation.status === statusFilter;
+    const matchesDate =
+      !dateFilter || reservation.reservation_date === dateFilter;
+    return matchesSearch && matchesStatus && matchesDate;
   });
 
   useEffect(() => {
@@ -222,6 +246,13 @@ export default function ReservationsPage() {
       loadTimeSlots();
     }
   }, [showTimeSlotsSection, restaurant, selectedDay]);
+
+  useEffect(() => {
+    if (formSuccess) {
+      const timer = setTimeout(() => setFormSuccess(null), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [formSuccess]);
 
   const fetchReservations = async (restaurantId: string) => {
     if (!restaurantId) return;
@@ -519,6 +550,39 @@ export default function ReservationsPage() {
     });
   };
 
+  // --- Calendar helpers ---
+  function generateCalendarDays(date: Date) {
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    const firstDayOfMonth = new Date(year, month, 1);
+    const lastDayOfMonth = new Date(year, month + 1, 0);
+    let firstDayOfWeek = firstDayOfMonth.getDay() - 1;
+    if (firstDayOfWeek < 0) firstDayOfWeek = 6;
+    let lastDayOfWeek = lastDayOfMonth.getDay() - 1;
+    if (lastDayOfWeek < 0) lastDayOfWeek = 6;
+    const daysFromPrevMonth = firstDayOfWeek;
+    const daysFromNextMonth = 6 - lastDayOfWeek;
+    const calendarDays = [];
+    for (let i = daysFromPrevMonth; i > 0; i--) {
+      calendarDays.push(new Date(year, month, 1 - i));
+    }
+    for (let i = 1; i <= lastDayOfMonth.getDate(); i++) {
+      calendarDays.push(new Date(year, month, i));
+    }
+    for (let i = 1; i <= daysFromNextMonth; i++) {
+      calendarDays.push(new Date(year, month + 1, i));
+    }
+    return calendarDays;
+  }
+
+  // Agrupa reservas por fecha (YYYY-MM-DD)
+  const reservationsByDate = reservations.reduce((acc, r) => {
+    const dateKey = r.reservation_date;
+    if (!acc[dateKey]) acc[dateKey] = [];
+    acc[dateKey].push(r);
+    return acc;
+  }, {} as Record<string, Reservation[]>);
+
   // Si no hay restaurante configurado, mostrar pantalla de welcome igual que en dashboard
   if (!isLoading && !restaurant) {
     return (
@@ -540,620 +604,456 @@ export default function ReservationsPage() {
     );
   }
 
+  // --- UI ---
   return (
-    <div className="px-4">
-      {/* Formulario para crear reserva manual */}
-      <form
-        onSubmit={handleCreateReservation}
-        className="max-w-xl mx-auto bg-white rounded-xl shadow-sm p-4 mb-8 space-y-2"
-      >
-        <h2 className="text-lg font-semibold mb-2">Crear nueva reserva</h2>
-        <input
-          name="customer_name"
-          value={newReservation.customer_name}
-          onChange={handleReservationChange}
-          placeholder="Nombre completo"
-          className="border px-2 py-1 w-full"
-        />
-        <input
-          name="customer_email"
-          value={newReservation.customer_email}
-          onChange={handleReservationChange}
-          placeholder="Email"
-          className="border px-2 py-1 w-full"
-        />
-        <input
-          name="customer_phone"
-          value={newReservation.customer_phone}
-          onChange={handleReservationChange}
-          placeholder="Teléfono"
-          className="border px-2 py-1 w-full"
-        />
-        <div className="flex gap-2">
-          <input
-            name="reservation_date"
-            type="date"
-            value={newReservation.reservation_date}
-            onChange={handleReservationChange}
-            className="border px-2 py-1 flex-1"
-          />
-          <input
-            name="reservation_time"
-            type="time"
-            value={newReservation.reservation_time}
-            onChange={handleReservationChange}
-            className="border px-2 py-1 flex-1"
-          />
-        </div>
-        <input
-          name="party_size"
-          type="number"
-          min={1}
-          value={newReservation.party_size}
-          onChange={handleReservationChange}
-          className="border px-2 py-1 w-full"
-          placeholder="Personas"
-        />
-        <textarea
-          name="special_requests"
-          value={newReservation.special_requests}
-          onChange={handleReservationChange}
-          placeholder="Petición especial (opcional)"
-          className="border px-2 py-1 w-full"
-        />
-        <label className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            name="addToCRM"
-            checked={newReservation.addToCRM}
-            onChange={handleReservationChange}
-          />
-          Añadir cliente al CRM
-        </label>
-        <button
-          type="submit"
-          className="bg-blue-600 text-white px-4 py-1 rounded"
-        >
-          Crear reserva
-        </button>
-        {formError && <div className="text-red-600 text-sm">{formError}</div>}
-        {formSuccess && (
-          <div className="text-green-600 text-sm">{formSuccess}</div>
-        )}
-      </form>
-
-      {/* Botón para mostrar/ocultar la sección de gestión de horarios */}
-      <div className="mb-6">
-        <button
-          onClick={() => setShowTimeSlotsSection(!showTimeSlotsSection)}
-          className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-        >
-          {showTimeSlotsSection ? 'Ocultar gestión de horarios' : 'Gestionar horarios de reserva'}
-          <svg xmlns="http://www.w3.org/2000/svg" className={`ml-2 h-5 w-5 transform ${showTimeSlotsSection ? 'rotate-180' : ''}`} viewBox="0 0 20 20" fill="currentColor">
-            <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-          </svg>
-        </button>
-      </div>
-
-      {/* Sección de gestión de horarios */}
-      {showTimeSlotsSection && (
-        <div className="mb-8 bg-white rounded-xl shadow-sm overflow-hidden">
-          <div className="px-4 py-5 border-b border-gray-200">
-            <h3 className="text-lg font-medium leading-6 text-gray-900">
-              Gestión de horarios disponibles
-            </h3>
-            <p className="mt-1 text-sm text-gray-500">
-              Configura los horarios en los que tus clientes podrán hacer reservas
-            </p>
+    <div className="flex flex-col min-h-screen">
+      <main className="flex-1 p-4 md:p-6">
+        <div className="max-w-6xl mx-auto">
+          {/* Tabs y acciones arriba */}
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+            <div className="flex gap-2 border-b w-full md:w-auto">
+              <button onClick={() => setActiveTab('calendar')} className={`px-4 py-2 font-medium ${activeTab === 'calendar' ? 'border-b-2 border-primary text-primary' : 'text-gray-500'}`}>Calendario</button>
+              <button onClick={() => setActiveTab('list')} className={`px-4 py-2 font-medium ${activeTab === 'list' ? 'border-b-2 border-primary text-primary' : 'text-gray-500'}`}>Listado</button>
+            </div>
+            <div className="flex gap-2 w-full md:w-auto justify-end">
+              <button onClick={() => setShowTimeSlotsSection(true)} className="flex items-center gap-1 px-4 py-2 border rounded text-sm font-medium bg-white hover:bg-gray-50"><Clock className="h-4 w-4" />Gestionar horarios</button>
+              <button onClick={() => setShowNewReservationDialog(true)} className="flex items-center gap-1 px-4 py-2 border rounded text-sm font-medium bg-blue-600 text-white hover:bg-blue-700"><Plus className="h-4 w-4" />Nueva reserva</button>
+            </div>
           </div>
 
-          <div className="px-4 py-5">
-            {/* Selector de día */}
-            <div className="mb-6">
-              <label htmlFor="day-selector" className="block text-sm font-medium text-gray-700">
-                Seleccionar día
-              </label>
-              <select
-                id="day-selector"
-                value={selectedDay}
-                onChange={(e) => setSelectedDay(parseInt(e.target.value))}
-                className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
-              >
-                {dayNames.map((dayName, index) => (
-                  <option key={index} value={index}>
-                    {dayName}
-                  </option>
-                ))}
-              </select>
+          {/* Modales */}
+          {showNewReservationDialog && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+              <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative animate-fade-in">
+                <button onClick={() => setShowNewReservationDialog(false)} className="absolute top-2 right-2 text-gray-400 hover:text-gray-700"><X className="h-5 w-5" /></button>
+                <h2 className="text-xl font-bold mb-2">Nueva Reserva</h2>
+                <form onSubmit={handleCreateReservation} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Nombre del cliente</label>
+                    <input name="customer_name" value={newReservation.customer_name} onChange={handleReservationChange} placeholder="Nombre completo" className="border px-3 py-2 rounded w-full" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Email</label>
+                    <input name="customer_email" type="email" value={newReservation.customer_email} onChange={handleReservationChange} placeholder="email@ejemplo.com" className="border px-3 py-2 rounded w-full" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Teléfono</label>
+                    <input name="customer_phone" value={newReservation.customer_phone} onChange={handleReservationChange} placeholder="Teléfono" className="border px-3 py-2 rounded w-full" />
+                  </div>
+                  <div className="flex gap-2">
+                    <div className="flex-1">
+                      <label className="block text-sm font-medium mb-1">Fecha</label>
+                      <input name="reservation_date" type="date" value={newReservation.reservation_date} onChange={handleReservationChange} className="border px-3 py-2 rounded w-full" />
+                    </div>
+                    <div className="flex-1">
+                      <label className="block text-sm font-medium mb-1">Hora</label>
+                      <input name="reservation_time" type="time" value={newReservation.reservation_time} onChange={handleReservationChange} className="border px-3 py-2 rounded w-full" />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Número de personas</label>
+                    <input name="party_size" type="number" min={1} value={newReservation.party_size} onChange={handleReservationChange} className="border px-3 py-2 rounded w-full" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Petición especial (opcional)</label>
+                    <textarea name="special_requests" value={newReservation.special_requests} onChange={handleReservationChange} className="border px-3 py-2 rounded w-full" />
+                  </div>
+                  <label className="flex items-center gap-2">
+                    <input type="checkbox" name="addToCRM" checked={newReservation.addToCRM} onChange={handleReservationChange} />
+                    Añadir cliente al CRM
+                  </label>
+                  <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded font-semibold hover:bg-blue-700">Guardar reserva</button>
+                  {formError && <div className="text-red-600 text-sm">{formError}</div>}
+                  {formSuccess && <div className="text-green-600 text-sm">{formSuccess}</div>}
+                </form>
+              </div>
             </div>
-
-            {/* Tabla de horarios existentes */}
-            <div className="bg-white overflow-hidden border border-gray-200 rounded-md mb-6">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Hora inicio
-                    </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Hora fin
-                    </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Capacidad
-                    </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Personas
-                    </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Estado
-                    </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Acciones
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {timeSlots.length > 0 ? (
-                    timeSlots.map((slot) => (
-                      <tr key={slot.id}>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {slot.start_time.substring(0, 5)}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {slot.end_time.substring(0, 5)}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {slot.max_reservations} reservas
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {slot.max_party_size} personas
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm">
-                          <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${slot.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                            {slot.is_active ? 'Activo' : 'Inactivo'}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                          <button
-                            onClick={() => prepareEditSlot(slot)}
-                            className="text-blue-600 hover:text-blue-900 mr-3"
-                          >
-                            Editar
-                          </button>
-                          <button
-                            onClick={() => deleteTimeSlot(slot.id)}
-                            className="text-red-600 hover:text-red-900"
-                          >
-                            Eliminar
-                          </button>
-                        </td>
+          )}
+          {showTimeSlotsSection && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+              <div className="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6 relative animate-fade-in overflow-y-auto max-h-[90vh]">
+                <button onClick={() => setShowTimeSlotsSection(false)} className="absolute top-2 right-2 text-gray-400 hover:text-gray-700"><X className="h-5 w-5" /></button>
+                <h2 className="text-xl font-bold mb-2">Gestión de horarios</h2>
+                {/* Selector de día */}
+                <div className="mb-6">
+                  <label htmlFor="day-selector" className="block text-sm font-medium text-gray-700">Seleccionar día</label>
+                  <select
+                    id="day-selector"
+                    value={selectedDay}
+                    onChange={(e) => setSelectedDay(parseInt(e.target.value))}
+                    className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+                  >
+                    {dayNames.map((dayName, index) => (
+                      <option key={index} value={index}>{dayName}</option>
+                    ))}
+                  </select>
+                </div>
+                {/* Tabla de horarios existentes */}
+                <div className="bg-white overflow-hidden border border-gray-200 rounded-md mb-6">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Hora inicio</th>
+                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Hora fin</th>
+                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Capacidad</th>
+                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Personas</th>
+                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Estado</th>
+                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Acciones</th>
                       </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan={6} className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
-                        No hay horarios configurados para {dayNames[selectedDay]}
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-
-            {/* Formulario para editar time slot */}
-            {isEditingSlot && editingSlot && (
-              <div className="bg-blue-50 p-4 rounded-md mb-6">
-                <h4 className="font-medium text-blue-900 mb-3">Editar horario</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label htmlFor="edit-start-time" className="block text-sm font-medium text-gray-700">
-                      Hora de inicio
-                    </label>
-                    <input
-                      type="time"
-                      id="edit-start-time"
-                      name="start_time"
-                      value={editingSlot.start_time}
-                      onChange={handleEditSlotChange}
-                      className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                    />
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {timeSlots.length > 0 ? (
+                        timeSlots.map((slot) => (
+                          <tr key={slot.id}>
+                            <td className="px-4 py-2">{slot.start_time?.substring(0,5)}</td>
+                            <td className="px-4 py-2">{slot.end_time?.substring(0,5)}</td>
+                            <td className="px-4 py-2">{slot.max_reservations} reservas</td>
+                            <td className="px-4 py-2">{slot.max_party_size} personas</td>
+                            <td className="px-4 py-2">
+                              <label className="inline-flex items-center cursor-pointer">
+                                <input
+                                  type="checkbox"
+                                  checked={slot.is_active}
+                                  onChange={async (e) => {
+                                    const newValue = e.target.checked;
+                                    await supabase
+                                      .from("reservation_time_slots")
+                                      .update({ is_active: newValue })
+                                      .eq("id", slot.id)
+                                      .eq("restaurant_id", restaurant?.id);
+                                    loadTimeSlots();
+                                  }}
+                                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                />
+                                <span className="ml-2 text-sm text-gray-700">{slot.is_active ? 'Activo' : 'Inactivo'}</span>
+                              </label>
+                            </td>
+                            <td className="px-4 py-2">
+                              <button onClick={() => prepareEditSlot(slot)} className="text-blue-600 hover:text-blue-900 mr-3 text-xs">Editar</button>
+                              <button onClick={() => deleteTimeSlot(slot.id)} className="text-red-600 hover:text-red-900 text-xs">Eliminar</button>
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan={6} className="px-4 py-2 text-center text-gray-500">No hay horarios configurados para {dayNames[selectedDay]}</td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+                {/* Formulario para añadir nuevo time slot */}
+                <div className="bg-gray-50 p-4 rounded-md">
+                  <h4 className="text-lg font-medium mb-3">Añadir nuevo horario para {dayNames[selectedDay]}</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Hora de inicio</label>
+                      <input type="time" name="start_time" value={newSlot.start_time} onChange={handleSlotChange} className="border px-3 py-2 rounded w-full" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Hora de fin</label>
+                      <input type="time" name="end_time" value={newSlot.end_time} onChange={handleSlotChange} className="border px-3 py-2 rounded w-full" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Capacidad (número de reservas)</label>
+                      <input type="number" name="max_reservations" min={1} value={newSlot.max_reservations} onChange={handleSlotChange} className="border px-3 py-2 rounded w-full" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Tamaño máximo de grupo</label>
+                      <input type="number" name="max_party_size" min={1} value={newSlot.max_party_size} onChange={handleSlotChange} className="border px-3 py-2 rounded w-full" />
+                    </div>
                   </div>
-                  
-                  <div>
-                    <label htmlFor="edit-end-time" className="block text-sm font-medium text-gray-700">
-                      Hora de fin
+                  <div className="mt-3">
+                    <label className="inline-flex items-center">
+                      <input type="checkbox" name="is_active" checked={newSlot.is_active} onChange={handleSlotChange} className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+                      <span className="ml-2 text-sm text-gray-700">Activo</span>
                     </label>
-                    <input
-                      type="time"
-                      id="edit-end-time"
-                      name="end_time"
-                      value={editingSlot.end_time}
-                      onChange={handleEditSlotChange}
-                      className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                    />
                   </div>
-                  
-                  <div>
-                    <label htmlFor="edit-max-reservations" className="block text-sm font-medium text-gray-700">
-                      Capacidad (número de reservas)
-                    </label>
-                    <input
-                      type="number"
-                      id="edit-max-reservations"
-                      name="max_reservations"
-                      min="1"
-                      value={editingSlot.max_reservations}
-                      onChange={handleEditSlotChange}
-                      className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label htmlFor="edit-max-party-size" className="block text-sm font-medium text-gray-700">
-                      Tamaño máximo de grupo
-                    </label>
-                    <input
-                      type="number"
-                      id="edit-max-party-size"
-                      name="max_party_size"
-                      min="1"
-                      value={editingSlot.max_party_size}
-                      onChange={handleEditSlotChange}
-                      className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                    />
+                  <div className="mt-4">
+                    <button type="button" onClick={addTimeSlot} className="w-full bg-blue-600 text-white py-2 rounded font-semibold hover:bg-blue-700">Añadir horario</button>
                   </div>
                 </div>
-                
-                <div className="mt-3">
-                  <label className="inline-flex items-center">
-                    <input
-                      type="checkbox"
-                      name="is_active"
-                      checked={editingSlot.is_active}
-                      onChange={handleEditSlotChange}
-                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                    />
-                    <span className="ml-2 text-sm text-gray-700">Activo</span>
-                  </label>
-                </div>
-                
-                <div className="mt-4 flex justify-end">
-                  <button
-                    type="button"
-                    onClick={cancelEditSlot}
-                    className="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 mr-3"
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    type="button"
-                    onClick={saveSlotChanges}
-                    className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                  >
-                    Guardar cambios
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* Formulario para añadir nuevo time slot */}
-            <div className="bg-gray-50 p-4 rounded-md">
-              <h4 className="font-medium text-gray-900 mb-3">Añadir nuevo horario para {dayNames[selectedDay]}</h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label htmlFor="start-time" className="block text-sm font-medium text-gray-700">
-                    Hora de inicio
-                  </label>
-                  <input
-                    type="time"
-                    id="start-time"
-                    name="start_time"
-                    value={newSlot.start_time}
-                    onChange={handleSlotChange}
-                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                  />
-                </div>
-                
-                <div>
-                  <label htmlFor="end-time" className="block text-sm font-medium text-gray-700">
-                    Hora de fin
-                  </label>
-                  <input
-                    type="time"
-                    id="end-time"
-                    name="end_time"
-                    value={newSlot.end_time}
-                    onChange={handleSlotChange}
-                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                  />
-                </div>
-                
-                <div>
-                  <label htmlFor="max-reservations" className="block text-sm font-medium text-gray-700">
-                    Capacidad (número de reservas)
-                  </label>
-                  <input
-                    type="number"
-                    id="max-reservations"
-                    name="max_reservations"
-                    min="1"
-                    value={newSlot.max_reservations}
-                    onChange={handleSlotChange}
-                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                  />
-                </div>
-                
-                <div>
-                  <label htmlFor="max-party-size" className="block text-sm font-medium text-gray-700">
-                    Tamaño máximo de grupo
-                  </label>
-                  <input
-                    type="number"
-                    id="max-party-size"
-                    name="max_party_size"
-                    min="1"
-                    value={newSlot.max_party_size}
-                    onChange={handleSlotChange}
-                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                  />
-                </div>
-              </div>
-              
-              <div className="mt-3">
-                <label className="inline-flex items-center">
-                  <input
-                    type="checkbox"
-                    name="is_active"
-                    checked={newSlot.is_active}
-                    onChange={handleSlotChange}
-                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                  />
-                  <span className="ml-2 text-sm text-gray-700">Activo</span>
-                </label>
-              </div>
-              
-              <div className="mt-4">
-                <button
-                  type="button"
-                  onClick={addTimeSlot}
-                  className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                >
-                  Añadir horario
-                </button>
+                {/* Formulario para editar slot (opcional, si está activo) */}
+                {isEditingSlot && editingSlot && (
+                  <div className="bg-blue-50 p-4 rounded-md mt-6">
+                    <h4 className="font-medium text-blue-900 mb-3">Editar horario</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium mb-1">Hora de inicio</label>
+                        <input type="time" name="start_time" value={editingSlot.start_time} onChange={handleEditSlotChange} className="border px-3 py-2 rounded w-full" />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium mb-1">Hora de fin</label>
+                        <input type="time" name="end_time" value={editingSlot.end_time} onChange={handleEditSlotChange} className="border px-3 py-2 rounded w-full" />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium mb-1">Capacidad (número de reservas)</label>
+                        <input type="number" name="max_reservations" min={1} value={editingSlot.max_reservations} onChange={handleEditSlotChange} className="border px-3 py-2 rounded w-full" />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium mb-1">Tamaño máximo de grupo</label>
+                        <input type="number" name="max_party_size" min={1} value={editingSlot.max_party_size} onChange={handleEditSlotChange} className="border px-3 py-2 rounded w-full" />
+                      </div>
+                    </div>
+                    <div className="mt-3">
+                      <label className="inline-flex items-center">
+                        <input type="checkbox" name="is_active" checked={editingSlot.is_active} onChange={handleEditSlotChange} className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+                        <span className="ml-2 text-sm text-gray-700">Activo</span>
+                      </label>
+                    </div>
+                    <div className="mt-4 flex justify-end gap-2">
+                      <button type="button" onClick={cancelEditSlot} className="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50">Cancelar</button>
+                      <button type="button" onClick={saveSlotChanges} className="py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">Guardar cambios</button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
-          </div>
-        </div>
-      )}
+          )}
 
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-        <h1 className="text-2xl font-bold">Reservas</h1>
-
-        <div className="flex flex-wrap items-center gap-4">
-          {/* Filtro por estado */}
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="border rounded-lg px-3 py-2 focus:ring focus:outline-none focus:ring-blue-300 text-sm"
-          >
-            <option value="all">Todos los estados</option>
-            <option value="pending">Pendientes</option>
-            <option value="confirmed">Confirmadas</option>
-            <option value="cancelled">Canceladas</option>
-            <option value="completed">Completadas</option>
-          </select>
-
-          {/* Filtro por fecha */}
-          <input
-            type="date"
-            value={dateFilter}
-            onChange={(e) => setDateFilter(e.target.value)}
-            className="border rounded-lg px-3 py-2 focus:ring focus:outline-none focus:ring-blue-300 text-sm"
-          />
-
-          {/* Botón para limpiar filtros */}
-          <button
-            onClick={() => {
-              setStatusFilter("all");
-              setDateFilter("");
-            }}
-            className="px-3 py-2 text-xs text-blue-600 hover:text-blue-800"
-          >
-            Limpiar filtros
-          </button>
-        </div>
-      </div>
-
-      {isLoading ? (
-        <div className="flex justify-center items-center py-20">
-          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500"></div>
-        </div>
-      ) : reservations.length === 0 ? (
-        <div className="bg-white rounded-xl shadow-sm p-8 text-center">
-          <svg
-            className="w-12 h-12 mx-auto text-gray-400 mb-4"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={1.5}
-              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-            />
-          </svg>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">
-            No hay reservas
-          </h3>
-          <p className="text-gray-500">
-            {statusFilter !== "all" || dateFilter
-              ? "No hay reservas que coincidan con los filtros seleccionados."
-              : "Aún no tienes reservas. Cuando los clientes hagan reservas aparecerán aquí."}
-          </p>
-        </div>
-      ) : (
-        <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
-                    Fecha
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
-                    Cliente
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
-                    Personas
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
-                    Estado
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
-                    Acciones
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {reservations.map((reservation) => (
-                  <tr key={reservation.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">
-                        {formatDate(reservation.reservation_date)}
-                      </div>
-                      <div className="text-xs text-gray-500">
-                        {reservation.reservation_time.substring(0, 5)}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="text-sm font-medium text-gray-900">
-                        {reservation.customer_name}
-                      </div>
-                      <div className="text-xs text-gray-500">
-                        {reservation.customer_email}
-                      </div>
-                      <div className="text-xs text-gray-500">
-                        {reservation.customer_phone}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">
-                        {reservation.party_size}{" "}
-                        {reservation.party_size === 1 ? "persona" : "personas"}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span
-                        className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full border ${getStatusColor(
-                          reservation.status
-                        )}`}
-                      >
-                        {getStatusText(reservation.status)}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      {/* Acciones dependen del estado */}
-                      {reservation.status === "pending" && (
-                        <div className="flex items-center gap-2">
-                          <button
-                            onClick={() =>
-                              handleStatusChange(reservation.id, "confirmed")
-                            }
-                            className="text-green-600 hover:text-green-900 text-xs font-medium"
-                          >
-                            Confirmar
-                          </button>
-                          <button
-                            onClick={() =>
-                              handleStatusChange(reservation.id, "cancelled")
-                            }
-                            className="text-red-600 hover:text-red-900 text-xs font-medium"
-                          >
-                            Rechazar
-                          </button>
-                        </div>
-                      )}
-                      {reservation.status === "confirmed" && (
-                        <div className="flex items-center gap-2">
-                          <button
-                            onClick={() =>
-                              handleStatusChange(reservation.id, "completed")
-                            }
-                            className="text-blue-600 hover:text-blue-900 text-xs font-medium"
-                          >
-                            Marcar completada
-                          </button>
-                          <button
-                            onClick={() =>
-                              handleStatusChange(reservation.id, "cancelled")
-                            }
-                            className="text-red-600 hover:text-red-900 text-xs font-medium"
-                          >
-                            Cancelar
-                          </button>
-                        </div>
-                      )}
-                      {(reservation.status === "cancelled" ||
-                        reservation.status === "completed") && (
-                        <div>
-                          <button
-                            onClick={() => {
-                              const confirmMessage = `¿Estás seguro de que deseas eliminar esta reserva?`;
-                              if (window.confirm(confirmMessage)) {
-                                supabase
-                                  .from("reservations")
-                                  .delete()
-                                  .eq("id", reservation.id)
-                                  .then(({ error }) => {
-                                    if (error) {
-                                      toast.error(
-                                        "Error al eliminar la reserva"
-                                      );
-                                      console.error(error);
-                                    } else {
-                                      toast.success(
-                                        "Reserva eliminada correctamente"
-                                      );
-                                      setReservations((prev) =>
-                                        prev.filter(
-                                          (r) => r.id !== reservation.id
-                                        )
-                                      );
-                                    }
-                                  });
-                              }
-                            }}
-                            className="text-gray-600 hover:text-gray-900 text-xs font-medium"
-                          >
-                            Eliminar
-                          </button>
-                        </div>
-                      )}
-                    </td>
-                  </tr>
+          {/* Calendario y Listado (igual que antes, pero sin header) */}
+          {/* Calendario */}
+          {activeTab === 'calendar' && (
+            <div className="bg-white rounded-xl shadow p-6 mb-8">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-2xl font-bold">{format(calendarDate, "MMMM yyyy", { locale: es })}</h2>
+                <div className="flex gap-2">
+                  <button onClick={() => setCalendarDate(new Date(calendarDate.getFullYear(), calendarDate.getMonth() - 1, 1))} className="px-3 py-1 border rounded">Mes anterior</button>
+                  <button onClick={() => setCalendarDate(new Date(calendarDate.getFullYear(), calendarDate.getMonth() + 1, 1))} className="px-3 py-1 border rounded">Mes siguiente</button>
+                </div>
+              </div>
+              <div className="grid grid-cols-7 gap-1 rounded-lg border bg-card p-4 shadow-sm">
+                {["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"].map((day) => (
+                  <div key={day} className="text-center font-medium text-muted-foreground">{day}</div>
                 ))}
-              </tbody>
-            </table>
-          </div>
+                {generateCalendarDays(calendarDate).map((day, i) => {
+                  const isCurrentMonth = day.getMonth() === calendarDate.getMonth();
+                  const isSelected = isSameDay(day, calendarDate);
+                  const dateKey = format(day, 'yyyy-MM-dd');
+                  const dayReservations = reservationsByDate[dateKey] || [];
+                  const hasReservations = dayReservations.length > 0;
+                  return (
+                    <div
+                      key={i}
+                      className={`relative flex h-24 flex-col rounded-md border p-1 transition-all hover:bg-accent/50 ${!isCurrentMonth ? 'opacity-40' : ''} ${isToday(day) ? 'border-primary' : ''} ${isSelected ? 'bg-accent' : ''} ${hasReservations ? 'border-rose-200' : ''}`}
+                      onClick={() => setCalendarDate(day)}
+                    >
+                      <div className="flex justify-between">
+                        <span className={`flex h-7 w-7 items-center justify-center rounded-full text-sm ${isToday(day) ? 'bg-primary text-primary-foreground font-bold' : ''}`}>{format(day, "d")}</span>
+                        {hasReservations && (
+                          <span className="flex h-5 items-center justify-center rounded-full bg-rose-100 px-1.5 text-xs font-medium text-rose-700">{dayReservations.length}</span>
+                        )}
+                      </div>
+                      {hasReservations && (
+                        <div className="mt-1 flex flex-col gap-1 overflow-hidden">
+                          {dayReservations.slice(0, 2).map((res, idx) => (
+                            <div key={idx} className={`truncate rounded px-1 py-0.5 text-xs ${res.status === 'completed' ? 'bg-green-100 text-green-800' : res.status === 'pending' ? 'bg-amber-100 text-amber-800' : res.status === 'cancelled' ? 'bg-red-100 text-red-800' : ''}`}>{res.reservation_time.substring(0,5)} - {res.customer_name}</div>
+                          ))}
+                          {dayReservations.length > 2 && (
+                            <div className="text-xs text-muted-foreground pl-1">+{dayReservations.length - 2} más</div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+              {/* Detalle de reservas del día seleccionado */}
+              <div className="mt-8">
+                <h3 className="text-lg font-semibold mb-2">Reservas para {format(calendarDate, "PPP", { locale: es })}</h3>
+                <div className="space-y-4">
+                  {(reservationsByDate[format(calendarDate, 'yyyy-MM-dd')] || []).length === 0 ? (
+                    <div className="flex h-32 items-center justify-center rounded-lg border border-dashed">
+                      <div className="flex flex-col items-center gap-1 text-center">
+                        <CalendarIcon className="h-10 w-10 text-muted-foreground" />
+                        <h3 className="font-medium">No hay reservas</h3>
+                        <p className="text-sm text-muted-foreground">No hay reservas programadas para este día.</p>
+                      </div>
+                    </div>
+                  ) : (
+                    (reservationsByDate[format(calendarDate, 'yyyy-MM-dd')] || []).map((reservation, index) => (
+                      <div key={reservation.id} className={`flex items-center justify-between rounded-lg border p-3 ${reservation.status === 'completed' ? 'border-green-200 bg-green-50' : reservation.status === 'pending' ? 'border-amber-200 bg-amber-50' : reservation.status === 'cancelled' ? 'border-red-200 bg-red-50' : ''}`}>
+                        <div className="grid gap-1">
+                          <div className="font-medium">{reservation.customer_name}</div>
+                          <div className="text-sm text-muted-foreground">{reservation.customer_email}</div>
+                          <div className="flex items-center gap-2 text-sm">
+                            <Clock className="h-3.5 w-3.5" />
+                            <span>{reservation.reservation_time.substring(0,5)}</span>
+                            <Users className="ml-2 h-3.5 w-3.5" />
+                            <span>{reservation.party_size} personas</span>
+                          </div>
+                        </div>
+                        <div>
+                          <span className={`rounded-full px-2 py-1 text-xs font-medium ${reservation.status === 'completed' ? 'bg-green-100 text-green-700' : reservation.status === 'pending' ? 'bg-amber-100 text-amber-700' : reservation.status === 'cancelled' ? 'bg-red-100 text-red-700' : ''}`}>{getStatusText(reservation.status)}</span>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Listado */}
+          {activeTab === 'list' && (
+            <div className="bg-white rounded-xl shadow p-6">
+              {/* Filtros y búsqueda */}
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+                <div className="relative w-full max-w-sm">
+                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <input
+                    type="search"
+                    placeholder="Buscar por cliente, email o teléfono..."
+                    className="pl-8 border rounded px-2 py-2 w-full"
+                    value={searchTerm}
+                    onChange={e => setSearchTerm(e.target.value)}
+                  />
+                  {searchTerm && (
+                    <button
+                      className="absolute right-0 top-0 h-9 w-9"
+                      onClick={() => setSearchTerm("")}
+                    >
+                      <X className="h-4 w-4" />
+                      <span className="sr-only">Limpiar búsqueda</span>
+                    </button>
+                  )}
+                </div>
+                <div className="flex items-center gap-2">
+                  <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="border rounded px-3 py-2 text-sm">
+                    <option value="all">Todos los estados</option>
+                    <option value="pending">Pendientes</option>
+                    <option value="confirmed">Confirmadas</option>
+                    <option value="cancelled">Canceladas</option>
+                    <option value="completed">Completadas</option>
+                  </select>
+                  <input type="date" value={dateFilter} onChange={e => setDateFilter(e.target.value)} className="border rounded px-3 py-2 text-sm" />
+                  <button onClick={() => { setStatusFilter('all'); setDateFilter(''); }} className="px-3 py-2 text-xs text-blue-600 hover:text-blue-800">Limpiar filtros</button>
+                </div>
+              </div>
+              {/* Tabla de reservas */}
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Personas</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {filteredReservations.length === 0 ? (
+                      <tr>
+                        <td colSpan={5} className="h-24 text-center">No se encontraron reservas.</td>
+                      </tr>
+                    ) : (
+                      filteredReservations.map((reservation) => (
+                        <tr key={reservation.id} className="hover:bg-gray-50">
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm font-medium text-gray-900">{formatDate(reservation.reservation_date)}</div>
+                            <div className="text-xs text-gray-500">{reservation.reservation_time.substring(0, 5)}</div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="text-sm font-medium text-gray-900">{reservation.customer_name}</div>
+                            <div className="text-xs text-gray-500">{reservation.customer_email}</div>
+                            <div className="text-xs text-gray-500">{reservation.customer_phone}</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900">{reservation.party_size} {reservation.party_size === 1 ? "persona" : "personas"}</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full border ${getStatusColor(reservation.status)}`}>{getStatusText(reservation.status)}</span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            {/* Acciones dependen del estado */}
+                            {reservation.status === "pending" && (
+                              <div className="flex items-center gap-2">
+                                <button
+                                  onClick={() =>
+                                    handleStatusChange(reservation.id, "confirmed")
+                                  }
+                                  className="text-green-600 hover:text-green-900 text-xs font-medium"
+                                >
+                                  Confirmar
+                                </button>
+                                <button
+                                  onClick={() =>
+                                    handleStatusChange(reservation.id, "cancelled")
+                                  }
+                                  className="text-red-600 hover:text-red-900 text-xs font-medium"
+                                >
+                                  Rechazar
+                                </button>
+                              </div>
+                            )}
+                            {reservation.status === "confirmed" && (
+                              <div className="flex items-center gap-2">
+                                <button
+                                  onClick={() =>
+                                    handleStatusChange(reservation.id, "completed")
+                                  }
+                                  className="text-blue-600 hover:text-blue-900 text-xs font-medium"
+                                >
+                                  Marcar completada
+                                </button>
+                                <button
+                                  onClick={() =>
+                                    handleStatusChange(reservation.id, "cancelled")
+                                  }
+                                  className="text-red-600 hover:text-red-900 text-xs font-medium"
+                                >
+                                  Cancelar
+                                </button>
+                              </div>
+                            )}
+                            {(reservation.status === "cancelled" ||
+                              reservation.status === "completed") && (
+                              <div>
+                                <button
+                                  onClick={() => {
+                                    const confirmMessage = `¿Estás seguro de que deseas eliminar esta reserva?`;
+                                    if (window.confirm(confirmMessage)) {
+                                      supabase
+                                        .from("reservations")
+                                        .delete()
+                                        .eq("id", reservation.id)
+                                        .then(({ error }) => {
+                                          if (error) {
+                                            toast.error(
+                                              "Error al eliminar la reserva"
+                                            );
+                                            console.error(error);
+                                          } else {
+                                            toast.success(
+                                              "Reserva eliminada correctamente"
+                                            );
+                                            setReservations((prev) =>
+                                              prev.filter(
+                                                (r) => r.id !== reservation.id
+                                              )
+                                            );
+                                          }
+                                        });
+                                    }
+                                  }}
+                                  className="text-gray-600 hover:text-gray-900 text-xs font-medium"
+                                >
+                                  Eliminar
+                                </button>
+                              </div>
+                            )}
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
         </div>
-      )}
+      </main>
     </div>
   );
 
