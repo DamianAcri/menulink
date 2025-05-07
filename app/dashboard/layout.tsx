@@ -6,6 +6,7 @@ import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import type { User } from '@supabase/supabase-js';
 import i18n from '@/lib/i18n';
+import { Toaster, toast } from "sonner";
 
 export default function DashboardLayout({
   children,
@@ -86,6 +87,60 @@ export default function DashboardLayout({
   const isActive = (path: string) => {
     return pathname === path;
   };
+
+  useEffect(() => {
+    // Suscripción global a nuevas reservas para mostrar toast
+    let channel: any = null;
+    let restaurantId: string | null = null;
+    let ignoreFirst = true;
+
+    async function subscribeToReservations() {
+      // Obtener el restaurante del usuario
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+      const { data: restaurant } = await supabase
+        .from("restaurants")
+        .select("id, name")
+        .eq("user_id", session.user.id)
+        .single();
+      if (!restaurant) return;
+      restaurantId = restaurant.id;
+      // Suscribirse a inserciones en reservations de este restaurante
+      channel = supabase
+        .channel("dashboard-global-reservations")
+        .on(
+          "postgres_changes",
+          {
+            event: "INSERT",
+            schema: "public",
+            table: "reservations",
+            filter: `restaurant_id=eq.${restaurant.id}`,
+          },
+          (payload) => {
+            // Evitar mostrar el toast por reservas ya existentes al conectar
+            if (ignoreFirst) {
+              ignoreFirst = false;
+              return;
+            }
+            const r = payload.new;
+            toast.success(
+              <div>
+                <b>¡Nueva reserva recibida!</b>
+                <div>Cliente: {r.customer_name}</div>
+                <div>Fecha: {r.reservation_date} {r.reservation_time?.slice(0,5)}</div>
+                <div>Personas: {r.party_size}</div>
+              </div>,
+              { position: "bottom-right", duration: 7000 }
+            );
+          }
+        )
+        .subscribe();
+    }
+    subscribeToReservations();
+    return () => {
+      if (channel) supabase.removeChannel(channel);
+    };
+  }, []);
 
   if (loading) {
     return (
@@ -192,6 +247,7 @@ export default function DashboardLayout({
         </div>
         <main className="flex-1 relative overflow-y-auto focus:outline-none p-4 md:p-6">
           {children}
+          <Toaster position="bottom-right" richColors />
         </main>
       </div>
     </div>

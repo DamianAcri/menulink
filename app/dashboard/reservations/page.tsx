@@ -245,13 +245,9 @@ export default function ReservationsPage() {
       const { data, error } = await query;
       console.log('Reservas devueltas por Supabase:', data);
       if (error) throw error;
-      // Ordenar por fecha y hora
+      // Ordenar por fecha de creación descendente (más nuevas arriba)
       const sortedReservations = (data || []).sort((a, b) => {
-        const dateCompare =
-          new Date(a.reservation_date).getTime() -
-          new Date(b.reservation_date).getTime();
-        if (dateCompare !== 0) return dateCompare;
-        return a.reservation_time.localeCompare(b.reservation_time);
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
       });
       setReservations(sortedReservations);
     } catch (error: unknown) {
