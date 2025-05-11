@@ -14,7 +14,7 @@ interface ScheduledEmail {
   reservation_id: string;
   restaurant_id: string;
   customer_email: string;
-  type: 'thank_you' | 'review_request';
+  type: 'thank_you' | 'review_request' | 'reminder';
   scheduled_for: string;
   reservations: {
     customer_name: string;
@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
         )
       `)
       .eq('status', 'scheduled')
-      .eq('type', 'review_request')
+      .in('type', ['review_request', 'reminder'])
       .lte('scheduled_for', now.toISOString())
       .limit(50); // Procesar en lotes para evitar problemas de rendimiento
 
@@ -103,46 +103,67 @@ export async function POST(request: NextRequest) {
           continue;
         }
 
-        const restaurantName = email.reservations.restaurants.name;
-        const restaurantSlug = email.reservations.restaurants.slug;
-        const customerName = email.reservations.customer_name;
-        const customerEmail = email.customer_email;
-        const reviewLink = email.reservations.restaurants.google_my_business_link || null;
+        if (email.type === 'reminder') {
+          // Email de recordatorio (cliente o restaurante)
+          const { data: reservationData, error: resError } = await supabase
+            .from('reservations')
+            .select('*, restaurants(name)')
+            .eq('id', email.reservation_id)
+            .single();
+          if (resError || !reservationData) throw new Error('No se pudo obtener la reserva');
+          const restaurantName = reservationData.restaurants?.name || 'Restaurante';
+          const reservationDate = reservationData.reservation_date;
+          const reservationTime = reservationData.reservation_time;
+          const toEmail = email.customer_email;
+          // Enviar email de recordatorio
+          await EmailService.sendReminderEmail({
+            toEmail,
+            restaurantName,
+            reservationDate,
+            reservationTime
+          });
+        } else {
+          const restaurantName = email.reservations.restaurants.name;
+          const restaurantSlug = email.reservations.restaurants.slug;
+          const customerName = email.reservations.customer_name;
+          const customerEmail = email.customer_email;
+          const reviewLink = email.reservations.restaurants.google_my_business_link || null;
 
-        // Enviar correo de solicitud de reseña usando nuestro servicio unificado
-        const sendResult = await EmailService.sendReviewRequestEmail(
-          customerName,
-          customerEmail,
-          restaurantName,
-          restaurantSlug,
-          reviewLink
-        );
+          // Enviar correo de solicitud de reseña usando nuestro servicio unificado
+          const sendResult = await EmailService.sendReviewRequestEmail(
+            customerName,
+            customerEmail,
+            restaurantName,
+            restaurantSlug,
+            reviewLink
+          );
 
-        if (!sendResult.success) {
-          throw new Error((sendResult.error as { message?: string })?.message || 'Error al enviar el correo');
-        }
+          if (!sendResult.success) {
+            throw new Error((sendResult.error as { message?: string })?.message || 'Error al enviar el correo');
+          }
 
-        // Actualizar el estado en la base de datos
-        await supabase
-          .from('email_logs')
-          .update({ 
+          // Actualizar el estado en la base de datos
+          await supabase
+            .from('email_logs')
+            .update({ 
+              status: 'sent',
+              sent_at: new Date().toISOString() 
+            })
+            .eq('id', email.id);
+
+          results.sent++;
+          
+          // Obtener el ID del mensaje de manera segura
+          const messageId = sendResult.data?.id || 
+                          sendResult.data?.messageId || 
+                          'unknown';
+                          
+          results.details.push({
+            id: email.id,
             status: 'sent',
-            sent_at: new Date().toISOString() 
-          })
-          .eq('id', email.id);
-
-        results.sent++;
-        
-        // Obtener el ID del mensaje de manera segura
-        const messageId = sendResult.data?.id || 
-                         sendResult.data?.messageId || 
-                         'unknown';
-                         
-        results.details.push({
-          id: email.id,
-          status: 'sent',
-          messageId
-        });
+            messageId
+          });
+        }
 
       } catch (emailError: unknown) {
         console.error('Error al procesar correo programado:', emailError);

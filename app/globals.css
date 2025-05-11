@@ -1,8 +1,26 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #fff;
+  --foreground: #111827;
+  --secondary-text: #6B7280;
+  --border: #E5E7EB;
+  --primary: #2563EB;
+  --primary-hover: #1D4ED8;
+  --card-bg: #fff;
+  --card-bg-alt: #F3F4F6;
+  --card-bg-soft: #F9FAFB;
+  --shadow: 0 1px 2px 0 rgb(16 24 40 / 0.04);
+  --input-bg: #fff;
+  --input-border: #E5E7EB;
+  --input-focus: #2563EB;
+  --button-bg: #2563EB;
+  --button-text: #fff;
+  --button-hover-bg: #1D4ED8;
+  --button-outline-border: #D1D5DB;
+  --button-outline-text: #111827;
+  --button-outline-hover-bg: #F3F4F6;
+  --icon-color: #2563EB;
 }
 
 @theme inline {
@@ -12,17 +30,81 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Inter', 'Satoshi', Arial, Helvetica, sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  box-shadow: var(--shadow);
+  padding: 1.5rem;
+}
+
+input, textarea, select {
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  border-radius: 0.5rem;
+  color: var(--foreground);
+  font-size: 1rem;
+  transition: border 0.2s;
+}
+input:focus, textarea:focus, select:focus {
+  border-color: var(--input-focus);
+  outline: none;
+}
+
+.button-primary {
+  background: var(--button-bg);
+  color: var(--button-text);
+  border-radius: 0.375rem;
+  font-weight: 500;
+  padding: 0.5rem 1.25rem;
+  border: none;
+  transition: background 0.2s;
+}
+.button-primary:hover {
+  background: var(--button-hover-bg);
+}
+
+.button-outline {
+  background: #fff;
+  color: var(--button-outline-text);
+  border: 1px solid var(--button-outline-border);
+  border-radius: 0.375rem;
+  font-weight: 500;
+  padding: 0.5rem 1.25rem;
+  transition: background 0.2s, border 0.2s;
+}
+.button-outline:hover {
+  background: var(--button-outline-hover-bg);
+  border-color: var(--primary);
+}
+
+.text-secondary {
+  color: var(--secondary-text);
+}
+
+.bg-soft {
+  background: var(--card-bg-soft);
+}
+
+.border-divider {
+  border-color: var(--border);
+}
+
+.icon-primary {
+  color: var(--icon-color);
 }
 
 /* Animaciones para el menú digital */

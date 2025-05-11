@@ -632,12 +632,12 @@ export default function ReservationsPage() {
           {/* Tabs y acciones arriba */}
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
             <div className="flex gap-2 border-b w-full md:w-auto">
-              <button onClick={() => setActiveTab('calendar')} className={`px-4 py-2 font-medium ${activeTab === 'calendar' ? 'border-b-2 border-primary text-primary' : 'text-gray-500'}`}>Calendario</button>
-              <button onClick={() => setActiveTab('list')} className={`px-4 py-2 font-medium ${activeTab === 'list' ? 'border-b-2 border-primary text-primary' : 'text-gray-500'}`}>Listado</button>
+              <button onClick={() => setActiveTab('calendar')} className={`button-outline font-medium ${activeTab === 'calendar' ? 'border-b-2 border-primary text-primary' : ''}`}>Calendario</button>
+              <button onClick={() => setActiveTab('list')} className={`button-outline font-medium ${activeTab === 'list' ? 'border-b-2 border-primary text-primary' : ''}`}>Listado</button>
             </div>
             <div className="flex gap-2 w-full md:w-auto justify-end">
-              <button onClick={() => setShowTimeSlotsSection(true)} className="flex items-center gap-1 px-4 py-2 border rounded text-sm font-medium bg-white hover:bg-gray-50"><Clock className="h-4 w-4" />Gestionar horarios</button>
-              <button onClick={() => setShowNewReservationDialog(true)} className="flex items-center gap-1 px-4 py-2 border rounded text-sm font-medium bg-blue-600 text-white hover:bg-blue-700"><Plus className="h-4 w-4" />Nueva reserva</button>
+              <button onClick={() => setShowTimeSlotsSection(true)} className="button-outline flex items-center gap-1"><Clock className="h-4 w-4" />Gestionar horarios</button>
+              <button onClick={() => setShowNewReservationDialog(true)} className="button-primary flex items-center gap-1"><Plus className="h-4 w-4" />Nueva reserva</button>
             </div>
           </div>
 
@@ -645,7 +645,7 @@ export default function ReservationsPage() {
           {showNewReservationDialog && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
               <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative animate-fade-in">
-                <button onClick={() => setShowNewReservationDialog(false)} className="absolute top-2 right-2 text-gray-400 hover:text-gray-700"><X className="h-5 w-5" /></button>
+                <button onClick={() => setShowNewReservationDialog(false)} className="button-outline absolute top-2 right-2"><X className="h-5 w-5" /></button>
                 <h2 className="text-xl font-bold mb-2">Nueva Reserva</h2>
                 <form onSubmit={handleCreateReservation} className="space-y-4">
                   <div>
@@ -682,7 +682,7 @@ export default function ReservationsPage() {
                     <input type="checkbox" name="addToCRM" checked={newReservation.addToCRM} onChange={handleReservationChange} />
                     Añadir cliente al CRM
                   </label>
-                  <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded font-semibold hover:bg-blue-700">Guardar reserva</button>
+                  <button type="submit" className="button-primary w-full">Guardar reserva</button>
                   {formError && <div className="text-red-600 text-sm">{formError}</div>}
                   {formSuccess && <div className="text-green-600 text-sm">{formSuccess}</div>}
                 </form>
@@ -692,7 +692,7 @@ export default function ReservationsPage() {
           {showTimeSlotsSection && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
               <div className="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6 relative animate-fade-in overflow-y-auto max-h-[90vh]">
-                <button onClick={() => setShowTimeSlotsSection(false)} className="absolute top-2 right-2 text-gray-400 hover:text-gray-700"><X className="h-5 w-5" /></button>
+                <button onClick={() => setShowTimeSlotsSection(false)} className="button-outline absolute top-2 right-2"><X className="h-5 w-5" /></button>
                 <h2 className="text-xl font-bold mb-2">Gestión de horarios</h2>
                 {/* Selector de día */}
                 <div className="mb-6">
@@ -790,7 +790,7 @@ export default function ReservationsPage() {
                     </label>
                   </div>
                   <div className="mt-4">
-                    <button type="button" onClick={addTimeSlot} className="w-full bg-blue-600 text-white py-2 rounded font-semibold hover:bg-blue-700">Añadir horario</button>
+                    <button type="button" onClick={addTimeSlot} className="button-primary w-full">Añadir horario</button>
                   </div>
                 </div>
                 {/* Formulario para editar slot (opcional, si está activo) */}
@@ -822,8 +822,8 @@ export default function ReservationsPage() {
                       </label>
                     </div>
                     <div className="mt-4 flex justify-end gap-2">
-                      <button type="button" onClick={cancelEditSlot} className="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50">Cancelar</button>
-                      <button type="button" onClick={saveSlotChanges} className="py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">Guardar cambios</button>
+                      <button type="button" onClick={cancelEditSlot} className="button-outline">Cancelar</button>
+                      <button type="button" onClick={saveSlotChanges} className="button-primary">Guardar cambios</button>
                     </div>
                   </div>
                 )}
@@ -838,8 +838,8 @@ export default function ReservationsPage() {
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-2xl font-bold">{format(calendarDate, "MMMM yyyy", { locale: es })}</h2>
                 <div className="flex gap-2">
-                  <button onClick={() => setCalendarDate(new Date(calendarDate.getFullYear(), calendarDate.getMonth() - 1, 1))} className="px-3 py-1 border rounded">Mes anterior</button>
-                  <button onClick={() => setCalendarDate(new Date(calendarDate.getFullYear(), calendarDate.getMonth() + 1, 1))} className="px-3 py-1 border rounded">Mes siguiente</button>
+                  <button onClick={() => setCalendarDate(new Date(calendarDate.getFullYear(), calendarDate.getMonth() - 1, 1))} className="button-outline">Mes anterior</button>
+                  <button onClick={() => setCalendarDate(new Date(calendarDate.getFullYear(), calendarDate.getMonth() + 1, 1))} className="button-outline">Mes siguiente</button>
                 </div>
               </div>
               <div className="grid grid-cols-7 gap-1 rounded-lg border bg-card p-4 shadow-sm">

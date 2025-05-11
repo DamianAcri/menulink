@@ -72,17 +72,17 @@ interface ButtonClick {
 
 // Stats components
 const StatsCard = ({ title, value, icon }: { title: string; value: React.ReactNode; icon: React.ReactNode }) => (
-  <div className="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg">
+  <div className="bg-white overflow-hidden shadow rounded-lg">
     <div className="p-5">
       <div className="flex items-center">
-        <div className="flex-shrink-0 text-blue-500 dark:text-blue-400">
+        <div className="flex-shrink-0 text-blue-500">
           {icon}
         </div>
         <div className="ml-5 w-0 flex-1">
           <dl>
-            <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">{title}</dt>
+            <dt className="text-sm font-medium text-gray-500 truncate">{title}</dt>
             <dd>
-              <div className="text-lg font-medium text-gray-900 dark:text-white">{value}</div>
+              <div className="text-lg font-medium text-gray-900">{value}</div>
             </dd>
           </dl>
         </div>
@@ -972,13 +972,13 @@ export default function StatsPage() {
   return (
     <div className="py-6">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
-        <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">Estadísticas</h1>
+        <h1 className="text-2xl font-semibold text-gray-900">Estadísticas</h1>
       </div>
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
         <div className="py-4">
           {/* Tabs */}
-          <div className="mb-6 border-b border-gray-200 dark:border-gray-700">
+          <div className="mb-6 border-b border-gray-200">
             <ul className="flex flex-wrap -mb-px">
               <li className="mr-2">
                 <button
@@ -986,7 +986,7 @@ export default function StatsPage() {
                   className={`inline-flex items-center py-2 px-4 text-sm font-medium ${
                     activeTab === 'views'
                       ? 'text-blue-600 border-b-2 border-blue-600'
-                      : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
+                      : 'text-gray-500 hover:text-gray-700'
                   }`}
                 >
                   <svg className="mr-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -1002,7 +1002,7 @@ export default function StatsPage() {
                   className={`inline-flex items-center py-2 px-4 text-sm font-medium ${
                     activeTab === 'reservations'
                       ? 'text-blue-600 border-b-2 border-blue-600'
-                      : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
+                      : 'text-gray-500 hover:text-gray-700'
                   }`}
                 >
                   <svg className="mr-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -1017,7 +1017,7 @@ export default function StatsPage() {
           {/* Time range selector */}
           <div className="mb-6">
             <div className="flex items-center justify-between">
-              <h2 className="text-xl font-medium text-gray-900 dark:text-white mb-4">Filtrar por periodo</h2>
+              <h2 className="text-xl font-medium text-gray-900 mb-4">Filtrar por periodo</h2>
               <div className="inline-flex rounded-md shadow-sm">
                 {(['day', 'week', 'month', 'year'] as const).map(range => (
                   <button
@@ -1027,8 +1027,8 @@ export default function StatsPage() {
                     className={`px-4 py-2 text-sm font-medium ${
                       timeRange === range
                         ? 'bg-blue-600 text-white'
-                        : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600'
-                    } border border-gray-300 dark:border-gray-600 ${
+                        : 'bg-white text-gray-700 hover:bg-gray-50'
+                    } border border-gray-300 ${
                       range === 'day' ? 'rounded-l-md' : range === 'year' ? 'rounded-r-md' : ''
                     }`}
                   >
@@ -1057,13 +1057,13 @@ export default function StatsPage() {
               {timedOut && (
                 <div className="flex flex-col items-center justify-center h-64">
                   <div className="mb-2 text-2xl">⚠️</div>
-                  <div className="text-gray-700 dark:text-gray-200 mb-2">La carga está tardando demasiado.</div>
+                  <div className="text-gray-700 mb-2">La carga está tardando demasiado.</div>
                   <button onClick={() => window.location.reload()} className="px-4 py-2 bg-blue-600 text-white rounded shadow">Reintentar</button>
                 </div>
               )}
 
               {!loading && pageViews.length === 0 && (
-                <div className="bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-700 rounded-md p-4 my-6">
+                <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4 my-6">
                   <div className="flex">
                     <div className="flex-shrink-0">
                       <svg className="h-5 w-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
@@ -1071,7 +1071,7 @@ export default function StatsPage() {
                       </svg>
                     </div>
                     <div className="ml-3">
-                      <p className="text-sm text-yellow-700 dark:text-yellow-200">
+                      <p className="text-sm text-yellow-700">
                         No hay datos de visitas para el periodo seleccionado.
                       </p>
                     </div>
@@ -1110,19 +1110,19 @@ export default function StatsPage() {
                   </div>
 
                   {/* Tasa de conversión y comparativa */}
-                  <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-8">
-                    <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Tasa de conversión</h3>
+                  <div className="bg-white rounded-lg shadow p-6 mb-8">
+                    <h3 className="text-lg font-medium text-gray-900 mb-4">Tasa de conversión</h3>
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
-                      <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
-                        <div className="text-sm text-gray-500 dark:text-gray-400">Tasa actual</div>
-                        <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">{conversionStats.rate.toFixed(1)}%</div>
+                      <div className="bg-blue-50 p-4 rounded-lg">
+                        <div className="text-sm text-gray-500">Tasa actual</div>
+                        <div className="text-2xl font-bold text-blue-600">{conversionStats.rate.toFixed(1)}%</div>
                         <div className="mt-2 text-xs">
                           <span className={`inline-flex items-center px-2 py-0.5 rounded ${
                             conversionStats.change > 0 
-                              ? 'text-green-800 bg-green-100 dark:bg-green-900/30 dark:text-green-400' 
+                              ? 'text-green-800 bg-green-100' 
                               : conversionStats.change < 0 
-                                ? 'text-red-800 bg-red-100 dark:bg-red-900/30 dark:text-red-400' 
-                                : 'text-gray-800 bg-gray-100 dark:text-gray-200 dark:bg-gray-700'
+                                ? 'text-red-800 bg-red-100' 
+                                : 'text-gray-800 bg-gray-100'
                           }`}>
                             <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
@@ -1136,35 +1136,35 @@ export default function StatsPage() {
                             {conversionStats.change !== 0 ? `${Math.abs(conversionStats.change).toFixed(1)}%` : 'Sin cambios'}
                             {conversionStats.change !== 0 ? (conversionStats.change > 0 ? ' más' : ' menos') : ''}
                           </span>
-                          <span className="ml-1 text-gray-500 dark:text-gray-400">vs. periodo anterior</span>
+                          <span className="ml-1 text-gray-500">vs. periodo anterior</span>
                         </div>
                       </div>
-                      <div className="bg-gray-50 dark:bg-gray-700/20 p-4 rounded-lg">
-                        <div className="text-sm text-gray-500 dark:text-gray-400">Reservas</div>
-                        <div className="text-2xl font-bold text-gray-700 dark:text-gray-300">{conversionStats.reservations}</div>
+                      <div className="bg-gray-50 p-4 rounded-lg">
+                        <div className="text-sm text-gray-500">Reservas</div>
+                        <div className="text-2xl font-bold text-gray-700">{conversionStats.reservations}</div>
                       </div>
-                      <div className="bg-gray-50 dark:bg-gray-700/20 p-4 rounded-lg">
-                        <div className="text-sm text-gray-500 dark:text-gray-400">Visitas</div>
-                        <div className="text-2xl font-bold text-gray-700 dark:text-gray-300">{conversionStats.views}</div>
+                      <div className="bg-gray-50 p-4 rounded-lg">
+                        <div className="text-sm text-gray-500">Visitas</div>
+                        <div className="text-2xl font-bold text-gray-700">{conversionStats.views}</div>
                       </div>
-                      <div className="bg-gray-50 dark:bg-gray-700/20 p-4 rounded-lg">
-                        <div className="text-sm text-gray-500 dark:text-gray-400">Tasa anterior</div>
-                        <div className="text-2xl font-bold text-gray-700 dark:text-gray-300">{conversionStats.previousRate.toFixed(1)}%</div>
+                      <div className="bg-gray-50 p-4 rounded-lg">
+                        <div className="text-sm text-gray-500">Tasa anterior</div>
+                        <div className="text-2xl font-bold text-gray-700">{conversionStats.previousRate.toFixed(1)}%</div>
                       </div>
                     </div>
                   </div>
 
                   {/* Charts */}
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                      <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Visitas por día</h3>
+                    <div className="bg-white rounded-lg shadow p-6">
+                      <h3 className="text-lg font-medium text-gray-900 mb-4">Visitas por día</h3>
                       <div className="h-80">
                         <Line data={lineChartData} options={{ maintainAspectRatio: false, responsive: true }} />
                       </div>
                     </div>
 
-                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                      <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Fuentes de tráfico detalladas</h3>
+                    <div className="bg-white rounded-lg shadow p-6">
+                      <h3 className="text-lg font-medium text-gray-900 mb-4">Fuentes de tráfico detalladas</h3>
                       <div className="h-80">
                         <Pie data={trafficSourcesChartData} options={{ maintainAspectRatio: false, responsive: true }} />
                       </div>
@@ -1173,15 +1173,15 @@ export default function StatsPage() {
 
                   {/* Segmentación por dispositivo */}
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                      <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Segmentación por dispositivo</h3>
+                    <div className="bg-white rounded-lg shadow p-6">
+                      <h3 className="text-lg font-medium text-gray-900 mb-4">Segmentación por dispositivo</h3>
                       <div className="h-80">
                         <Pie data={deviceChartData} options={{ maintainAspectRatio: false, responsive: true }} />
                       </div>
                     </div>
                     
-                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                      <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Clicks por categoría del menú</h3>
+                    <div className="bg-white rounded-lg shadow p-6">
+                      <h3 className="text-lg font-medium text-gray-900 mb-4">Clicks por categoría del menú</h3>
                       <div className="h-80">
                         <Bar data={menuCategoriesChart} options={horizontalBarOptions} />
                       </div>
@@ -1189,10 +1189,10 @@ export default function StatsPage() {
                   </div>
 
                   {/* Platos más populares (gráfico de barras horizontal) */}
-                  <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-8">
-                    <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Platos más populares</h3>
+                  <div className="bg-white rounded-lg shadow p-6 mb-8">
+                    <h3 className="text-lg font-medium text-gray-900 mb-4">Platos más populares</h3>
                     {menuItemRanking.length === 0 ? (
-                      <div className="text-gray-500 dark:text-gray-400 text-center py-10">
+                      <div className="text-gray-500 text-center py-10">
                         No hay datos de platos para mostrar
                       </div>
                     ) : (
@@ -1206,10 +1206,10 @@ export default function StatsPage() {
                   </div>
 
                   {/* Botones de delivery/redes más usados (gráfico de barras horizontal) */}
-                  <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-8">
-                    <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Botones de delivery/redes más usados</h3>
+                  <div className="bg-white rounded-lg shadow p-6 mb-8">
+                    <h3 className="text-lg font-medium text-gray-900 mb-4">Botones de delivery/redes más usados</h3>
                     {buttonRanking.length === 0 ? (
-                      <div className="text-gray-500 dark:text-gray-400 text-center py-10">
+                      <div className="text-gray-500 text-center py-10">
                         No hay datos suficientes
                       </div>
                     ) : (
@@ -1223,30 +1223,30 @@ export default function StatsPage() {
                   </div>
 
                   {/* Recent visits table */}
-                  <div className="mt-8 bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg">
+                  <div className="mt-8 bg-white overflow-hidden shadow rounded-lg">
                     <div className="px-4 py-5 sm:px-6">
-                      <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-white">Visitas recientes</h3>
-                      <p className="mt-1 max-w-2xl text-sm text-gray-500 dark:text-gray-400">
+                      <h3 className="text-lg leading-6 font-medium text-gray-900">Visitas recientes</h3>
+                      <p className="mt-1 max-w-2xl text-sm text-gray-500">
                         Las últimas 10 visitas a tu página
                       </p>
                     </div>
-                    <div className="border-t border-gray-200 dark:border-gray-700">
+                    <div className="border-t border-gray-200">
                       <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                          <thead className="bg-gray-50 dark:bg-gray-700">
+                        <table className="min-w-full divide-y divide-gray-200">
+                          <thead className="bg-gray-50">
                             <tr>
-                              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Fecha
                               </th>
-                              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Referente
                               </th>
-                              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Dispositivo
                               </th>
                             </tr>
                           </thead>
-                          <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                          <tbody className="bg-white divide-y divide-gray-200">
                             {pageViews.slice(-10).reverse().map((view) => {
                               // Extract device info from user agent
                               const userAgentInfo = view.user_agent ? 
@@ -1256,13 +1256,13 @@ export default function StatsPage() {
                               
                               return (
                                 <tr key={view.id}>
-                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                     {new Date(view.viewed_at).toLocaleString()}
                                   </td>
-                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                     {view.referrer || 'Directo'}
                                   </td>
-                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                     {userAgentInfo}
                                   </td>
                                 </tr>
@@ -1296,13 +1296,13 @@ export default function StatsPage() {
               {timedOut && (
                 <div className="flex flex-col items-center justify-center h-64">
                   <div className="mb-2 text-2xl">⚠️</div>
-                  <div className="text-gray-700 dark:text-gray-200 mb-2">La carga está tardando demasiado.</div>
+                  <div className="text-gray-700 mb-2">La carga está tardando demasiado.</div>
                   <button onClick={() => window.location.reload()} className="px-4 py-2 bg-blue-600 text-white rounded shadow">Reintentar</button>
                 </div>
               )}
 
               {!reservationsLoading && reservations.length === 0 && (
-                <div className="bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-700 rounded-md p-4 my-6">
+                <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4 my-6">
                   <div className="flex">
                     <div className="flex-shrink-0">
                       <svg className="h-5 w-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
@@ -1310,7 +1310,7 @@ export default function StatsPage() {
                       </svg>
                     </div>
                     <div className="ml-3">
-                      <p className="text-sm text-yellow-700 dark:text-yellow-200">
+                      <p className="text-sm text-yellow-700">
                         No hay datos de reservas para el periodo seleccionado.
                       </p>
                     </div>
@@ -1357,15 +1357,15 @@ export default function StatsPage() {
 
                   {/* Reservations charts */}
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                      <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Reservas por día</h3>
+                    <div className="bg-white rounded-lg shadow p-6">
+                      <h3 className="text-lg font-medium text-gray-900 mb-4">Reservas por día</h3>
                       <div className="h-80">
                         <Line data={reservationsLineChartData} options={{ maintainAspectRatio: false, responsive: true }} />
                       </div>
                     </div>
 
-                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                      <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Estado de reservas</h3>
+                    <div className="bg-white rounded-lg shadow p-6">
+                      <h3 className="text-lg font-medium text-gray-900 mb-4">Estado de reservas</h3>
                       <div className="h-80">
                         <Pie data={reservationsStatusPieChartData} options={{ maintainAspectRatio: false, responsive: true }} />
                       </div>
@@ -1373,33 +1373,33 @@ export default function StatsPage() {
                   </div>
 
                   {/* Recent reservations table */}
-                  <div className="mt-8 bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg">
+                  <div className="mt-8 bg-white overflow-hidden shadow rounded-lg">
                     <div className="px-4 py-5 sm:px-6">
-                      <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-white">Reservas recientes</h3>
-                      <p className="mt-1 max-w-2xl text-sm text-gray-500 dark:text-gray-400">
+                      <h3 className="text-lg leading-6 font-medium text-gray-900">Reservas recientes</h3>
+                      <p className="mt-1 max-w-2xl text-sm text-gray-500">
                         Las últimas 10 reservas recibidas
                       </p>
                     </div>
-                    <div className="border-t border-gray-200 dark:border-gray-700">
+                    <div className="border-t border-gray-200">
                       <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                          <thead className="bg-gray-50 dark:bg-gray-700">
+                        <table className="min-w-full divide-y divide-gray-200">
+                          <thead className="bg-gray-50">
                             <tr>
-                              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Fecha
                               </th>
-                              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Cliente
                               </th>
-                              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Personas
                               </th>
-                              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Estado
                               </th>
                             </tr>
                           </thead>
-                          <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                          <tbody className="bg-white divide-y divide-gray-200">
                             {reservations.slice(-10).reverse().map((reservation) => {
                               const statusColors = {
                                 pending: 'bg-yellow-100 text-yellow-800 border-yellow-200',
@@ -1418,22 +1418,22 @@ export default function StatsPage() {
                               return (
                                 <tr key={reservation.id}>
                                   <td className="px-6 py-4 whitespace-nowrap">
-                                    <div className="text-sm text-gray-900 dark:text-gray-100">
+                                    <div className="text-sm text-gray-900">
                                       {new Date(reservation.reservation_date).toLocaleDateString()}
                                     </div>
-                                    <div className="text-xs text-gray-500 dark:text-gray-400">
+                                    <div className="text-xs text-gray-500">
                                       {reservation.reservation_time.substring(0, 5)}
                                     </div>
                                   </td>
                                   <td className="px-6 py-4 whitespace-nowrap">
-                                    <div className="text-sm text-gray-900 dark:text-gray-100">
+                                    <div className="text-sm text-gray-900">
                                       {reservation.customer_name}
                                     </div>
-                                    <div className="text-xs text-gray-500 dark:text-gray-400">
+                                    <div className="text-xs text-gray-500">
                                       {reservation.customer_email}
                                     </div>
                                   </td>
-                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                     {reservation.party_size} {reservation.party_size === 1 ? 'persona' : 'personas'}
                                   </td>
                                   <td className="px-6 py-4 whitespace-nowrap">

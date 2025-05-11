@@ -56,7 +56,7 @@
 
 ## Despliegue y Pruebas
 - [ ] Configuración para despliegue en producción
-- [ ] Pruebas de integración y usabilidad
+- [X] Pruebas de integración y usabilidad
 
 ## Optimización
 - [ ] Optimización de SEO

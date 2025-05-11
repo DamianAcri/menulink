@@ -149,3 +149,17 @@ export async function sendClientReservationStatusEmailDev(clientEmail: string, c
     `
   });
 }
+
+export async function sendReminderEmailDev(toEmail: string, restaurantName: string, reservationDate: string, reservationTime: string) {
+  return mailtrapTransport.sendMail({
+    from: 'MenuLink <mailer@menulink.app>',
+    to: toEmail,
+    subject: `¡Recordatorio! Tu reserva es en 30 minutos`,
+    html: `
+      <h2>¡Tu reserva es en 30 minutos!</h2>
+      <p>Te recordamos que tienes una reserva en <b>${restaurantName}</b> hoy a las <b>${reservationTime?.substring(0,5)}</b> (${reservationDate}).</p>
+      <p>Por favor, avísanos si no puedes asistir o si necesitas modificar tu reserva.</p>
+      <p style="color:#888;font-size:12px;">No respondas a este correo. Si tienes dudas, contacta directamente con el restaurante.</p>
+    `
+  });
+}

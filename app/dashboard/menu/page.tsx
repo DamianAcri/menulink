@@ -508,15 +508,16 @@ export default function MenuPage() {
   if (!restaurantId) {
     return (
       <div className="text-center py-12">
-        <h2 className="text-xl font-medium text-gray-900 dark:text-white">
+        <h2 className="text-xl font-medium text-gray-900">
           Necesitas completar la configuración de tu restaurante
         </h2>
-        <p className="mt-2 text-gray-600 dark:text-gray-400">
+        <p className="mt-2 text-gray-500">
           Antes de crear tu menú, completa la información básica de tu restaurante.
         </p>
         <button
           onClick={() => window.location.href = "/dashboard"}
-          className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
+          className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white"
+          style={{ backgroundColor: 'var(--accent)' }}
         >
           Ir al dashboard
         </button>
@@ -528,10 +529,10 @@ export default function MenuPage() {
     <div className="space-y-6">
       <div className="md:flex md:items-center md:justify-between">
         <div className="min-w-0 flex-1">
-          <h2 className="text-2xl font-bold leading-7 text-gray-900 dark:text-white sm:truncate sm:text-3xl">
+          <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl">
             Gestión del Menú
           </h2>
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+          <p className="mt-1 text-sm text-gray-500">
             Administra las categorías y platos de tu menú.
           </p>
         </div>
@@ -540,7 +541,8 @@ export default function MenuPage() {
             type="button"
             onClick={handleAddCategory}
             disabled={processingAction}
-            className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+            className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white"
+            style={{ backgroundColor: 'var(--accent)' }}
           >
             <svg className="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -551,14 +553,14 @@ export default function MenuPage() {
       </div>
 
       {/* Contenido principal */}
-      <div className="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-lg">
+      <div className="bg-white shadow overflow-hidden sm:rounded-lg">
         {categories.length === 0 ? (
           <div className="text-center py-12">
-            <svg className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
             </svg>
-            <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">No hay categorías</h3>
-            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+            <h3 className="mt-2 text-sm font-medium text-gray-900">No hay categorías</h3>
+            <p className="mt-1 text-sm text-gray-500">
               Comienza creando una categoría para tu menú
             </p>
             <div className="mt-6">
@@ -566,7 +568,8 @@ export default function MenuPage() {
                 type="button"
                 onClick={handleAddCategory}
                 disabled={processingAction}
-                className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+                className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white"
+                style={{ backgroundColor: 'var(--accent)' }}
               >
                 <svg className="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -578,9 +581,9 @@ export default function MenuPage() {
         ) : (
           <div className="flex flex-col md:flex-row">
             {/* Sidebar de categorías */}
-            <div className="w-full md:w-64 bg-gray-50 dark:bg-gray-700 p-4 border-b md:border-b-0 md:border-r border-gray-200 dark:border-gray-600">
+            <div className="w-full md:w-64 bg-gray-50 p-4 border-b md:border-b-0 md:border-r border-gray-200">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-medium text-gray-900 dark:text-white">Categorías</h3>
+                <h3 className="text-lg font-medium text-gray-900">Categorías</h3>
               </div>
               <nav className="space-y-1">
                 {categories.map((category) => (
@@ -588,8 +591,8 @@ export default function MenuPage() {
                     key={category.id} 
                     className={`flex justify-between items-center px-3 py-2 rounded-md cursor-pointer ${
                       activeCategory === category.id 
-                        ? 'bg-blue-50 dark:bg-blue-900 text-blue-700 dark:text-blue-200' 
-                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600'
+                        ? 'bg-blue-50 text-blue-700' 
+                        : 'text-gray-700 hover:bg-gray-100'
                     }`}
                   >
                     <div 
@@ -602,7 +605,7 @@ export default function MenuPage() {
                       <button
                         onClick={() => handleEditCategory(category)}
                         disabled={processingAction}
-                        className="p-1 rounded-md text-gray-400 dark:text-gray-500 hover:text-gray-500 dark:hover:text-gray-400 disabled:opacity-50"
+                        className="p-1 rounded-md text-gray-400 hover:text-gray-500 disabled:opacity-50"
                       >
                         <svg className="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -611,7 +614,7 @@ export default function MenuPage() {
                       <button
                         onClick={() => handleDeleteCategory(category.id)}
                         disabled={processingAction}
-                        className="p-1 rounded-md text-gray-400 dark:text-gray-500 hover:text-red-500 disabled:opacity-50"
+                        className="p-1 rounded-md text-gray-400 hover:text-red-500 disabled:opacity-50"
                       >
                         <svg className="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -626,14 +629,15 @@ export default function MenuPage() {
             {/* Contenido de platos */}
             <div className="flex-1 p-4">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                <h3 className="text-lg font-medium text-gray-900">
                   {activeCategory ? categories.find(c => c.id === activeCategory)?.name : "Platos"}
                 </h3>
                 <button
                   type="button"
                   onClick={handleAddItem}
                   disabled={processingAction || !activeCategory}
-                  className="inline-flex items-center px-3 py-1 border border-transparent text-sm rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+                  className="inline-flex items-center px-3 py-1 border border-transparent text-sm rounded-md shadow-sm text-white"
+                  style={{ backgroundColor: 'var(--accent)' }}
                 >
                   <svg className="-ml-1 mr-1 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -643,12 +647,12 @@ export default function MenuPage() {
               </div>
 
               {filteredItems.length === 0 ? (
-                <div className="text-center py-12 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg">
-                  <svg className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <div className="text-center py-12 border-2 border-dashed border-gray-300 rounded-lg">
+                  <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                  <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">No hay platos en esta categoría</h3>
-                  <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                  <h3 className="mt-2 text-sm font-medium text-gray-900">No hay platos en esta categoría</h3>
+                  <p className="mt-1 text-sm text-gray-500">
                     Comienza añadiendo platos a esta categoría
                   </p>
                   <div className="mt-6">
@@ -656,7 +660,8 @@ export default function MenuPage() {
                       type="button"
                       onClick={handleAddItem}
                       disabled={processingAction}
-                      className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+                      className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white"
+                      style={{ backgroundColor: 'var(--accent)' }}
                     >
                       <svg className="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -670,12 +675,12 @@ export default function MenuPage() {
                   {filteredItems.map((item) => (
                     <li 
                       key={item.id} 
-                      className="col-span-1 bg-white dark:bg-gray-700 rounded-lg shadow divide-y divide-gray-200 dark:divide-gray-600"
+                      className="col-span-1 bg-white rounded-lg shadow divide-y divide-gray-200"
                     >
                       <div className="w-full flex items-center justify-between p-4">
                         <div className="flex-1 truncate">
                           <div className="flex items-center space-x-3">
-                            <h3 className="text-gray-900 dark:text-white text-sm font-medium truncate">{item.name}</h3>
+                            <h3 className="text-gray-900 text-sm font-medium truncate">{item.name}</h3>
                             {item.is_featured && (
                               <span className="flex-shrink-0 inline-block px-2 py-0.5 text-xs font-medium bg-yellow-100 text-yellow-800 rounded-full">
                                 Destacado
@@ -687,10 +692,10 @@ export default function MenuPage() {
                               </span>
                             )}
                           </div>
-                          <p className="mt-1 text-gray-500 dark:text-gray-400 text-xs truncate">
+                          <p className="mt-1 text-gray-500 text-xs truncate">
                             {item.description || "Sin descripción"}
                           </p>
-                          <p className="mt-1 text-gray-900 dark:text-white font-semibold">
+                          <p className="mt-1 text-gray-900 font-semibold">
                             ${item.price.toFixed(2)}
                           </p>
                         </div>
@@ -703,21 +708,21 @@ export default function MenuPage() {
                             height={64}
                           />
                         ) : (
-                          <div className="w-16 h-16 bg-gray-300 dark:bg-gray-600 rounded-md flex items-center justify-center">
-                            <svg className="h-8 w-8 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                          <div className="w-16 h-16 bg-gray-300 rounded-md flex items-center justify-center">
+                            <svg className="h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                             </svg>
                           </div>
                         )}
                       </div>
-                      <div className="-mt-px flex divide-x divide-gray-200 dark:divide-gray-600">
+                      <div className="-mt-px flex divide-x divide-gray-200">
                         <div className="w-0 flex-1 flex">
                           <button
                             onClick={() => handleEditItem(item)}
                             disabled={processingAction}
-                            className="relative -mr-px w-0 flex-1 inline-flex items-center justify-center py-2 text-sm text-gray-700 dark:text-gray-200 font-medium border border-transparent rounded-bl-lg hover:bg-gray-100 dark:hover:bg-gray-600 disabled:opacity-50"
+                            className="relative -mr-px w-0 flex-1 inline-flex items-center justify-center py-2 text-sm text-gray-700 font-medium border border-transparent rounded-bl-lg hover:bg-gray-100 disabled:opacity-50"
                           >
-                            <svg className="h-5 w-5 text-gray-400 dark:text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                             </svg>
                             <span className="ml-2">Editar</span>
@@ -727,9 +732,9 @@ export default function MenuPage() {
                           <button
                             onClick={() => handleDeleteItem(item.id)}
                             disabled={processingAction}
-                            className="relative w-0 flex-1 inline-flex items-center justify-center py-2 text-sm text-gray-700 dark:text-gray-200 font-medium border border-transparent rounded-br-lg hover:bg-gray-100 dark:hover:bg-gray-600 hover:text-red-500 disabled:opacity-50"
+                            className="relative w-0 flex-1 inline-flex items-center justify-center py-2 text-sm text-gray-700 font-medium border border-transparent rounded-br-lg hover:bg-gray-100 hover:text-red-500 disabled:opacity-50"
                           >
-                            <svg className="h-5 w-5 text-gray-400 dark:text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                             </svg>
                             <span className="ml-2">Eliminar</span>
@@ -749,13 +754,13 @@ export default function MenuPage() {
       {showCategoryModal && (
         <div className="fixed z-50 inset-0 flex items-center justify-center bg-black bg-opacity-40" onClick={() => { if (!processingAction) setShowCategoryModal(false); }}>
           <div
-            className="bg-white dark:bg-gray-800 rounded-lg px-4 pt-5 pb-4 text-left shadow-xl sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6 relative z-60"
+            className="bg-white rounded-lg px-4 pt-5 pb-4 text-left shadow-xl sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6 relative z-60"
             style={{ minWidth: 320, maxWidth: 400 }}
             onClick={e => e.stopPropagation()}
           >
             <div>
               <div className="mt-3 text-center sm:mt-5">
-                <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-white">
+                <h3 className="text-lg leading-6 font-medium text-gray-900">
                   {isEditing ? "Editar Categoría" : "Nueva Categoría"}
                 </h3>
                 <div className="mt-2">
@@ -764,7 +769,7 @@ export default function MenuPage() {
                     className="space-y-4"
                   >
                     <div>
-                      <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 text-left">
+                      <label htmlFor="name" className="block text-sm font-medium text-gray-700 text-left">
                         Nombre
                       </label>
                       <input
@@ -774,12 +779,12 @@ export default function MenuPage() {
                         required
                         value={categoryForm.name}
                         onChange={e => setCategoryForm({...categoryForm, name: e.target.value})}
-                        className="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white"
+                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                         placeholder="Ej: Entrantes, Platos principales, Postres"
                       />
                     </div>
                     <div>
-                      <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 text-left">
+                      <label htmlFor="description" className="block text-sm font-medium text-gray-700 text-left">
                         Descripción (opcional)
                       </label>
                       <textarea
@@ -788,7 +793,7 @@ export default function MenuPage() {
                         rows={3}
                         value={categoryForm.description}
                         onChange={e => setCategoryForm({...categoryForm, description: e.target.value})}
-                        className="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white"
+                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                         placeholder="Descripción breve de la categoría"
                       />
                     </div>
@@ -797,14 +802,15 @@ export default function MenuPage() {
                         type="button"
                         onClick={() => { if (!processingAction) setShowCategoryModal(false); }}
                         disabled={processingAction}
-                        className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-600 shadow-sm px-4 py-2 bg-white dark:bg-gray-700 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:col-start-1 disabled:opacity-50"
+                        className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:col-start-1 disabled:opacity-50"
                       >
                         Cancelar
                       </button>
                       <button
                         type="submit"
                         disabled={processingAction}
-                        className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:col-start-2 disabled:opacity-50"
+                        className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 text-base font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:col-start-2 disabled:opacity-50"
+                        style={{ backgroundColor: 'var(--accent)' }}
                       >
                         {processingAction ? (
                           <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -827,13 +833,13 @@ export default function MenuPage() {
       {showItemModal && (
         <div className="fixed z-50 inset-0 flex items-center justify-center bg-black bg-opacity-40" onClick={() => { if (!processingAction) setShowItemModal(false); }}>
           <div
-            className="bg-white dark:bg-gray-800 rounded-lg px-4 pt-5 pb-4 text-left shadow-xl sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6 relative z-60"
+            className="bg-white rounded-lg px-4 pt-5 pb-4 text-left shadow-xl sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6 relative z-60"
             style={{ minWidth: 320, maxWidth: 400, maxHeight: '90vh', overflowY: 'auto' }}
             onClick={e => e.stopPropagation()}
           >
             <div>
               <div className="mt-3 text-center sm:mt-5">
-                <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-white">
+                <h3 className="text-lg leading-6 font-medium text-gray-900">
                   {isEditing ? "Editar Plato" : "Nuevo Plato"}
                 </h3>
                 <div className="mt-2">
@@ -856,7 +862,7 @@ export default function MenuPage() {
                                 setItemImage(null);
                                 setItemForm({...itemForm, image_url: ""});
                               }}
-                              className="absolute -top-2 -right-2 bg-white dark:bg-gray-800 rounded-full p-1 shadow-sm"
+                              className="absolute -top-2 -right-2 bg-white rounded-full p-1 shadow-sm"
                             >
                               <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -866,7 +872,7 @@ export default function MenuPage() {
                         ) : (
                           <div 
                             onClick={() => document.getElementById("item-image")?.click()}
-                            className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-md flex items-center justify-center h-full cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700"
+                            className="border-2 border-dashed border-gray-300 rounded-md flex items-center justify-center h-full cursor-pointer hover:bg-gray-50"
                           >
                             <svg className="h-8 w-8 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -883,7 +889,7 @@ export default function MenuPage() {
                       />
                     </div>
                     <div className="text-left">
-                      <label htmlFor="item-name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                      <label htmlFor="item-name" className="block text-sm font-medium text-gray-700">
                         Nombre
                       </label>
                       <input
@@ -892,12 +898,12 @@ export default function MenuPage() {
                         required
                         value={itemForm.name}
                         onChange={(e) => setItemForm({...itemForm, name: e.target.value})}
-                        className="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white"
+                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                         placeholder="Ej: Paella, Pizza Margarita"
                       />
                     </div>
                     <div className="text-left">
-                      <label htmlFor="item-description" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                      <label htmlFor="item-description" className="block text-sm font-medium text-gray-700">
                         Descripción (opcional)
                       </label>
                       <textarea
@@ -905,17 +911,17 @@ export default function MenuPage() {
                         rows={2}
                         value={itemForm.description}
                         onChange={(e) => setItemForm({...itemForm, description: e.target.value})}
-                        className="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white"
+                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                         placeholder="Ingredientes o descripción del plato"
                       />
                     </div>
                     <div className="text-left">
-                      <label htmlFor="item-price" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                      <label htmlFor="item-price" className="block text-sm font-medium text-gray-700">
                         Precio
                       </label>
                       <div className="mt-1 relative rounded-md shadow-sm">
                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                          <span className="text-gray-500 dark:text-gray-400 sm:text-sm">€</span>
+                          <span className="text-gray-500 sm:text-sm">€</span>
                         </div>
                         <input
                           type="text"
@@ -930,7 +936,7 @@ export default function MenuPage() {
                             if (parts.length > 2) val = parts[0] + '.' + parts.slice(1).join('');
                             setItemForm({...itemForm, price: val});
                           }}
-                          className="block w-full pl-7 pr-12 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white"
+                          className="block w-full pl-7 pr-12 border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                           placeholder="Ej: 10.00"
                           inputMode="decimal"
                           autoComplete="off"
@@ -938,7 +944,7 @@ export default function MenuPage() {
                       </div>
                     </div>
                     <div className="text-left">
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
                         Nivel de picante
                       </label>
                       <div className="flex items-center space-x-1">
@@ -963,14 +969,14 @@ export default function MenuPage() {
                         type="checkbox"
                         checked={itemForm.is_featured}
                         onChange={e => setItemForm({...itemForm, is_featured: e.target.checked})}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded"
+                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                       />
-                      <label htmlFor="is_featured" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
+                      <label htmlFor="is_featured" className="ml-2 block text-sm text-gray-700">
                         Destacar este plato
                       </label>
                     </div>
                     <div className="text-left">
-                      <label htmlFor="item-ingredients" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                      <label htmlFor="item-ingredients" className="block text-sm font-medium text-gray-700">
                         Ingredientes (opcional)
                       </label>
                       <input
@@ -978,12 +984,12 @@ export default function MenuPage() {
                         id="item-ingredients"
                         value={itemForm.ingredients}
                         onChange={e => setItemForm({...itemForm, ingredients: e.target.value})}
-                        className="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white"
+                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                         placeholder="Ej: Lechuga, pollo, parmesano, salsa césar"
                       />
                     </div>
                     <div className="text-left">
-                      <label htmlFor="item-allergens" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                      <label htmlFor="item-allergens" className="block text-sm font-medium text-gray-700">
                         Alérgenos (separados por coma)
                       </label>
                       <input
@@ -991,7 +997,7 @@ export default function MenuPage() {
                         id="item-allergens"
                         value={itemForm.allergens}
                         onChange={e => setItemForm({...itemForm, allergens: e.target.value})}
-                        className="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white"
+                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                         placeholder="Ej: gluten, huevo, leche"
                       />
                     </div>
@@ -1025,7 +1031,7 @@ export default function MenuPage() {
                       </label>
                     </div>
                     <div className="text-left mt-2">
-                      <label htmlFor="item-discount" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                      <label htmlFor="item-discount" className="block text-sm font-medium text-gray-700">
                         Descuento (%) (opcional)
                       </label>
                       <input
@@ -1033,7 +1039,7 @@ export default function MenuPage() {
                         id="item-discount"
                         value={itemForm.discount_percentage}
                         onChange={e => setItemForm({...itemForm, discount_percentage: e.target.value})}
-                        className="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white"
+                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                         placeholder="Ej: 10"
                         min="0"
                         max="100"
@@ -1045,14 +1051,15 @@ export default function MenuPage() {
                         type="button"
                         onClick={() => { if (!processingAction) setShowItemModal(false); }}
                         disabled={processingAction}
-                        className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-600 shadow-sm px-4 py-2 bg-white dark:bg-gray-700 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:col-start-1 disabled:opacity-50"
+                        className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:col-start-1 disabled:opacity-50"
                       >
                         Cancelar
                       </button>
                       <button
                         type="submit"
                         disabled={processingAction}
-                        className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:col-start-2 disabled:opacity-50"
+                        className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 text-base font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:col-start-2 disabled:opacity-50"
+                        style={{ backgroundColor: 'var(--accent)' }}
                       >
                         {processingAction ? (
                           <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">

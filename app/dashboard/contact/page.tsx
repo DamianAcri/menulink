@@ -289,15 +289,16 @@ export default function ContactPage() {
   if (!restaurantId) {
     return (
       <div className="text-center py-12">
-        <h2 className="text-xl font-medium text-gray-900 dark:text-white">
+        <h2 className="text-xl font-medium text-gray-900">
           Necesitas completar la configuración de tu restaurante
         </h2>
-        <p className="mt-2 text-gray-600 dark:text-gray-400">
+        <p className="mt-2 text-gray-500">
           Antes de configurar la información de contacto, completa la información básica de tu restaurante.
         </p>
         <button
           onClick={() => window.location.href = "/dashboard"}
-          className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
+          className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white"
+          style={{ backgroundColor: 'var(--accent)' }}
         >
           Ir al dashboard
         </button>
@@ -309,10 +310,10 @@ export default function ContactPage() {
     <div>
       <div className="md:flex md:items-center md:justify-between mb-6">
         <div className="min-w-0 flex-1">
-          <h2 className="text-2xl font-bold leading-7 text-gray-900 dark:text-white sm:truncate sm:text-3xl">
+          <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl">
             Información de Contacto
           </h2>
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+          <p className="mt-1 text-sm text-gray-500">
             Configura la dirección, teléfono y horarios de tu negocio.
           </p>
         </div>
@@ -322,8 +323,8 @@ export default function ContactPage() {
         <div
           className={`p-4 mb-6 rounded-md ${
             saveMessage.type === "success"
-              ? "bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400"
-              : "bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400"
+              ? "bg-green-50 text-green-700"
+              : "bg-red-50 text-red-700"
           }`}
         >
           {saveMessage.message}
@@ -331,14 +332,14 @@ export default function ContactPage() {
       )}
 
       <form onSubmit={handleSaveContact} className="space-y-8">
-        <div className="bg-white dark:bg-gray-800 shadow sm:rounded-lg p-6">
-          <h3 className="text-lg font-medium leading-6 text-gray-900 dark:text-white mb-4">
+        <div className="bg-white shadow sm:rounded-lg p-6">
+          <h3 className="text-lg font-medium leading-6 text-gray-900 mb-4">
             Ubicación y Contacto
           </h3>
 
           <div className="grid grid-cols-1 gap-y-6 sm:grid-cols-6 sm:gap-x-6">
             <div className="sm:col-span-3">
-              <label htmlFor="address" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label htmlFor="address" className="block text-sm font-medium text-gray-700">
                 Dirección
               </label>
               <div className="mt-1">
@@ -348,14 +349,14 @@ export default function ContactPage() {
                   id="address"
                   value={contactForm.address}
                   onChange={handleContactChange}
-                  className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md"
+                  className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
                   placeholder="Calle, número..."
                 />
               </div>
             </div>
 
             <div className="sm:col-span-3">
-              <label htmlFor="city" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label htmlFor="city" className="block text-sm font-medium text-gray-700">
                 Ciudad
               </label>
               <div className="mt-1">
@@ -365,14 +366,14 @@ export default function ContactPage() {
                   id="city"
                   value={contactForm.city}
                   onChange={handleContactChange}
-                  className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md"
+                  className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
                   placeholder="Ciudad"
                 />
               </div>
             </div>
 
             <div className="sm:col-span-3">
-              <label htmlFor="postal_code" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label htmlFor="postal_code" className="block text-sm font-medium text-gray-700">
                 Código Postal
               </label>
               <div className="mt-1">
@@ -382,14 +383,14 @@ export default function ContactPage() {
                   id="postal_code"
                   value={contactForm.postal_code}
                   onChange={handleContactChange}
-                  className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md"
+                  className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
                   placeholder="Código postal"
                 />
               </div>
             </div>
 
             <div className="sm:col-span-3">
-              <label htmlFor="country" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label htmlFor="country" className="block text-sm font-medium text-gray-700">
                 País
               </label>
               <div className="mt-1">
@@ -398,7 +399,7 @@ export default function ContactPage() {
                   name="country"
                   value={contactForm.country}
                   onChange={handleContactChange}
-                  className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md"
+                  className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
                 >
                   <option value="">Seleccionar país...</option>
                   <option value="España">España</option>
@@ -419,7 +420,7 @@ export default function ContactPage() {
             </div>
 
             <div className="sm:col-span-3">
-              <label htmlFor="phone" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
                 Teléfono
               </label>
               <div className="mt-1">
@@ -429,17 +430,17 @@ export default function ContactPage() {
                   id="phone"
                   value={contactForm.phone}
                   onChange={handleContactChange}
-                  className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md"
+                  className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
                   placeholder="+34 123456789"
                 />
               </div>
-              <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+              <p className="mt-2 text-sm text-gray-500">
                 Incluye el código de país (ej: +34 para España)
               </p>
             </div>
 
             <div className="sm:col-span-3">
-              <label htmlFor="whatsapp" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label htmlFor="whatsapp" className="block text-sm font-medium text-gray-700">
                 WhatsApp
               </label>
               <div className="mt-1">
@@ -449,17 +450,17 @@ export default function ContactPage() {
                   id="whatsapp"
                   value={contactForm.whatsapp}
                   onChange={handleContactChange}
-                  className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md"
+                  className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
                   placeholder="+34 123456789"
                 />
               </div>
-              <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+              <p className="mt-2 text-sm text-gray-500">
                 Si es diferente al teléfono principal
               </p>
             </div>
 
             <div className="sm:col-span-6">
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
                 Email de contacto
               </label>
               <div className="mt-1">
@@ -469,7 +470,7 @@ export default function ContactPage() {
                   id="email"
                   value={contactForm.email}
                   onChange={handleContactChange}
-                  className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md"
+                  className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
                   placeholder="contacto@turestaurante.com"
                 />
               </div>
@@ -477,10 +478,10 @@ export default function ContactPage() {
 
             {/* Mapa con ubicación - Implementación futura
             <div className="sm:col-span-6">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label className="block text-sm font-medium text-gray-700">
                 Ubicación en el mapa
               </label>
-              <div className="mt-1 aspect-w-16 aspect-h-9 rounded-md bg-gray-200 dark:bg-gray-600 min-h-[200px]">
+              <div className="mt-1 aspect-w-16 aspect-h-9 rounded-md bg-gray-200 min-h-[200px]">
                 {/* Aquí iría el componente de mapa */}
             {/*</div>
             </div>
@@ -488,8 +489,8 @@ export default function ContactPage() {
           </div>
         </div>
 
-        <div className="bg-white dark:bg-gray-800 shadow sm:rounded-lg p-6">
-          <h3 className="text-lg font-medium leading-6 text-gray-900 dark:text-white mb-4">
+        <div className="bg-white shadow sm:rounded-lg p-6">
+          <h3 className="text-lg font-medium leading-6 text-gray-900 mb-4">
             Horarios de Apertura
           </h3>
 
@@ -497,7 +498,7 @@ export default function ContactPage() {
             {openingHours.map((hour, index) => (
               <div key={index} className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
                 <div className="sm:col-span-2">
-                  <span className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <span className="block text-sm font-medium text-gray-700">
                     {DAYS_OF_WEEK[hour.day_of_week]}
                   </span>
                 </div>
@@ -512,7 +513,7 @@ export default function ContactPage() {
                       onChange={(e) => handleHoursChange(index, 'is_closed', e.target.checked)}
                       className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                     />
-                    <label htmlFor={`closed-${index}`} className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
+                    <label htmlFor={`closed-${index}`} className="ml-2 block text-sm text-gray-700">
                       Cerrado
                     </label>
                   </div>
@@ -520,7 +521,7 @@ export default function ContactPage() {
                   {!hour.is_closed && (
                     <div className="ml-6 flex items-center space-x-2">
                       <div className="flex-1">
-                        <label htmlFor={`opens-${index}`} className="block text-xs text-gray-500 dark:text-gray-400">
+                        <label htmlFor={`opens-${index}`} className="block text-xs text-gray-500">
                           Abre
                         </label>
                         <input
@@ -528,11 +529,11 @@ export default function ContactPage() {
                           id={`opens-${index}`}
                           value={hour.opens_at}
                           onChange={(e) => handleHoursChange(index, 'opens_at', e.target.value)}
-                          className="block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white"
+                          className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                         />
                       </div>
                       <div className="flex-1">
-                        <label htmlFor={`closes-${index}`} className="block text-xs text-gray-500 dark:text-gray-400">
+                        <label htmlFor={`closes-${index}`} className="block text-xs text-gray-500">
                           Cierra
                         </label>
                         <input
@@ -540,7 +541,7 @@ export default function ContactPage() {
                           id={`closes-${index}`}
                           value={hour.closes_at}
                           onChange={(e) => handleHoursChange(index, 'closes_at', e.target.value)}
-                          className="block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white"
+                          className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                         />
                       </div>
                     </div>
@@ -555,14 +556,15 @@ export default function ContactPage() {
           <button
             type="button"
             onClick={() => window.location.href = "/dashboard"}
-            className="bg-white dark:bg-gray-700 py-2 px-4 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            className="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
           >
             Cancelar
           </button>
           <button
             type="submit"
             disabled={saving}
-            className="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+            className="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white"
+            style={{ backgroundColor: 'var(--accent)' }}
           >
             {saving ? "Guardando..." : "Guardar cambios"}
           </button>

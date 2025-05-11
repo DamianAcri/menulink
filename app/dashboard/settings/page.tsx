@@ -17,6 +17,7 @@ export default function ConfigPage() {
   const [reservationMode, setReservationMode] = useState("form");
   const [savingSettings, setSavingSettings] = useState(false);
   const [enableLanguageSelector, setEnableLanguageSelector] = useState(false);
+  const [emailNotifications, setEmailNotifications] = useState(true);
   const { t } = useTranslation();
   
   // Nuevos estados para la configuración de reservas
@@ -120,6 +121,11 @@ export default function ConfigPage() {
         setReservationMode(restaurantData.reservation_mode || 'form');
         setLanguage(restaurantData.language || 'en');
         setEnableLanguageSelector(!!restaurantData.enable_language_selector);
+        setEmailNotifications(
+          typeof restaurantData.email_notifications === 'boolean'
+            ? restaurantData.email_notifications
+            : true
+        );
         i18n.changeLanguage(restaurantData.language || 'en');
         localStorage.setItem('lang', restaurantData.language || 'en');
         
@@ -159,7 +165,8 @@ export default function ConfigPage() {
         .update({
           reservation_mode: reservationMode,
           language: language,
-          enable_language_selector: enableLanguageSelector
+          enable_language_selector: enableLanguageSelector,
+          email_notifications: emailNotifications
         })
         .eq('id', restaurant.id);
       
@@ -218,19 +225,19 @@ export default function ConfigPage() {
     <div className="max-w-4xl mx-auto">
       <h1 className="text-2xl font-bold mb-8">{t('settings_title', 'Configuración')}</h1>
       
-      <div className="bg-white dark:bg-gray-800 shadow overflow-hidden rounded-lg">
-        <div className="px-4 py-5 sm:px-6 border-b border-gray-200 dark:border-gray-700">
-          <h2 className="text-lg font-medium text-gray-900 dark:text-white">{t('general_preferences', 'Preferencias Generales')}</h2>
+      <div className="bg-white shadow overflow-hidden rounded-lg">
+        <div className="px-4 py-5 sm:px-6 border-b border-gray-200">
+          <h2 className="text-lg font-medium text-gray-900">{t('general_preferences', 'Preferencias Generales')}</h2>
         </div>
         
         <div className="px-4 py-5 sm:p-6 space-y-6">
           {/* Selección de idioma */}
           <div>
-            <label htmlFor="language" className="block text-md font-medium text-gray-900 dark:text-white">{t('dashboard_language', 'Idioma del dashboard')}</label>
+            <label htmlFor="language" className="block text-md font-medium text-gray-900">{t('dashboard_language', 'Idioma del dashboard')}</label>
             <select
               id="language"
               name="language"
-              className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+              className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
               value={language}
               onChange={handleLanguageChange}
             >
@@ -238,7 +245,7 @@ export default function ConfigPage() {
               <option value="es">Español</option>
               <option value="fr">Français</option>
             </select>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+            <p className="text-xs text-gray-500 mt-1">
               {t('dashboard_language_help', 'Este idioma se usará en todo el panel de administración y, si no activas el selector público, también en la web pública.')}
             </p>
           </div>
@@ -252,18 +259,18 @@ export default function ConfigPage() {
               onChange={e => setEnableLanguageSelector(e.target.checked)}
               className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
             />
-            <label htmlFor="enable-language-selector" className="ml-2 block text-sm text-gray-900 dark:text-gray-300">
+            <label htmlFor="enable-language-selector" className="ml-2 block text-sm text-gray-900">
               {t('enable_public_language_selector', 'Permitir a los clientes elegir idioma en la web pública')}
             </label>
           </div>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+          <p className="text-xs text-gray-500 mt-1">
             {t('public_language_selector_help', 'Si activas esta opción, aparecerá un pequeño selector de idioma en la web pública (abajo a la izquierda). Si no, la web pública usará el idioma del dashboard.')}
           </p>
           
           {/* Configuración del formulario de reservas */}
           <div>
-            <h3 className="text-md font-medium text-gray-900 dark:text-white mb-2">Sistema de Reservas</h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+            <h3 className="text-md font-medium text-gray-900 mb-2">Sistema de Reservas</h3>
+            <p className="text-sm text-gray-500 mb-4">
               Decide cómo quieres gestionar las reservas de tu restaurante
             </p>
             
@@ -277,7 +284,7 @@ export default function ConfigPage() {
                   onChange={() => setReservationMode('form')}
                   className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
                 />
-                <label htmlFor="reservation-enabled" className="ml-3 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label htmlFor="reservation-enabled" className="ml-3 block text-sm font-medium text-gray-700">
                   Activar - Mostrar el formulario de reservas a los clientes
                 </label>
               </div>
@@ -291,18 +298,18 @@ export default function ConfigPage() {
                   onChange={() => setReservationMode('disabled')}
                   className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
                 />
-                <label htmlFor="reservation-disabled" className="ml-3 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label htmlFor="reservation-disabled" className="ml-3 block text-sm font-medium text-gray-700">
                   Desactivar - Ocultar el formulario de reservas
                 </label>
               </div>
             </div>
             
             {reservationMode === 'form' && (
-              <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600 mt-4">
-                <h4 className="text-md font-medium text-gray-900 dark:text-white mb-3">Configuración básica de reservas</h4>
+              <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 mt-4">
+                <h4 className="text-md font-medium text-gray-900 mb-3">Configuración básica de reservas</h4>
                 
                 <div className="mb-4">
-                  <label htmlFor="max-party-size" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label htmlFor="max-party-size" className="block text-sm font-medium text-gray-700 mb-1">
                     Tamaño máximo de grupo
                   </label>
                   <div className="flex items-center">
@@ -313,23 +320,23 @@ export default function ConfigPage() {
                       max="50"
                       value={maxPartySize}
                       onChange={(e) => setMaxPartySize(parseInt(e.target.value) || 1)}
-                      className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-20 sm:text-sm border-gray-300 rounded-md dark:bg-gray-800 dark:border-gray-600 dark:text-white"
+                      className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-20 sm:text-sm border-gray-300 rounded-md"
                     />
-                    <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">personas</span>
+                    <span className="ml-2 text-sm text-gray-500">personas</span>
                   </div>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  <p className="text-xs text-gray-500 mt-1">
                     Este es el número máximo de personas que un cliente puede seleccionar al hacer una reserva
                   </p>
                 </div>
                 
                 <div className="flex justify-between items-center">
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                  <p className="text-sm text-gray-600">
                     Para gestionar los horarios disponibles, ir a la página de reservas
                   </p>
                   <button 
                     type="button"
                     onClick={goToReservationsPage}
-                    className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    className="button-primary"
                   >
                     Gestionar horarios
                   </button>
@@ -337,23 +344,37 @@ export default function ConfigPage() {
               </div>
             )}
           </div>
+          {/* Notificaciones por email al restaurante */}
+          <div className="flex items-center mt-4">
+            <input
+              id="email-notifications"
+              name="email-notifications"
+              type="checkbox"
+              checked={emailNotifications}
+              onChange={e => setEmailNotifications(e.target.checked)}
+              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+            />
+            <label htmlFor="email-notifications" className="ml-2 block text-sm text-gray-900">
+              Recibir notificaciones por email de nuevas reservas
+            </label>
+          </div>
         </div>
       </div>
       
-      <div className="bg-white dark:bg-gray-800 shadow overflow-hidden rounded-lg mt-8">
-        <div className="px-4 py-5 sm:px-6 border-b border-gray-200 dark:border-gray-700">
-          <h2 className="text-lg font-medium text-gray-900 dark:text-white">Seguridad</h2>
+      <div className="bg-white shadow overflow-hidden rounded-lg mt-8">
+        <div className="px-4 py-5 sm:px-6 border-b border-gray-200">
+          <h2 className="text-lg font-medium text-gray-900">Seguridad</h2>
         </div>
         
         <div className="px-4 py-5 sm:p-6 space-y-6">
           {/* Cambiar contraseña */}
           <div>
-            <h3 className="text-md font-medium text-gray-900 dark:text-white">Cambiar contraseña</h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">Actualiza tu contraseña para mayor seguridad</p>
+            <h3 className="text-md font-medium text-gray-900">Cambiar contraseña</h3>
+            <p className="text-sm text-gray-500 mb-4">Actualiza tu contraseña para mayor seguridad</p>
             <button
               type="button"
               onClick={handleChangePassword}
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              className="button-primary"
             >
               Cambiar contraseña
             </button>
@@ -361,23 +382,23 @@ export default function ConfigPage() {
           
           {/* Eliminar cuenta */}
           <div>
-            <h3 className="text-md font-medium text-gray-900 dark:text-white">Eliminar cuenta</h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">Eliminar permanentemente tu cuenta y todos tus datos</p>
+            <h3 className="text-md font-medium text-gray-900">Eliminar cuenta</h3>
+            <p className="text-sm text-gray-500 mb-4">Eliminar permanentemente tu cuenta y todos tus datos</p>
             
             {!deleteConfirmOpen ? (
               <button
                 type="button"
                 onClick={() => setDeleteConfirmOpen(true)}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                className="button-primary"
               >
                 Eliminar cuenta
               </button>
             ) : (
-              <div className="border-t border-gray-200 dark:border-gray-700 pt-4 mt-4">
+              <div className="border-t border-gray-200 pt-4 mt-4">
                 <p className="text-sm font-medium text-red-600 mb-2">
                   Esta acción no se puede deshacer. Se eliminarán permanentemente todos tus datos.
                 </p>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                <p className="text-sm text-gray-500 mb-4">
                   Para confirmar, escribe &quot;ELIMINAR&quot; en el campo a continuación:
                 </p>
                 <div className="flex items-center">
@@ -385,14 +406,14 @@ export default function ConfigPage() {
                     type="text"
                     value={deleteInput}
                     onChange={(e) => setDeleteInput(e.target.value)}
-                    className="shadow-sm focus:ring-red-500 focus:border-red-500 block w-full sm:text-sm border-gray-300 rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white mr-4"
+                    className="shadow-sm focus:ring-red-500 focus:border-red-500 block w-full sm:text-sm border-gray-300 rounded-md mr-4"
                     placeholder="ELIMINAR"
                   />
                   <button
                     type="button"
                     onClick={handleDeleteAccount}
                     disabled={deleteInput !== "ELIMINAR" || loading}
-                    className={`inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white ${deleteInput === "ELIMINAR" ? 'bg-red-600 hover:bg-red-700' : 'bg-gray-400 cursor-not-allowed'} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500`}
+                    className={`button-primary ${deleteInput === "ELIMINAR" ? '' : 'opacity-50 cursor-not-allowed'}`}
                   >
                     {loading ? "Eliminando..." : "Confirmar"}
                   </button>
@@ -402,7 +423,7 @@ export default function ConfigPage() {
                       setDeleteConfirmOpen(false);
                       setDeleteInput("");
                     }}
-                    className="ml-3 inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:bg-gray-600 dark:text-white dark:border-gray-500 dark:hover:bg-gray-700"
+                    className="button-outline ml-3"
                   >
                     Cancelar
                   </button>
@@ -413,9 +434,9 @@ export default function ConfigPage() {
         </div>
       </div>
       
-      <div className="bg-white dark:bg-gray-800 shadow overflow-hidden rounded-lg mt-8">
-        <div className="px-4 py-5 sm:px-6 border-b border-gray-200 dark:border-gray-700">
-          <h2 className="text-lg font-medium text-gray-900 dark:text-white">Privacidad</h2>
+      <div className="bg-white shadow overflow-hidden rounded-lg mt-8">
+        <div className="px-4 py-5 sm:px-6 border-b border-gray-200">
+          <h2 className="text-lg font-medium text-gray-900">Privacidad</h2>
         </div>
         
         <div className="px-4 py-5 sm:p-6 space-y-6">
@@ -428,7 +449,7 @@ export default function ConfigPage() {
               className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
               defaultChecked
             />
-            <label htmlFor="cookies" className="ml-2 block text-sm text-gray-900 dark:text-gray-300">
+            <label htmlFor="cookies" className="ml-2 block text-sm text-gray-900">
               Permitir cookies para mejorar la experiencia
             </label>
           </div>
@@ -441,13 +462,13 @@ export default function ConfigPage() {
               className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
               defaultChecked
             />
-            <label htmlFor="analytics" className="ml-2 block text-sm text-gray-900 dark:text-gray-300">
+            <label htmlFor="analytics" className="ml-2 block text-sm text-gray-900">
               Permitir análisis anónimo de uso
             </label>
           </div>
           
           <div>
-            <a href="/privacy-policy" className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 text-sm">
+            <a href="/privacy-policy" className="text-blue-600 hover:text-blue-800 text-sm">
               Ver política de privacidad completa
             </a>
           </div>
@@ -459,7 +480,7 @@ export default function ConfigPage() {
           type="button"
           onClick={handleSaveSettings}
           disabled={savingSettings}
-          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          className="button-primary"
         >
           {savingSettings ? 'Guardando...' : 'Guardar cambios'}
         </button>

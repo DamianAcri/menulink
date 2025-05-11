@@ -1,395 +1,274 @@
-// Página simple de CRM para listar y añadir clientes manualmente
-'use client';
-import { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase';
-import { saveAs } from 'file-saver';
+"use client";
 
-interface Customer {
+import type React from "react";
+import { useState } from "react";
+import { Search, Plus, Download, Edit, Trash2 } from "lucide-react";
+import { Button } from "../../components/ui/button";
+import { Input } from "../../components/ui/input";
+import { Checkbox } from "../../components/ui/checkbox";
+import { Textarea } from "../../components/ui/textarea";
+import { Badge } from "../../components/ui/badge";
+
+interface Cliente {
   id: string;
-  first_name: string;
-  last_name: string;
+  nombre: string;
+  apellidos: string;
   email: string;
-  phone?: string | null;  // Updated to allow null
-  notes?: string | null;   // Updated to allow null
-  created_at?: string;
-  reservation_count?: number;
-  last_reservations?: { id: string; reservation_date: string; reservation_time: string; status: string }[];
+  telefono: string;
+  notas: string;
+  fechaAlta: string;
+  reservas: {
+    fecha: string;
+    estado: string;
+  }[];
 }
 
-export default function CRMPage() {
-  const [customers, setCustomers] = useState<Customer[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [form, setForm] = useState({ first_name: '', last_name: '', email: '', phone: '', notes: '' });
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
-  const [editId, setEditId] = useState<string | null>(null);
-  const [editForm, setEditForm] = useState<Partial<Customer>>({});
-  const [deletingId, setDeletingId] = useState<string | null>(null);
-  // Añadir filtro de búsqueda
-  const [search, setSearch] = useState('');
+export default function CRM() {
+  const [mostrarSoloConReservas, setMostrarSoloConReservas] = useState(false);
+  const [busqueda, setBusqueda] = useState("");
+  const [mostrarFormulario, setMostrarFormulario] = useState(false);
+  const [nuevoCliente, setNuevoCliente] = useState({
+    nombre: "",
+    apellidos: "",
+    email: "",
+    telefono: "",
+    notas: "",
+  });
 
-  // Obtener el restaurant_id del usuario autenticado
-  const [restaurantId, setRestaurantId] = useState<string | null>(null);
+  const [clientes, setClientes] = useState<Cliente[]>([
+    {
+      id: "1",
+      nombre: "cosiña",
+      apellidos: "",
+      email: "cosil@gmail.com",
+      telefono: "31231231",
+      notas: "",
+      fechaAlta: "8 de mayo de 2025, 18:39",
+      reservas: [
+        {
+          fecha: "10 de mayo de 2025 13:00h",
+          estado: "Pending",
+        },
+      ],
+    },
+  ]);
 
-  useEffect(() => {
-    const fetchRestaurantId = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return;
-      // Buscar el restaurante del usuario
-      const { data } = await supabase
-        .from('restaurants')
-        .select('id')
-        .eq('user_id', session.user.id)
-        .single();
-      if (data) setRestaurantId(data.id);
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setNuevoCliente({
+      ...nuevoCliente,
+      [name]: value,
+    });
+  };
+
+  const handleAñadirCliente = () => {
+    const id = Date.now().toString();
+    const fechaActual = new Date().toLocaleString("es-ES", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
+    const cliente: Cliente = {
+      id,
+      ...nuevoCliente,
+      fechaAlta: fechaActual,
+      reservas: [],
     };
-    fetchRestaurantId();
-  }, []);
 
-  useEffect(() => {
-    if (!restaurantId) return;
-    setLoading(true);
-    // Traer clientes y para cada uno, contar reservas y traer últimas 3
-    (async () => {
-      const { data } = await supabase
-        .from('customers')
-        .select('*')
-        .eq('restaurant_id', restaurantId)
-        .order('created_at', { ascending: false });
-      if (data) {
-        // Para cada cliente, obtener reservas
-        const customersWithStats = await Promise.all(
-          data.map(async (c: Customer) => {
-            const { count } = await supabase
-              .from('reservations')
-              .select('id', { count: 'exact', head: true })
-              .eq('restaurant_id', restaurantId)
-              .eq('customer_email', c.email);
-            const { data: lastRes } = await supabase
-              .from('reservations')
-              .select('id, reservation_date, reservation_time, status')
-              .eq('restaurant_id', restaurantId)
-              .eq('customer_email', c.email)
-              .order('reservation_date', { ascending: false })
-              .order('reservation_time', { ascending: false })
-              .limit(3);
-            return {
-              ...c,
-              reservation_count: count || 0,
-              last_reservations: lastRes || [],
-            };
-          })
-        );
-        setCustomers(customersWithStats);
-      }
-      setLoading(false);
-    })();
-  }, [restaurantId]);
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    setClientes([...clientes, cliente]);
+    setNuevoCliente({
+      nombre: "",
+      apellidos: "",
+      email: "",
+      telefono: "",
+      notas: "",
+    });
+    setMostrarFormulario(false);
   };
 
-  // Modificar handleSubmit para evitar duplicados por email
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    setSuccess(null);
-    if (!form.first_name || !form.email) {
-      setError('Nombre y email son obligatorios.');
-      return;
-    }
-    if (!restaurantId) {
-      setError('No se ha encontrado el restaurante.');
-      return;
-    }
-    // Validar teléfono (mínimo 7 dígitos)
-    if (form.phone && form.phone.replace(/\D/g, '').length < 7) {
-      setError('El teléfono debe tener al menos 7 dígitos.');
-      return;
-    }
-    // Comprobar si ya existe cliente por email
-    const { data: existing } = await supabase
-      .from('customers')
-      .select('id')
-      .eq('restaurant_id', restaurantId)
-      .eq('email', form.email)
-      .maybeSingle();
-    if (existing) {
-      setError('Ya existe un cliente con ese email.');
-      return;
-    }
-    const { data, error } = await supabase
-      .from('customers')
-      .insert({
-        first_name: form.first_name,
-        last_name: form.last_name || '',
-        email: form.email,
-        phone: form.phone || null,
-        notes: form.notes || null,
-        restaurant_id: restaurantId,
-      })
-      .select('*')
-      .single();
-    if (error) {
-      setError('Error al guardar el cliente.');
-    } else {
-      setSuccess('Cliente añadido correctamente.');
-      setCustomers([data, ...customers]);
-      setForm({ first_name: '', last_name: '', email: '', phone: '', notes: '' });
-    }
+  const handleEliminarCliente = (id: string) => {
+    setClientes(clientes.filter((cliente) => cliente.id !== id));
   };
 
-  // Edición
-  const startEdit = (c: Customer) => {
-    setEditId(c.id);
-    setEditForm({ ...c });
-  };
-  const cancelEdit = () => {
-    setEditId(null);
-    setEditForm({});
-  };
-  const handleEditChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setEditForm({ ...editForm, [e.target.name]: e.target.value });
-  };
-  const saveEdit = async () => {
-    if (!editId) return;
-    const { first_name, last_name, email, phone, notes } = editForm;
-    // Clear previous messages
-    setError(null);
-    setSuccess(null);
-    
-    // Validate required fields
-    if (!first_name || !email) {
-      setError('Nombre y email son obligatorios.');
-      return;
-    }
-    
-    // last_name is required in the database, enforce a default empty string if undefined
-    const sanitizedLastName = last_name || '';
-    
-    // Validate phone (minimum 7 digits if provided)
-    if (phone && phone.replace(/\D/g, '').length < 7) {
-      setError('El teléfono debe tener al menos 7 dígitos.');
-      return;
-    }
-    
-    // Check if email exists for another customer
-    if (email !== customers.find(c => c.id === editId)?.email) {
-      const { data: existingEmail } = await supabase
-        .from('customers')
-        .select('id')
-        .eq('restaurant_id', restaurantId)
-        .eq('email', email)
-        .neq('id', editId)
-        .maybeSingle();
-        
-      if (existingEmail) {
-        setError('Ya existe otro cliente con ese email.');
-        return;
-      }
-    }
-    
-    try {
-      const { error } = await supabase
-        .from('customers')
-        .update({ 
-          first_name, 
-          last_name: sanitizedLastName, // Use sanitized value
-          email, 
-          phone, 
-          notes,
-          restaurant_id: restaurantId, // Ensure restaurant_id is included
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', editId);
-      
-      if (error) {
-        console.error("Error updating customer:", error);
-        setError('Error al actualizar el cliente.');
-        return;
-      }
-      
-      // Update customers list with edited data with proper type handling
-      setCustomers(cs => cs.map(c => {
-        if (c.id === editId) {
-          return {
-            ...c,
-            first_name,
-            last_name: sanitizedLastName, // Use sanitized value
-            email,
-            phone: phone || null,
-            notes: notes || null
-          };
-        }
-        return c;
-      }));
-      
-      setSuccess('Cliente actualizado correctamente');
-      setEditId(null);
-    } catch (err) {
-      console.error("Exception during customer update:", err);
-      setError('Error al actualizar el cliente.');
-    }
-  };
-  // Eliminación
-  const deleteCustomer = async (id: string) => {
-    setDeletingId(id);
-    const { error } = await supabase.from('customers').delete().eq('id', id);
-    if (!error) {
-      setCustomers(cs => cs.filter(c => c.id !== id));
-      setSuccess('Cliente eliminado');
-    } else {
-      setError('Error al eliminar');
-    }
-    setDeletingId(null);
-  };
+  const clientesFiltrados = clientes.filter((cliente) => {
+    const coincideBusqueda =
+      cliente.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
+      cliente.apellidos.toLowerCase().includes(busqueda.toLowerCase()) ||
+      cliente.email.toLowerCase().includes(busqueda.toLowerCase());
 
-  // Exportar clientes a CSV
-  const exportCSV = () => {
-    const header = ['Nombre', 'Apellidos', 'Email', 'Teléfono', 'Notas'];
-    const rows = filteredCustomers.map(c => [
-      c.first_name,
-      c.last_name,
-      c.email,
-      c.phone || '',
-      c.notes || ''
-    ]);
-    const csv = [header, ...rows].map(r => r.map(x => `"${(x || '').replace(/"/g, '""')}` ).join(',')).join('\n');
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    saveAs(blob, `clientes_${new Date().toISOString().slice(0,10)}.csv`);
-  };
+    if (mostrarSoloConReservas) {
+      return coincideBusqueda && cliente.reservas.length > 0;
+    }
 
-  // Filtro por clientes con reservas activas
-  const [onlyWithReservations, setOnlyWithReservations] = useState(false);
-  const filteredCustomers = customers.filter(c => {
-    const matchesSearch =
-      c.first_name?.toLowerCase().includes(search.toLowerCase()) ||
-      c.last_name?.toLowerCase().includes(search.toLowerCase()) ||
-      c.email?.toLowerCase().includes(search.toLowerCase());
-    const matchesReservations = !onlyWithReservations || (c.reservation_count && c.reservation_count > 0);
-    return matchesSearch && matchesReservations;
+    return coincideBusqueda;
   });
 
   return (
-    <div className="max-w-2xl mx-auto py-8">
-      <h1 className="text-2xl font-bold mb-4">CRM - Clientes</h1>
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mb-2">
-        <div className="flex-1">
-          <input
-            type="text"
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            placeholder="Buscar por nombre, apellidos o email..."
-            className="border px-2 py-1 w-full"
+    <div className="max-w-5xl mx-auto p-4 sm:p-6">
+      <header className="mb-8">
+        <h1 className="text-2xl font-bold mb-2">CRM - Clientes</h1>
+        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+          <div className="relative w-full sm:max-w-md">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+            <Input
+              placeholder="Buscar por nombre, apellidos o email..."
+              className="pl-10"
+              value={busqueda}
+              onChange={(e) => setBusqueda(e.target.value)}
+            />
+          </div>
+          <div className="flex gap-2 w-full sm:w-auto">
+            <Button
+              variant="outline"
+              className="flex-1 sm:flex-none"
+              onClick={() => setMostrarFormulario(!mostrarFormulario)}
+            >
+              {mostrarFormulario ? "Cancelar" : "Nuevo cliente"}
+            </Button>
+            <Button className="flex-1 sm:flex-none" style={{ backgroundColor: "var(--accent)" }}>
+              <Download className="w-4 h-4 mr-2" />
+              Exportar
+            </Button>
+          </div>
+        </div>
+        <div className="mt-4 flex items-center gap-2">
+          <Checkbox
+            id="mostrarReservas"
+            checked={mostrarSoloConReservas}
+            onCheckedChange={(checked) => setMostrarSoloConReservas(checked as boolean)}
           />
+          <label htmlFor="mostrarReservas" className="text-sm">
+            Mostrar solo clientes con reservas
+          </label>
         </div>
-        <button onClick={exportCSV} className="bg-green-600 text-white px-3 py-1 rounded text-sm">Exportar clientes</button>
-      </div>
-      <div className="mb-2 flex gap-2 items-center">
-        <label className="text-xs flex items-center gap-1">
-          <input type="checkbox" checked={onlyWithReservations} onChange={e => setOnlyWithReservations(e.target.checked)} />
-          Mostrar solo clientes con reservas
-        </label>
-      </div>
-      <form onSubmit={handleSubmit} className="mb-6 space-y-2">
-        <div className="flex gap-2">
-          <div className="flex-1">
-            <label className="block text-xs text-gray-600 mb-1">Nombre</label>
-            <input name="first_name" value={form.first_name} onChange={handleChange} placeholder="Nombre" className="border px-2 py-1 w-full" />
+      </header>
+
+      {mostrarFormulario && (
+        <div className="bg-gray-50 p-4 rounded-lg mb-8">
+          <h2 className="text-lg font-medium mb-4">Añadir nuevo cliente</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="text-sm text-gray-500 mb-1 block">Nombre</label>
+              <Input name="nombre" value={nuevoCliente.nombre} onChange={handleInputChange} placeholder="Nombre" />
+            </div>
+            <div>
+              <label className="text-sm text-gray-500 mb-1 block">Apellidos</label>
+              <Input
+                name="apellidos"
+                value={nuevoCliente.apellidos}
+                onChange={handleInputChange}
+                placeholder="Apellidos"
+              />
+            </div>
+            <div className="sm:col-span-2">
+              <label className="text-sm text-gray-500 mb-1 block">Email</label>
+              <Input
+                name="email"
+                value={nuevoCliente.email}
+                onChange={handleInputChange}
+                placeholder="Email"
+                type="email"
+              />
+            </div>
+            <div className="sm:col-span-2">
+              <label className="text-sm text-gray-500 mb-1 block">Teléfono</label>
+              <Input
+                name="telefono"
+                value={nuevoCliente.telefono}
+                onChange={handleInputChange}
+                placeholder="Teléfono (opcional)"
+              />
+            </div>
+            <div className="sm:col-span-2">
+              <label className="text-sm text-gray-500 mb-1 block">Notas internas</label>
+              <Textarea
+                name="notas"
+                value={nuevoCliente.notas}
+                onChange={handleInputChange}
+                placeholder="Ej: Cliente habitual, llamar para confirmar, alergias..."
+                className="resize-none"
+                rows={3}
+              />
+            </div>
+            <div className="sm:col-span-2 pt-2">
+              <Button onClick={handleAñadirCliente} style={{ backgroundColor: "var(--accent)" }}>
+                <Plus className="w-4 h-4 mr-2" />
+                Añadir cliente
+              </Button>
+            </div>
           </div>
-          <div className="flex-1">
-            <label className="block text-xs text-gray-600 mb-1">Apellidos</label>
-            <input name="last_name" value={form.last_name} onChange={handleChange} placeholder="Apellidos" className="border px-2 py-1 w-full" />
-          </div>
         </div>
-        <div>
-          <label className="block text-xs text-gray-600 mb-1">Email</label>
-          <input name="email" value={form.email} onChange={handleChange} placeholder="Email" className="border px-2 py-1 w-full" />
-        </div>
-        <div>
-          <label className="block text-xs text-gray-600 mb-1">Teléfono</label>
-          <input name="phone" value={form.phone} onChange={handleChange} placeholder="Teléfono (opcional)" className="border px-2 py-1 w-full" />
-        </div>
-        <div>
-          <label className="block text-xs text-gray-600 mb-1">Notas internas</label>
-          <textarea name="notes" value={form.notes || ''} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} placeholder="Ej: Cliente habitual, llamar para confirmar, alergias..." className="border px-2 py-1 w-full" />
-        </div>
-        <button type="submit" className="bg-blue-600 text-white px-4 py-1 rounded">Añadir cliente</button>
-        {error && <div className="text-red-600 text-sm">{error}</div>}
-        {success && <div className="text-green-600 text-sm">{success}</div>}
-      </form>
-      <h2 className="font-semibold mb-2">Clientes registrados</h2>
-      {loading ? (
-        <div>Cargando...</div>
-      ) : filteredCustomers.length === 0 ? (
-        <div>No hay clientes aún.</div>
-      ) : (
-        <ul className="divide-y">
-          {filteredCustomers.map(c => (
-            <li key={c.id} className="py-4">
-              {editId === c.id ? (
-                <div className="space-y-1 bg-gray-50 p-2 rounded">
-                  <div className="flex gap-2">
-                    <div className="flex-1">
-                      <label className="block text-xs text-gray-600 mb-1">Nombre</label>
-                      <input name="first_name" value={editForm.first_name || ''} onChange={handleEditChange} placeholder="Nombre" className="border px-2 py-1 w-full" />
-                    </div>
-                    <div className="flex-1">
-                      <label className="block text-xs text-gray-600 mb-1">Apellidos</label>
-                      <input name="last_name" value={editForm.last_name || ''} onChange={handleEditChange} placeholder="Apellidos" className="border px-2 py-1 w-full" />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-xs text-gray-600 mb-1">Email</label>
-                    <input name="email" value={editForm.email || ''} onChange={handleEditChange} placeholder="Email" className="border px-2 py-1 w-full" />
-                  </div>
-                  <div>
-                    <label className="block text-xs text-gray-600 mb-1">Teléfono</label>
-                    <input name="phone" value={editForm.phone || ''} onChange={handleEditChange} placeholder="Teléfono" className="border px-2 py-1 w-full" />
-                  </div>
-                  <div>
-                    <label className="block text-xs text-gray-600 mb-1">Notas internas</label>
-                    <textarea name="notes" value={editForm.notes || ''} onChange={handleEditChange} placeholder="Notas" className="border px-2 py-1 w-full" />
-                  </div>
-                  <div className="flex gap-2 mt-2">
-                    <button type="button" onClick={saveEdit} className="bg-blue-600 text-white px-3 py-1 rounded">Guardar</button>
-                    <button type="button" onClick={cancelEdit} className="bg-gray-300 px-3 py-1 rounded">Cancelar</button>
-                  </div>
-                </div>
-              ) : (
-                <div>
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <div className="font-medium text-lg">{c.first_name} {c.last_name}</div>
-                      <div className="text-sm text-gray-600"><span className="font-semibold">Email:</span> {c.email}</div>
-                      <div className="text-sm text-gray-600"><span className="font-semibold">Teléfono:</span> {c.phone || '-'}</div>
-                      {c.notes && <div className="text-xs text-gray-700 mt-1">📝 {c.notes}</div>}
-                      <div className="text-xs text-gray-500">Alta: {c.created_at ? new Date(c.created_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-'}</div>
-                    </div>
-                    <div className="flex gap-2">
-                      <button onClick={() => startEdit(c)} className="text-blue-600 text-xs">Editar</button>
-                      <button onClick={() => { if(window.confirm('¿Seguro que quieres eliminar este cliente?')) deleteCustomer(c.id); }} className="text-red-600 text-xs" disabled={deletingId === c.id}>{deletingId === c.id ? 'Eliminando...' : 'Eliminar'}</button>
-                    </div>
-                  </div>
-                  <div className="text-xs text-gray-500 mt-1">Reservas: {c.reservation_count || 0}</div>
-                  {c.last_reservations && c.last_reservations.length > 0 && (
-                    <div className="text-xs text-gray-500 mt-1">Últimas reservas:
-                      <ul className="list-disc ml-4">
-                        {c.last_reservations.map(r => (
-                          <li key={r.id}>{new Date(r.reservation_date).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })} {r.reservation_time?.slice(0,5)}h - <span className="capitalize">{r.status}</span></li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                </div>
-              )}
-            </li>
-          ))}
-        </ul>
       )}
-      {error && <div className="text-red-600 text-sm mt-2">{error}</div>}
-      {success && <div className="text-green-600 text-sm mt-2">{success}</div>}
+
+      <div>
+        <h2 className="text-lg font-medium mb-4">Clientes registrados</h2>
+
+        {clientesFiltrados.length === 0 ? (
+          <div className="text-center py-12 bg-gray-50 rounded-lg">
+            <p className="text-gray-500">No hay clientes que coincidan con los criterios de búsqueda.</p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {clientesFiltrados.map((cliente) => (
+              <div key={cliente.id} className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow">
+                <div className="flex flex-col sm:flex-row justify-between gap-4">
+                  <div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <h3 className="font-medium">
+                        {cliente.nombre} {cliente.apellidos}
+                      </h3>
+                      {cliente.reservas.length > 0 && (
+                        <Badge variant="outline" className="text-xs">
+                          {cliente.reservas.length} reserva(s)
+                        </Badge>
+                      )}
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-1 text-sm">
+                      <div>
+                        <span className="text-gray-500">Email:</span> {cliente.email}
+                      </div>
+                      <div>
+                        <span className="text-gray-500">Teléfono:</span> {cliente.telefono}
+                      </div>
+                      <div>
+                        <span className="text-gray-500">Alta:</span> {cliente.fechaAlta}
+                      </div>
+                      <div>
+                        <span className="text-gray-500">Reservas:</span> {cliente.reservas.length}
+                      </div>
+                    </div>
+                    {cliente.reservas.length > 0 && (
+                      <div className="mt-2 text-xs text-gray-500">
+                        <div className="font-medium">Últimas reservas:</div>
+                        <ul className="list-disc list-inside">
+                          {cliente.reservas.map((reserva, index) => (
+                            <li key={index}>
+                              {reserva.fecha} - {reserva.estado}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex gap-2 self-start sm:self-center">
+                    <Button variant="outline" onClick={() => {}}>
+                      <Edit className="w-4 h-4 mr-1" />
+                      Editar
+                    </Button>
+                    <Button variant="outline" onClick={() => handleEliminarCliente(cliente.id)} className="text-red-500 hover:text-red-700">
+                      <Trash2 className="w-4 h-4 mr-1" />
+                      Eliminar
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

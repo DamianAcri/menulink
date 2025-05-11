@@ -398,15 +398,16 @@ function SocialLinksPage() {
   if (!restaurantId) {
     return (
       <div className="text-center py-12">
-        <h2 className="text-xl font-medium text-gray-900 dark:text-white">
+        <h2 className="text-xl font-medium text-gray-900">
           Necesitas completar la configuración de tu restaurante
         </h2>
-        <p className="mt-2 text-gray-600 dark:text-gray-400">
+        <p className="mt-2 text-gray-500">
           Antes de configurar tus enlaces, completa la información básica de tu restaurante.
         </p>
         <button
           onClick={() => window.location.href = "/dashboard"}
-          className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
+          className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white"
+          style={{ backgroundColor: 'var(--accent)' }}
         >
           Ir al dashboard
         </button>
@@ -418,10 +419,10 @@ function SocialLinksPage() {
     <div>
       <div className="md:flex md:items-center md:justify-between mb-6">
         <div className="min-w-0 flex-1">
-          <h2 className="text-2xl font-bold leading-7 text-gray-900 dark:text-white sm:truncate sm:text-3xl">
+          <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl">
             Enlaces y Redes Sociales
           </h2>
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+          <p className="mt-1 text-sm text-gray-500">
             Gestiona tus redes sociales y enlaces de pedidos online.
           </p>
         </div>
@@ -431,8 +432,8 @@ function SocialLinksPage() {
         <div
           className={`p-4 mb-6 rounded-md ${
             saveMessage.type === "success"
-              ? "bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400"
-              : "bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400"
+              ? "bg-green-50 text-green-700"
+              : "bg-red-50 text-red-700"
           }`}
         >
           {saveMessage.message}
@@ -440,15 +441,16 @@ function SocialLinksPage() {
       )}
 
       {/* Sección de Redes Sociales */}
-      <div className="bg-white dark:bg-gray-800 shadow sm:rounded-lg p-6 mb-8">
+      <div className="bg-white shadow sm:rounded-lg p-6 mb-8">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-medium leading-6 text-gray-900 dark:text-white">
+          <h3 className="text-lg font-medium leading-6 text-gray-900">
             Redes Sociales
           </h3>
           <button
             type="button"
             onClick={handleAddSocialLink}
-            className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
+            className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md shadow-sm text-white"
+            style={{ backgroundColor: 'var(--accent)' }}
           >
             <svg className="-ml-0.5 mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -458,19 +460,20 @@ function SocialLinksPage() {
         </div>
 
         {socialLinks.length === 0 ? (
-          <div className="text-center py-12 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg">
-            <svg className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className="text-center py-12 border-2 border-dashed border-gray-200 rounded-lg">
+            <svg className="mx-auto h-12 w-12 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
             </svg>
-            <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">No hay enlaces de redes sociales</h3>
-            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+            <h3 className="mt-2 text-sm font-medium text-gray-900">No hay enlaces de redes sociales</h3>
+            <p className="mt-1 text-sm text-gray-500">
               Añade las redes sociales de tu negocio para que tus clientes te encuentren fácilmente
             </p>
             <div className="mt-6">
               <button
                 type="button"
                 onClick={handleAddSocialLink}
-                className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
+                className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white"
+                style={{ backgroundColor: 'var(--accent)' }}
               >
                 <svg className="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -480,13 +483,13 @@ function SocialLinksPage() {
             </div>
           </div>
         ) : (
-          <ul className="divide-y divide-gray-200 dark:divide-gray-700">
+          <ul className="divide-y divide-gray-200">
             {socialLinks.map((link) => {
               const platform = getPlatformInfo(link.platform, 'social');
               return (
                 <li key={link.id} className="py-4 flex items-center justify-between">
                   <div className="flex items-center">
-                    <div className="flex-shrink-0 h-10 w-10 bg-gray-100 dark:bg-gray-600 rounded-full flex items-center justify-center">
+                    <div className="flex-shrink-0 h-10 w-10 bg-gray-100 rounded-full flex items-center justify-center">
                       <Image 
                         src={`/social/${platform.icon}`} 
                         alt={platform.name} 
@@ -496,8 +499,8 @@ function SocialLinksPage() {
                       />
                     </div>
                     <div className="ml-4">
-                      <div className="text-sm font-medium text-gray-900 dark:text-white">{platform.name}</div>
-                      <div className="text-sm text-blue-600 dark:text-blue-400 truncate">
+                      <div className="text-sm font-medium text-gray-900">{platform.name}</div>
+                      <div className="text-sm text-blue-600 truncate">
                         <a href={link.url} 
                           target="_blank" 
                           rel="noopener noreferrer" 
@@ -516,7 +519,7 @@ function SocialLinksPage() {
                     <button
                       type="button"
                       onClick={() => handleEditSocialLink(link)}
-                      className="inline-flex items-center p-1.5 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700"
+                      className="inline-flex items-center p-1.5 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
                     >
                       <svg className="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -525,7 +528,7 @@ function SocialLinksPage() {
                     <button
                       type="button"
                       onClick={() => link.id && handleDeleteSocialLink(link.id)}
-                      className="inline-flex items-center p-1.5 border border-gray-300 dark:border-gray-600 rounded-md text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30"
+                      className="inline-flex items-center p-1.5 border border-gray-300 rounded-md text-red-700 hover:bg-red-50"
                     >
                       <svg className="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -540,15 +543,16 @@ function SocialLinksPage() {
       </div>
 
       {/* Sección de Enlaces de Delivery */}
-      <div className="bg-white dark:bg-gray-800 shadow sm:rounded-lg p-6">
+      <div className="bg-white shadow sm:rounded-lg p-6">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-medium leading-6 text-gray-900 dark:text-white">
+          <h3 className="text-lg font-medium leading-6 text-gray-900">
             Plataformas de Pedidos Online
           </h3>
           <button
             type="button"
             onClick={handleAddDeliveryLink}
-            className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
+            className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md shadow-sm text-white"
+            style={{ backgroundColor: 'var(--accent)' }}
           >
             <svg className="-ml-0.5 mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -558,19 +562,20 @@ function SocialLinksPage() {
         </div>
 
         {deliveryLinks.length === 0 ? (
-          <div className="text-center py-12 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg">
-            <svg className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className="text-center py-12 border-2 border-dashed border-gray-200 rounded-lg">
+            <svg className="mx-auto h-12 w-12 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
             </svg>
-            <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">No hay enlaces de delivery</h3>
-            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+            <h3 className="mt-2 text-sm font-medium text-gray-900">No hay enlaces de delivery</h3>
+            <p className="mt-1 text-sm text-gray-500">
               Añade enlaces a plataformas donde tus clientes puedan hacer pedidos online
             </p>
             <div className="mt-6">
               <button
                 type="button"
                 onClick={handleAddDeliveryLink}
-                className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
+                className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white"
+                style={{ backgroundColor: 'var(--accent)' }}
               >
                 <svg className="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -580,13 +585,13 @@ function SocialLinksPage() {
             </div>
           </div>
         ) : (
-          <ul className="divide-y divide-gray-200 dark:divide-gray-700">
+          <ul className="divide-y divide-gray-200">
             {deliveryLinks.map((link) => {
               const platform = getPlatformInfo(link.platform, 'delivery');
               return (
                 <li key={link.id} className="py-4 flex items-center justify-between">
                   <div className="flex items-center">
-                    <div className="flex-shrink-0 h-10 w-10 bg-gray-100 dark:bg-gray-600 rounded-full flex items-center justify-center">
+                    <div className="flex-shrink-0 h-10 w-10 bg-gray-100 rounded-full flex items-center justify-center">
                       <Image 
                         src={`/delivery/${platform.icon}`} 
                         alt={platform.name} 
@@ -599,10 +604,10 @@ function SocialLinksPage() {
                       />
                     </div>
                     <div className="ml-4">
-                      <div className="text-sm font-medium text-gray-900 dark:text-white">
+                      <div className="text-sm font-medium text-gray-900">
                         {platform.id === "custom" ? link.platform : platform.name}
                       </div>
-                      <div className="text-sm text-blue-600 dark:text-blue-400 truncate">
+                      <div className="text-sm text-blue-600 truncate">
                         <a href={link.url} 
                           target="_blank" 
                           rel="noopener noreferrer" 
@@ -621,7 +626,7 @@ function SocialLinksPage() {
                     <button
                       type="button"
                       onClick={() => handleEditDeliveryLink(link)}
-                      className="inline-flex items-center p-1.5 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700"
+                      className="inline-flex items-center p-1.5 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
                     >
                       <svg className="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -630,7 +635,7 @@ function SocialLinksPage() {
                     <button
                       type="button"
                       onClick={() => link.id && handleDeleteDeliveryLink(link.id)}
-                      className="inline-flex items-center p-1.5 border border-gray-300 dark:border-gray-600 rounded-md text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30"
+                      className="inline-flex items-center p-1.5 border border-gray-300 rounded-md text-red-700 hover:bg-red-50"
                     >
                       <svg className="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -648,16 +653,16 @@ function SocialLinksPage() {
       {showSocialModal && (
         <div className="fixed z-50 inset-0 flex items-center justify-center bg-black bg-opacity-40">
           <div className="relative w-full max-w-lg mx-auto">
-            <div className="bg-white dark:bg-gray-800 rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:p-6">
+            <div className="bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:p-6">
               <div>
                 <div className="mt-3 text-center sm:mt-5">
-                  <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-white">
+                  <h3 className="text-lg leading-6 font-medium text-gray-900">
                     {isEditing ? "Editar red social" : "Añadir red social"}
                   </h3>
                   <div className="mt-2">
                     <form onSubmit={handleSaveSocialLink} className="space-y-4">
                       <div>
-                        <label htmlFor="platform" className="block text-sm font-medium text-gray-700 dark:text-gray-300 text-left">
+                        <label htmlFor="platform" className="block text-sm font-medium text-gray-700 text-left">
                           Plataforma
                         </label>
                         <select
@@ -665,7 +670,7 @@ function SocialLinksPage() {
                           required
                           value={socialForm.platform}
                           onChange={(e) => setSocialForm({...socialForm, platform: e.target.value})}
-                          className="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white"
+                          className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                         >
                           <option value="">Selecciona una plataforma</option>
                           {SOCIAL_PLATFORMS.map((platform) => (
@@ -676,7 +681,7 @@ function SocialLinksPage() {
                         </select>
                       </div>
                       <div>
-                        <label htmlFor="url" className="block text-sm font-medium text-gray-700 dark:text-gray-300 text-left">
+                        <label htmlFor="url" className="block text-sm font-medium text-gray-700 text-left">
                           URL del perfil
                         </label>
                         <input
@@ -685,7 +690,7 @@ function SocialLinksPage() {
                           required
                           value={socialForm.url}
                           onChange={(e) => setSocialForm({...socialForm, url: e.target.value})}
-                          className="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white"
+                          className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                           placeholder="https://instagram.com/turestaurante"
                         />
                       </div>
@@ -693,14 +698,15 @@ function SocialLinksPage() {
                         <button
                           type="button"
                           onClick={() => setShowSocialModal(false)}
-                          className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-600 shadow-sm px-4 py-2 bg-white dark:bg-gray-700 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:col-start-1"
+                          className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:col-start-1"
                         >
                           Cancelar
                         </button>
                         <button
                           type="submit"
                           disabled={saving}
-                          className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:col-start-2 disabled:opacity-50"
+                          className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 text-base font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:col-start-2 disabled:opacity-50"
+                          style={{ backgroundColor: 'var(--accent)' }}
                         >
                           {saving ? "Guardando..." : "Guardar"}
                         </button>
@@ -711,7 +717,7 @@ function SocialLinksPage() {
               </div>
             </div>
             <button
-              className="absolute top-2 right-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+              className="absolute top-2 right-2 text-gray-400 hover:text-gray-600"
               onClick={() => setShowSocialModal(false)}
               aria-label="Cerrar"
             >
@@ -725,16 +731,16 @@ function SocialLinksPage() {
       {showDeliveryModal && (
         <div className="fixed z-50 inset-0 flex items-center justify-center bg-black bg-opacity-40">
           <div className="relative w-full max-w-lg mx-auto">
-            <div className="bg-white dark:bg-gray-800 rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:p-6">
+            <div className="bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:p-6">
               <div>
                 <div className="mt-3 text-center sm:mt-5">
-                  <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-white">
+                  <h3 className="text-lg leading-6 font-medium text-gray-900">
                     {isEditing ? "Editar plataforma de delivery" : "Añadir plataforma de delivery"}
                   </h3>
                   <div className="mt-2">
                     <form onSubmit={handleSaveDeliveryLink} className="space-y-4">
                       <div>
-                        <label htmlFor="delivery-platform" className="block text-sm font-medium text-gray-700 dark:text-gray-300 text-left">
+                        <label htmlFor="delivery-platform" className="block text-sm font-medium text-gray-700 text-left">
                           Plataforma
                         </label>
                         <select
@@ -742,7 +748,7 @@ function SocialLinksPage() {
                           required
                           value={deliveryForm.platform}
                           onChange={(e) => setDeliveryForm({...deliveryForm, platform: e.target.value})}
-                          className="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white"
+                          className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                         >
                           <option value="">Selecciona una plataforma</option>
                           {DELIVERY_PLATFORMS.map((platform) => (
@@ -755,7 +761,7 @@ function SocialLinksPage() {
                       
                       {deliveryForm.platform === "custom" && (
                         <div>
-                          <label htmlFor="custom-name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 text-left">
+                          <label htmlFor="custom-name" className="block text-sm font-medium text-gray-700 text-left">
                             Nombre de la plataforma
                           </label>
                           <input
@@ -764,14 +770,14 @@ function SocialLinksPage() {
                             required={deliveryForm.platform === "custom"}
                             value={deliveryForm.custom_name}
                             onChange={(e) => setDeliveryForm({...deliveryForm, custom_name: e.target.value})}
-                            className="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white"
+                            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                             placeholder="Nombre de la plataforma"
                           />
                         </div>
                       )}
                       
                       <div>
-                        <label htmlFor="delivery-url" className="block text-sm font-medium text-gray-700 dark:text-gray-300 text-left">
+                        <label htmlFor="delivery-url" className="block text-sm font-medium text-gray-700 text-left">
                           URL del perfil o enlace de pedidos
                         </label>
                         <input
@@ -780,7 +786,7 @@ function SocialLinksPage() {
                           required
                           value={deliveryForm.url}
                           onChange={(e) => setDeliveryForm({...deliveryForm, url: e.target.value})}
-                          className="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white"
+                          className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                           placeholder="https://ubereats.com/restaurant/tu-restaurante"
                         />
                       </div>
@@ -788,14 +794,15 @@ function SocialLinksPage() {
                         <button
                           type="button"
                           onClick={() => setShowDeliveryModal(false)}
-                          className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-600 shadow-sm px-4 py-2 bg-white dark:bg-gray-700 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:col-start-1"
+                          className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:col-start-1"
                         >
                           Cancelar
                         </button>
                         <button
                           type="submit"
                           disabled={saving}
-                          className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:col-start-2 disabled:opacity-50"
+                          className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 text-base font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:col-start-2 disabled:opacity-50"
+                          style={{ backgroundColor: 'var(--accent)' }}
                         >
                           {saving ? "Guardando..." : "Guardar"}
                         </button>
@@ -806,7 +813,7 @@ function SocialLinksPage() {
               </div>
             </div>
             <button
-              className="absolute top-2 right-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+              className="absolute top-2 right-2 text-gray-400 hover:text-gray-600"
               onClick={() => setShowDeliveryModal(false)}
               aria-label="Cerrar"
             >

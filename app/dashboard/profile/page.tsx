@@ -319,10 +319,10 @@ export default function ProfilePage() {
     <div>
       <div className="md:flex md:items-center md:justify-between mb-6">
         <div className="min-w-0 flex-1">
-          <h2 className="text-2xl font-bold leading-7 text-gray-900 dark:text-white sm:truncate sm:text-3xl">
+          <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl">
             Editar Perfil
           </h2>
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+          <p className="mt-1 text-sm text-gray-500">
             Personaliza la información y apariencia de tu restaurante.
           </p>
         </div>
@@ -332,8 +332,8 @@ export default function ProfilePage() {
         <div
           className={`p-4 mb-6 rounded-md ${
             saveMessage.type === "success"
-              ? "bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400"
-              : "bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400"
+              ? "bg-green-50 text-green-700"
+              : "bg-red-50 text-red-700"
           }`}
         >
           {saveMessage.message}
@@ -341,8 +341,8 @@ export default function ProfilePage() {
       )}
 
       <form onSubmit={handleSubmit} className="space-y-8">
-        <div className="bg-white dark:bg-gray-800 shadow sm:rounded-lg p-6">
-          <h3 className="text-lg font-medium leading-6 text-gray-900 dark:text-white mb-4">
+        <div className="bg-white shadow sm:rounded-lg p-6">
+          <h3 className="text-lg font-medium leading-6 text-gray-900 mb-4">
             Información del Negocio
           </h3>
 
@@ -350,7 +350,7 @@ export default function ProfilePage() {
             <div className="sm:col-span-4">
               <label
                 htmlFor="name"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                className="block text-sm font-medium text-gray-700"
               >
                 Nombre del negocio
               </label>
@@ -362,7 +362,7 @@ export default function ProfilePage() {
                   required
                   value={formData.name}
                   onChange={handleInputChange}
-                  className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md"
+                  className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
                 />
               </div>
             </div>
@@ -370,7 +370,7 @@ export default function ProfilePage() {
             <div className="sm:col-span-6">
               <label
                 htmlFor="description"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                className="block text-sm font-medium text-gray-700"
               >
                 Descripción
               </label>
@@ -381,10 +381,10 @@ export default function ProfilePage() {
                   rows={3}
                   value={formData.description}
                   onChange={handleInputChange}
-                  className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md"
+                  className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
                 />
               </div>
-              <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+              <p className="mt-2 text-sm text-gray-500">
                 Breve descripción que se mostrará en tu página
               </p>
             </div>
@@ -392,12 +392,12 @@ export default function ProfilePage() {
             <div className="sm:col-span-4">
               <label
                 htmlFor="slug"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                className="block text-sm font-medium text-gray-700"
               >
                 URL personalizada
               </label>
               <div className="mt-1 flex rounded-md shadow-sm">
-                <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 dark:border-gray-600 dark:bg-gray-700 bg-gray-50 text-gray-500 dark:text-gray-400 sm:text-sm">
+                <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">
                   menulink.com/r/
                 </span>
                 <input
@@ -407,24 +407,24 @@ export default function ProfilePage() {
                   required
                   value={formData.slug}
                   onChange={handleInputChange}
-                  className="focus:ring-blue-500 focus:border-blue-500 flex-1 block w-full rounded-none rounded-r-md sm:text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                  className="focus:ring-blue-500 focus:border-blue-500 flex-1 block w-full rounded-none rounded-r-md sm:text-sm border-gray-300"
                 />
               </div>
-              <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+              <p className="mt-2 text-sm text-gray-500">
                 Esta será la URL donde tus clientes podrán ver tu menú
               </p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white dark:bg-gray-800 shadow sm:rounded-lg p-6">
-          <h3 className="text-lg font-medium leading-6 text-gray-900 dark:text-white mb-4">
+        <div className="bg-white shadow sm:rounded-lg p-6">
+          <h3 className="text-lg font-medium leading-6 text-gray-900 mb-4">
             Imágenes y Marca
           </h3>
 
           <div className="grid grid-cols-1 gap-y-6 sm:grid-cols-6 sm:gap-x-6">
             <div className="sm:col-span-6">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label className="block text-sm font-medium text-gray-700">
                 Logo
               </label>
               <div className="mt-1 flex items-center">
@@ -451,8 +451,8 @@ export default function ProfilePage() {
                     </button>
                   </div>
                 ) : (
-                  <span className="h-16 w-16 overflow-hidden bg-gray-100 dark:bg-gray-700 rounded-md flex items-center justify-center">
-                    <svg className="h-8 w-8 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <span className="h-16 w-16 overflow-hidden bg-gray-100 rounded-md flex items-center justify-center">
+                    <svg className="h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
                   </span>
@@ -460,7 +460,7 @@ export default function ProfilePage() {
                 <button
                   type="button"
                   onClick={() => logoInputRef.current?.click()}
-                  className="ml-5 bg-white dark:bg-gray-700 py-2 px-3 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm leading-4 font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  className="ml-5 bg-white py-2 px-3 border border-gray-300 rounded-md shadow-sm text-sm leading-4 font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                 >
                   Cambiar
                 </button>
@@ -472,13 +472,13 @@ export default function ProfilePage() {
                   className="hidden"
                 />
               </div>
-              <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+              <p className="mt-2 text-sm text-gray-500">
                 Logotipo de tu negocio (recomendado: 400x400px)
               </p>
             </div>
 
             <div className="sm:col-span-6">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label className="block text-sm font-medium text-gray-700">
                 Imagen de portada
               </label>
               <div className="mt-1">
@@ -505,12 +505,12 @@ export default function ProfilePage() {
                     </button>
                   </div>
                 ) : (
-                  <div onClick={() => coverInputRef.current?.click()} className="h-32 flex items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-md cursor-pointer bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600">
+                  <div onClick={() => coverInputRef.current?.click()} className="h-32 flex items-center justify-center border-2 border-dashed border-gray-300 rounded-md cursor-pointer bg-gray-50 hover:bg-gray-100">
                     <div className="space-y-1 text-center">
-                      <svg className="mx-auto h-8 w-8 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <svg className="mx-auto h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                       </svg>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                      <p className="text-sm text-gray-500">
                         Haz clic para subir una imagen de portada
                       </p>
                     </div>
@@ -524,24 +524,24 @@ export default function ProfilePage() {
                   className="hidden"
                 />
               </div>
-              <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+              <p className="mt-2 text-sm text-gray-500">
                 Imagen destacada para tu página (recomendado: 1200x400px)
               </p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white dark:bg-gray-800 shadow sm:rounded-lg p-6">
-          <h3 className="text-lg font-medium leading-6 text-gray-900 dark:text-white mb-4">
+        <div className="bg-white shadow sm:rounded-lg p-6">
+          <h3 className="text-lg font-medium leading-6 text-gray-900 mb-4">
             Diseño de la página
           </h3>
 
           <div className="grid grid-cols-1 gap-y-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Selecciona el diseño para tu página
               </label>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+              <p className="text-sm text-gray-500 mb-4">
                 Cada diseño tiene un estilo diferente que se adapta a distintos tipos de negocios
               </p>
 
@@ -570,11 +570,11 @@ export default function ProfilePage() {
                         onChange={() => handleTemplateTypeChange('traditional')}
                         className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
                       />
-                      <label className="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                      <label className="ml-2 text-sm font-medium text-gray-700">
                         Tradicional
                       </label>
                     </div>
-                    <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                    <p className="mt-1 text-xs text-gray-500">
                       Ideal para restaurantes clásicos y familiares
                     </p>
                   </div>
@@ -604,11 +604,11 @@ export default function ProfilePage() {
                         onChange={() => handleTemplateTypeChange('minimalist')}
                         className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
                       />
-                      <label className="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                      <label className="ml-2 text-sm font-medium text-gray-700">
                         Minimalista
                       </label>
                     </div>
-                    <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                    <p className="mt-1 text-xs text-gray-500">
                       Perfecto para cafés modernos y bares
                     </p>
                   </div>
@@ -638,11 +638,11 @@ export default function ProfilePage() {
                         onChange={() => handleTemplateTypeChange('visual')}
                         className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
                       />
-                      <label className="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                      <label className="ml-2 text-sm font-medium text-gray-700">
                         Visual
                       </label>
                     </div>
-                    <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                    <p className="mt-1 text-xs text-gray-500">
                       Ideal para restaurantes gourmet y de autor
                     </p>
                   </div>
@@ -652,8 +652,8 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        <div className="bg-white dark:bg-gray-800 shadow sm:rounded-lg p-6">
-          <h3 className="text-lg font-medium leading-6 text-gray-900 dark:text-white mb-4">
+        <div className="bg-white shadow sm:rounded-lg p-6">
+          <h3 className="text-lg font-medium leading-6 text-gray-900 mb-4">
             Personalización
           </h3>
 
@@ -661,7 +661,7 @@ export default function ProfilePage() {
             <div className="sm:col-span-3">
               <label
                 htmlFor="themeColor"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                className="block text-sm font-medium text-gray-700"
               >
                 Color principal
               </label>
@@ -672,17 +672,17 @@ export default function ProfilePage() {
                   id="themeColor"
                   value={formData.themeColor}
                   onChange={handleInputChange}
-                  className="h-8 w-8 rounded-md border border-gray-300 dark:border-gray-600"
+                  className="h-8 w-8 rounded-md border border-gray-300"
                 />
                 <input
                   type="text"
                   value={formData.themeColor}
                   onChange={handleInputChange}
                   name="themeColor"
-                  className="ml-2 shadow-sm focus:ring-blue-500 focus:border-blue-500 block sm:text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md"
+                  className="ml-2 shadow-sm focus:ring-blue-500 focus:border-blue-500 block sm:text-sm border-gray-300 rounded-md"
                 />
               </div>
-              <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+              <p className="mt-2 text-sm text-gray-500">
                 Color principal para botones y acentos
               </p>
             </div>
@@ -690,7 +690,7 @@ export default function ProfilePage() {
             <div className="sm:col-span-3">
               <label
                 htmlFor="secondaryColor"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                className="block text-sm font-medium text-gray-700"
               >
                 Color secundario
               </label>
@@ -701,17 +701,17 @@ export default function ProfilePage() {
                   id="secondaryColor"
                   value={formData.secondaryColor}
                   onChange={handleInputChange}
-                  className="h-8 w-8 rounded-md border border-gray-300 dark:border-gray-600"
+                  className="h-8 w-8 rounded-md border border-gray-300"
                 />
                 <input
                   type="text"
                   value={formData.secondaryColor}
                   onChange={handleInputChange}
                   name="secondaryColor"
-                  className="ml-2 shadow-sm focus:ring-blue-500 focus:border-blue-500 block sm:text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md"
+                  className="ml-2 shadow-sm focus:ring-blue-500 focus:border-blue-500 block sm:text-sm border-gray-300 rounded-md"
                 />
               </div>
-              <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+              <p className="mt-2 text-sm text-gray-500">
                 Color secundario para detalles y fondos
               </p>
             </div>
@@ -719,7 +719,7 @@ export default function ProfilePage() {
             <div className="sm:col-span-4">
               <label
                 htmlFor="fontFamily"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                className="block text-sm font-medium text-gray-700"
               >
                 Fuente
               </label>
@@ -729,7 +729,7 @@ export default function ProfilePage() {
                   name="fontFamily"
                   value={formData.fontFamily}
                   onChange={handleInputChange}
-                  className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md"
+                  className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
                 >
                   {fontOptions.map((font) => (
                     <option key={font.value} value={font.value}>
@@ -738,7 +738,7 @@ export default function ProfilePage() {
                   ))}
                 </select>
               </div>
-              <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+              <p className="mt-2 text-sm text-gray-500">
                 Tipo de letra para el texto de tu menú
               </p>
             </div>
@@ -748,14 +748,15 @@ export default function ProfilePage() {
         <div className="flex justify-end">
           <button
             type="button"
-            className="bg-white dark:bg-gray-700 py-2 px-4 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            className="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
           >
             Cancelar
           </button>
           <button
             type="submit"
             disabled={saving}
-            className="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+            className="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white"
+            style={{ backgroundColor: 'var(--accent)' }}
           >
             {saving ? "Guardando..." : "Guardar cambios"}
           </button>

@@ -15,7 +15,7 @@ function LanguageModal({ open, onSelect }: { open: boolean; onSelect: (lang: str
   if (!open) return null;
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-8 max-w-xs w-full text-center">
+      <div className="bg-white rounded-xl shadow-lg p-8 max-w-xs w-full text-center">
         <h2 className="text-lg font-bold mb-4">{t('seleccionar_idioma')}</h2>
         <div className="flex justify-center gap-4 mb-4">
           <button onClick={() => onSelect('es')} className="focus:outline-none">
@@ -336,8 +336,8 @@ export default function OnboardingPage() {
             name: formData.restaurantName,
             slug: formData.slug,
             restaurant_type: formData.restaurantType,
-            theme_color: '#3B82F6', // Color azul por defecto
-            secondary_color: '#1E40AF',
+            theme_color: 'var(--accent)', // Color de acento
+            secondary_color: 'var(--accent-hover)',
             font_family: 'Inter, sans-serif',
             subscription_tier: 'free',
             reservation_mode: formData.reservationMode, // Guardar la configuración del formulario de reservas
@@ -477,16 +477,16 @@ export default function OnboardingPage() {
       {/* Header con pasos de progreso */}
       {currentStep < 4 && (
         <div className="mb-8">
-          <h1 className="text-2xl font-bold text-center text-gray-900 dark:text-white">
+          <h1 className="text-2xl font-bold text-center text-gray-900">
             Configura tu restaurante en MenuLink
           </h1>
           <div className="mt-4 flex flex-col md:flex-row md:items-center md:justify-center gap-4">
             <div>
-              <label htmlFor="language" className="block text-md font-medium text-gray-900 dark:text-white">Idioma del dashboard</label>
+              <label htmlFor="language" className="block text-md font-medium text-gray-900">Idioma del dashboard</label>
               <select
                 id="language"
                 name="language"
-                className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
                 value={language}
                 onChange={e => setLanguage(e.target.value)}
               >
@@ -494,7 +494,7 @@ export default function OnboardingPage() {
                 <option value="es">Español</option>
                 <option value="fr">Français</option>
               </select>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              <p className="text-xs text-gray-500 mt-1">
                 Este idioma se usará en todo el panel de administración y, si no activas el selector público, también en la web pública.
               </p>
             </div>
@@ -507,12 +507,12 @@ export default function OnboardingPage() {
                 onChange={e => setEnableLanguageSelector(e.target.checked)}
                 className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
               />
-              <label htmlFor="enable-language-selector" className="ml-2 block text-sm text-gray-900 dark:text-gray-300">
+              <label htmlFor="enable-language-selector" className="ml-2 block text-sm text-gray-900">
                 Permitir a los clientes elegir idioma en la web pública
               </label>
             </div>
           </div>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 text-center">
+          <p className="text-xs text-gray-500 mt-1 text-center">
             Si activas esta opción, aparecerá un pequeño selector de idioma en la web pública (abajo a la izquierda). Si no, la web pública usará el idioma del dashboard.
           </p>
           <div className="mt-8">
@@ -555,7 +555,7 @@ export default function OnboardingPage() {
       )}
 
       {/* Contenido del paso actual */}
-      <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
+      <div className="bg-white shadow rounded-lg p-6">
         {currentStep === 1 && (
           <Step1BasicInfo 
             formData={formData} 
@@ -592,7 +592,7 @@ export default function OnboardingPage() {
             <button
               type="button"
               onClick={prevStep}
-              className={`px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 ${currentStep === 1 ? 'invisible' : ''}`}
+              className={`px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 ${currentStep === 1 ? 'invisible' : ''}`}
             >
               Atrás
             </button>
@@ -601,7 +601,8 @@ export default function OnboardingPage() {
               type="button"
               onClick={nextStep}
               disabled={loading}
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white"
+              style={{ backgroundColor: 'var(--accent)' }}
             >
               {loading ? (
                 <>

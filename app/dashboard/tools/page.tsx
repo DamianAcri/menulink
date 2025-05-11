@@ -344,15 +344,16 @@ export default function ToolsPage() {
   if (!restaurant) {
     return (
       <div className="text-center py-12">
-        <h2 className="text-xl font-medium text-gray-900 dark:text-white">
+        <h2 className="text-xl font-medium text-gray-900">
           Necesitas completar la configuración de tu restaurante
         </h2>
-        <p className="mt-2 text-gray-600 dark:text-gray-400">
+        <p className="mt-2 text-gray-500">
           Antes de acceder a las herramientas, completa la información básica de tu restaurante.
         </p>
         <button
           onClick={() => window.location.href = "/dashboard"}
-          className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
+          className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white"
+          style={{ backgroundColor: 'var(--accent)' }}
         >
           Ir al dashboard
         </button>
@@ -363,31 +364,31 @@ export default function ToolsPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h2 className="text-2xl font-bold leading-7 text-gray-900 dark:text-white sm:truncate sm:text-3xl">
+        <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl">
           Herramientas
         </h2>
-        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+        <p className="mt-1 text-sm text-gray-500">
           Utilidades para promocionar y gestionar tu menú digital.
         </p>
       </div>
 
       {/* Generador de enlaces personalizados para campañas */}
-      <div className="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-lg">
+      <div className="bg-white shadow overflow-hidden sm:rounded-lg">
         <div className="px-4 py-5 sm:p-6">
-          <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-white flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <h3 className="text-lg leading-6 font-medium text-gray-900 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
             </svg>
             Generador de enlaces para campañas
           </h3>
-          <div className="mt-2 max-w-xl text-sm text-gray-500 dark:text-gray-400">
+          <div className="mt-2 max-w-xl text-sm text-gray-500">
             <p>
               Crea URLs personalizadas para tus campañas de marketing y rastrea su efectividad.
             </p>
           </div>
           <div className="mt-5 space-y-4">
             <div>
-              <label htmlFor="campaign-url" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label htmlFor="campaign-url" className="block text-sm font-medium text-gray-700">
                 URL base
               </label>
               <input
@@ -396,12 +397,12 @@ export default function ToolsPage() {
                 id="campaign-url"
                 value={campaignUrl}
                 onChange={(e) => setCampaignUrl(e.target.value)}
-                className="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white"
+                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
               />
             </div>
             <div className="grid grid-cols-1 gap-y-4 sm:grid-cols-2 sm:gap-x-4">
               <div>
-                <label htmlFor="campaign-source" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label htmlFor="campaign-source" className="block text-sm font-medium text-gray-700">
                   Fuente
                 </label>
                 <select
@@ -409,7 +410,7 @@ export default function ToolsPage() {
                   name="campaign-source"
                   value={campaignSource}
                   onChange={(e) => setCampaignSource(e.target.value)}
-                  className="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white"
+                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 >
                   <option value="instagram">Instagram</option>
                   <option value="facebook">Facebook</option>
@@ -422,7 +423,7 @@ export default function ToolsPage() {
                 </select>
               </div>
               <div>
-                <label htmlFor="campaign-name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label htmlFor="campaign-name" className="block text-sm font-medium text-gray-700">
                   Nombre de campaña
                 </label>
                 <input
@@ -431,7 +432,7 @@ export default function ToolsPage() {
                   id="campaign-name"
                   value={campaignName}
                   onChange={(e) => setCampaignName(e.target.value)}
-                  className="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white"
+                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                   placeholder="ej. primavera_2025"
                 />
               </div>
@@ -440,19 +441,21 @@ export default function ToolsPage() {
               <button
                 type="button"
                 onClick={generateCampaignUrl}
-                className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white"
+                style={{ backgroundColor: 'var(--accent)' }}
               >
                 Generar enlace
               </button>
             </div>
             {generatedCampaignUrl && (
-              <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-md">
+              <div className="mt-4 p-3 bg-gray-50 rounded-md">
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-800 dark:text-gray-200 break-all">{generatedCampaignUrl}</span>
+                  <span className="text-sm text-gray-800 break-all">{generatedCampaignUrl}</span>
                   <button
                     type="button"
                     onClick={() => copyToClipboard(generatedCampaignUrl)}
-                    className="ml-2 inline-flex items-center p-1 border border-transparent rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
+                    className="ml-2 inline-flex items-center p-1 border border-transparent rounded-md shadow-sm text-white"
+                    style={{ backgroundColor: 'var(--accent)' }}
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
@@ -466,15 +469,15 @@ export default function ToolsPage() {
       </div>
 
       {/* Generador de códigos QR */}
-      <div className="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-lg">
+      <div className="bg-white shadow overflow-hidden sm:rounded-lg">
         <div className="px-4 py-5 sm:p-6">
-          <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-white flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <h3 className="text-lg leading-6 font-medium text-gray-900 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 6h1m-7 7v1m-7-7H4m16-5v1m0 7v1M5 9.5V8m12 .5V8m-2.503 3h.01M9.503 11h.01M7.003 15h.01M18.003 15h.01M17.003 13h.01" />
             </svg>
             Generador de códigos QR
           </h3>
-          <div className="mt-2 max-w-xl text-sm text-gray-500 dark:text-gray-400">
+          <div className="mt-2 max-w-xl text-sm text-gray-500">
             <p>
               Crea códigos QR personalizados para tu menú digital. Puedes personalizarlos con tus colores corporativos.
             </p>
@@ -482,7 +485,7 @@ export default function ToolsPage() {
           <div className="mt-5 grid grid-cols-1 gap-y-6 sm:grid-cols-2 sm:gap-x-8">
             <div className="space-y-4">
               <div>
-                <label htmlFor="qr-color" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label htmlFor="qr-color" className="block text-sm font-medium text-gray-700">
                   Color del QR
                 </label>
                 <div className="mt-1 flex items-center">
@@ -492,13 +495,13 @@ export default function ToolsPage() {
                     id="qr-color"
                     value={qrColor}
                     onChange={(e) => setQrColor(e.target.value)}
-                    className="h-8 w-16 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    className="h-8 w-16 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                   />
                   <div className="ml-2">
                     <button
                       type="button"
                       onClick={() => setQrColor(restaurant.theme_color || "#000000")}
-                      className="inline-flex items-center px-2.5 py-1.5 border border-gray-300 dark:border-gray-600 shadow-sm text-xs font-medium rounded text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                      className="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                     >
                       Usar color principal
                     </button>
@@ -506,7 +509,7 @@ export default function ToolsPage() {
                 </div>
               </div>
               <div>
-                <label htmlFor="qr-bg-color" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label htmlFor="qr-bg-color" className="block text-sm font-medium text-gray-700">
                   Color de fondo
                 </label>
                 <div className="mt-1 flex items-center">
@@ -516,12 +519,12 @@ export default function ToolsPage() {
                     id="qr-bg-color"
                     value={qrBgColor}
                     onChange={(e) => setQrBgColor(e.target.value)}
-                    className="h-8 w-16 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    className="h-8 w-16 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
               </div>
               <div>
-                <label htmlFor="qr-size" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label htmlFor="qr-size" className="block text-sm font-medium text-gray-700">
                   Tamaño: {qrSize}px
                 </label>
                 <input
@@ -543,9 +546,9 @@ export default function ToolsPage() {
                   type="checkbox"
                   checked={qrLogo}
                   onChange={(e) => setQrLogo(e.target.checked)}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded"
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                 />
-                <label htmlFor="show-logo" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
+                <label htmlFor="show-logo" className="ml-2 block text-sm text-gray-700">
                   Mostrar logo en el centro
                 </label>
               </div>
@@ -553,13 +556,14 @@ export default function ToolsPage() {
                 <button
                   type="button"
                   onClick={() => downloadQrCode('png')}
-                  className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 mr-2"
+                  className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md shadow-sm text-white"
+                  style={{ backgroundColor: 'var(--accent)' }}
                 >
                   Descargar PNG
                 </button>
               </div>
             </div>
-            <div className="flex justify-center items-center p-4 bg-white dark:bg-gray-700 rounded-md">
+            <div className="flex justify-center items-center p-4 bg-white rounded-md">
               <div ref={qrCodeRef} className="qr-container">
                 <QRCodeCanvas
                   value={`https://menulink.com/r/${restaurant.slug}`}
@@ -584,15 +588,15 @@ export default function ToolsPage() {
       </div>
 
       {/* Descarga del menú en PDF */}
-      <div className="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-lg">
+      <div className="bg-white shadow overflow-hidden sm:rounded-lg">
         <div className="px-4 py-5 sm:p-6">
-          <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-white flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <h3 className="text-lg leading-6 font-medium text-gray-900 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
             </svg>
             Descargar menú en PDF
           </h3>
-          <div className="mt-2 max-w-xl text-sm text-gray-500 dark:text-gray-400">
+          <div className="mt-2 max-w-xl text-sm text-gray-500">
             <p>
               Genera una versión PDF de tu menú para imprimir o compartir digitalmente. El PDF incluirá un código QR para que tus clientes puedan acceder a la versión digital actualizada.
             </p>
@@ -601,7 +605,8 @@ export default function ToolsPage() {
             <button
               type="button"
               onClick={downloadMenuAsPdf}
-              className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white"
+              style={{ backgroundColor: 'var(--accent)' }}
             >
               <svg className="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -614,15 +619,15 @@ export default function ToolsPage() {
 
 
       {/* Soporte y sugerencias */}
-      <div className="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-lg">
+      <div className="bg-white shadow overflow-hidden sm:rounded-lg">
         <div className="px-4 py-5 sm:p-6">
-          <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-white flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <h3 className="text-lg leading-6 font-medium text-gray-900 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             Soporte y sugerencias
           </h3>
-          <div className="mt-2 max-w-xl text-sm text-gray-500 dark:text-gray-400">
+          <div className="mt-2 max-w-xl text-sm text-gray-500">
             <p>
               ¿Necesitas ayuda o tienes alguna sugerencia para mejorar nuestra plataforma? Ponte en contacto con nosotros.
             </p>
@@ -632,18 +637,19 @@ export default function ToolsPage() {
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
               </svg>
-              <span className="text-gray-800 dark:text-gray-200">soporte@menulink.com</span>
+              <span className="text-gray-800">soporte@menulink.com</span>
             </div>
             <div className="flex items-center space-x-2">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
               </svg>
-              <span className="text-gray-800 dark:text-gray-200">+34 912 345 678</span>
+              <span className="text-gray-800">+34 912 345 678</span>
             </div>
             <div className="pt-2">
               <a 
                 href={`mailto:damianacricort@gmail.com?subject=Soporte MenuLink - ${restaurant?.name || ''}`}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white"
+                style={{ backgroundColor: 'var(--accent)' }}
               >
                 Contactar soporte
               </a>
@@ -653,15 +659,15 @@ export default function ToolsPage() {
       </div>
 
       {/* Configuración de notificaciones */}
-      <div className="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-lg">
+      <div className="bg-white shadow overflow-hidden sm:rounded-lg">
         <div className="px-4 py-5 sm:p-6">
-          <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-white flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <h3 className="text-lg leading-6 font-medium text-gray-900 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
             </svg>
             Notificaciones por email
           </h3>
-          <div className="mt-2 max-w-xl text-sm text-gray-500 dark:text-gray-400">
+          <div className="mt-2 max-w-xl text-sm text-gray-500">
             <p>
               Configura tus preferencias de notificaciones para recibir información importante sobre tu menú digital.
             </p>
@@ -674,9 +680,9 @@ export default function ToolsPage() {
                 type="checkbox"
                 checked={emailNotifications}
                 onChange={(e) => setEmailNotifications(e.target.checked)}
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded"
+                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
               />
-              <label htmlFor="email-notifications" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
+              <label htmlFor="email-notifications" className="ml-2 block text-sm text-gray-700">
                 Recibir resumen semanal de visitas a mi menú
               </label>
             </div>
@@ -684,7 +690,8 @@ export default function ToolsPage() {
               <button
                 type="button"
                 onClick={saveNotificationPreferences}
-                className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white"
+                style={{ backgroundColor: 'var(--accent)' }}
               >
                 Guardar preferencias
               </button>

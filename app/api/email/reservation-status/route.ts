@@ -31,6 +31,18 @@ export async function POST(request: NextRequest) {
       reservation,
       status
     });
+    // Registrar en email_logs
+    const { error: logErrorStatus } = await supabase.from('email_logs').insert({
+      reservation_id: reservation.id,
+      restaurant_id: reservation.restaurant_id,
+      customer_email: clientEmail,
+      type: 'reservation_status',
+      status: 'sent',
+      sent_at: new Date().toISOString()
+    });
+    if (logErrorStatus) {
+      console.error('Error al registrar el envío de correo de estado de reserva:', logErrorStatus);
+    }
     if (!emailResult || emailResult.rejected?.length > 0) {
       return NextResponse.json({ error: 'Error al enviar el correo', details: emailResult?.response || 'Failed to send email' }, { status: 500 });
     }
