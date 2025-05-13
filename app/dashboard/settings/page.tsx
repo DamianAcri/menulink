@@ -296,43 +296,6 @@ export default function ConfigPage() {
                 </label>
               </div>
             </div>
-            {reservationMode === 'form' && (
-              <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 mt-4">
-                <h4 className="text-md font-medium text-gray-900 mb-3">Configuración básica de reservas</h4>
-                <div className="mb-4">
-                  <label htmlFor="max-party-size" className="block text-sm font-medium text-gray-700 mb-1">
-                    Tamaño máximo de grupo
-                  </label>
-                  <div className="flex items-center">
-                    <input
-                      type="number"
-                      id="max-party-size"
-                      min="1"
-                      max="50"
-                      value={maxPartySize}
-                      onChange={(e) => setMaxPartySize(parseInt(e.target.value) || 1)}
-                      className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-20 sm:text-sm border-gray-300 rounded-md"
-                    />
-                    <span className="ml-2 text-sm text-gray-500">personas</span>
-                  </div>
-                  <p className="text-xs text-gray-500 mt-1">
-                    Este es el número máximo de personas que un cliente puede seleccionar al hacer una reserva
-                  </p>
-                </div>
-                <div className="flex justify-between items-center">
-                  <p className="text-sm text-gray-600">
-                    Para gestionar las franjas horarias de reservas, ve a la página de Reservas.
-                  </p>
-                  <button 
-                    type="button"
-                    onClick={goToReservationsPage}
-                    className="button-primary"
-                  >
-                    Gestionar horarios
-                  </button>
-                </div>
-              </div>
-            )}
           </div>
           {/* Notificaciones por email al restaurante */}
           <div className="flex items-center mt-4">

@@ -7,6 +7,7 @@ import { Calendar as CalendarIcon, Clock, Plus, Settings, Users, Filter, Search,
 import { format, isSameDay, isToday, parseISO } from "date-fns";
 import { es } from "date-fns/locale/es";
 import { useReservationToast } from "../layout";
+import { useRouter } from "next/navigation";
 
 type Reservation = {
   id: string;
@@ -92,6 +93,7 @@ export default function ReservationsPage() {
   );
 
   const { setLastCreatedReservationId } = useReservationToast();
+  const router = useRouter();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -589,7 +591,7 @@ export default function ReservationsPage() {
               <button onClick={() => setActiveTab('list')} className={`button-outline font-medium ${activeTab === 'list' ? 'border-b-2 border-primary text-primary' : ''}`}>Listado</button>
             </div>
             <div className="flex gap-2 w-full md:w-auto justify-end">
-              <button onClick={() => setShowTimeSlotsSection(true)} className="button-outline flex items-center gap-1"><Clock className="h-4 w-4" />Gestionar horarios</button>
+              <button onClick={() => router.push('/dashboard/schedule')} className="button-outline flex items-center gap-1"><Clock className="h-4 w-4" />Gestionar horarios</button>
               <button onClick={() => setShowNewReservationDialog(true)} className="button-primary flex items-center gap-1"><Plus className="h-4 w-4" />Nueva reserva</button>
             </div>
           </div>
