@@ -32,7 +32,8 @@ async function trackPageView(restaurantId: string) {
 }
 
 type RestaurantPageProps = {
-  params: Promise<{ slug: string }>
+  params: Promise<{ slug: string }>,
+  searchParams?: { [key: string]: string | string[] | undefined }
 }
 
 // Define los tipos para los datos anidados
@@ -64,6 +65,15 @@ interface MenuCategory {
 export default async function RestaurantPage(props: RestaurantPageProps) {
   try {
     const { slug } = await props.params;
+    const searchParams = props.searchParams ? await props.searchParams : {};
+    let isPreview = false;
+    if (searchParams.preview) {
+      if (Array.isArray(searchParams.preview)) {
+        isPreview = searchParams.preview[0] === '1';
+      } else {
+        isPreview = searchParams.preview === '1';
+      }
+    }
     
     // Comprobar valores de conexión (sin mostrar claves completas por seguridad)
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -224,7 +234,9 @@ export default async function RestaurantPage(props: RestaurantPageProps) {
       }));
     }
 
-    await trackPageView(restaurant.id);
+    if (!isPreview) {
+      await trackPageView(restaurant.id);
+    }
 
     const themeColors = {
       primary: restaurant.theme_color || '#3b82f6',

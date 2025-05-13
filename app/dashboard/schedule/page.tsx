@@ -235,6 +235,14 @@ export default function SchedulePage() {
     if (!error) {
       toast.success("Horario eliminado correctamente");
       loadTimeSlots();
+    } else if (
+      error.code === '409' ||
+      (error.message && (
+        error.message.includes('violates foreign key constraint') ||
+        error.message.includes('constraint')
+      ))
+    ) {
+      toast.error("No puedes eliminar esta franja porque tiene reservas asociadas.");
     } else {
       toast.error("Error al eliminar horario");
     }

@@ -53,7 +53,7 @@ const PreviewComplete: React.FC<PreviewCompleteProps> = ({ restaurantSlug, finis
         </div>
         <div className="h-96 bg-white dark:bg-gray-900 relative">
           <iframe
-            src={`/r/${restaurantSlug}`}
+            src={`/r/${restaurantSlug}?preview=1`}
             className="absolute inset-0 w-full h-full border-0"
             title="Vista previa del menú"
           ></iframe>

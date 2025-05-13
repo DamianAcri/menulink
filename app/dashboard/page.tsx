@@ -171,7 +171,7 @@ export default function Dashboard() {
               <div className="bg-soft p-4">
                 <div className="relative h-80 md:h-96 rounded-lg overflow-hidden border">
                   <iframe
-                    src={`/r/${restaurant.slug}`}
+                    src={`/r/${restaurant.slug}?preview=1`}
                     className="absolute inset-0 w-full h-full border-0"
                     title="Vista previa del menú"
                   ></iframe>
