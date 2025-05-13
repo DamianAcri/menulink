@@ -222,6 +222,8 @@ export default function DashboardLayout({
 
   return (
     <ReservationToastContext.Provider value={{ lastCreatedReservationId, setLastCreatedReservationId }}>
+      {/* Toaster de Sonner para mostrar los toasts globales */}
+      <Toaster position="bottom-right" richColors />
       <div className="min-h-screen bg-white">
         {/* NAVBAR SUPERIOR */}
         <nav

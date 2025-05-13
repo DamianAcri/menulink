@@ -515,17 +515,21 @@ export default function ReservationsPage() {
     // Si se marcó añadir al CRM, intentar añadir el cliente (si no existe)
     if (newReservation.addToCRM) {
       // Comprobar si ya existe el cliente
-      const { data: existing } = await supabase
+      const { data: existing, error: existingError } = await supabase
         .from("customers")
         .select("id")
         .eq("restaurant_id", restaurant.id)
         .eq("email", newReservation.customer_email)
         .maybeSingle();
+      if (existingError) {
+        toast.error("Error comprobando cliente en CRM: " + existingError.message);
+        console.error("Error comprobando cliente en CRM:", existingError);
+      }
       if (!existing) {
         // Separar nombre y apellidos (simple)
         const [first_name, ...rest] = newReservation.customer_name.trim().split(" ");
         const last_name = rest.join(" ") || "-";
-        await supabase.from("customers").insert([
+        const { error: insertError } = await supabase.from("customers").insert([
           {
             restaurant_id: restaurant.id,
             first_name,
@@ -534,6 +538,14 @@ export default function ReservationsPage() {
             phone: newReservation.customer_phone || null,
           }
         ]);
+        if (insertError) {
+          toast.error("Error guardando cliente en CRM: " + insertError.message);
+          console.error("Error guardando cliente en CRM:", insertError);
+        } else {
+          toast.success("Cliente guardado en CRM");
+        }
+      } else {
+        toast("El cliente ya existe en el CRM");
       }
     }
     setNewReservation({
