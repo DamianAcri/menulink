@@ -1,13 +1,15 @@
 "use client";
 
 import type React from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Search, Plus, Download, Edit, Trash2 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Checkbox } from "../../components/ui/checkbox";
 import { Textarea } from "../../components/ui/textarea";
 import { Badge } from "../../components/ui/badge";
+import { supabase } from "@/lib/supabase";
+import { useRouter } from "next/navigation";
 
 interface Cliente {
   id: string;
@@ -34,24 +36,60 @@ export default function CRM() {
     telefono: "",
     notas: "",
   });
+  const [clientes, setClientes] = useState<Cliente[]>([]);
+  const router = useRouter();
 
-  const [clientes, setClientes] = useState<Cliente[]>([
-    {
-      id: "1",
-      nombre: "cosiña",
-      apellidos: "",
-      email: "cosil@gmail.com",
-      telefono: "31231231",
-      notas: "",
-      fechaAlta: "8 de mayo de 2025, 18:39",
-      reservas: [
-        {
-          fecha: "10 de mayo de 2025 13:00h",
-          estado: "Pending",
-        },
-      ],
-    },
-  ]);
+  useEffect(() => {
+    // Obtener el usuario y restaurante actual
+    async function fetchClientes() {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+      const { data: restaurant } = await supabase
+        .from("restaurants")
+        .select("id")
+        .eq("user_id", session.user.id)
+        .single();
+      if (!restaurant) return;
+      // Obtener clientes reales del CRM
+      const { data: customers, error } = await supabase
+        .from("customers")
+        .select("id, first_name, last_name, email, phone, notes, created_at")
+        .eq("restaurant_id", restaurant.id)
+        .order("created_at", { ascending: false });
+      if (error) {
+        setClientes([]);
+        return;
+      }
+      // Para cada cliente, obtener sus reservas
+      const clientesConReservas = await Promise.all(
+        (customers || []).map(async (c) => {
+          const { data: reservas } = await supabase
+            .from("reservations")
+            .select("reservation_date, reservation_time, status")
+            .eq("customer_email", c.email)
+            .eq("restaurant_id", restaurant.id)
+            .order("reservation_date", { ascending: false });
+          return {
+            id: c.id,
+            nombre: c.first_name,
+            apellidos: c.last_name,
+            email: c.email,
+            telefono: c.phone || "",
+            notas: c.notes || "",
+            fechaAlta: new Date(c.created_at).toLocaleString("es-ES", {
+              year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit"
+            }),
+            reservas: (reservas || []).map(r => ({
+              fecha: r.reservation_date + (r.reservation_time ? ` ${r.reservation_time.substring(0,5)}h` : ""),
+              estado: r.status
+            }))
+          };
+        })
+      );
+      setClientes(clientesConReservas);
+    }
+    fetchClientes();
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;

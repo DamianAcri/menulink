@@ -511,43 +511,6 @@ export default function ReservationsPage() {
     setIsSubmitting(false);
     // No añadir la reserva manualmente para evitar duplicados, solo limpiar el formulario
     // La suscripción en tiempo real recargará la lista automáticamente
-    // setReservations((prev) => [data, ...prev]);
-    // Si se marcó añadir al CRM, intentar añadir el cliente (si no existe)
-    if (newReservation.addToCRM) {
-      // Comprobar si ya existe el cliente
-      const { data: existing, error: existingError } = await supabase
-        .from("customers")
-        .select("id")
-        .eq("restaurant_id", restaurant.id)
-        .eq("email", newReservation.customer_email)
-        .maybeSingle();
-      if (existingError) {
-        toast.error("Error comprobando cliente en CRM: " + existingError.message);
-        console.error("Error comprobando cliente en CRM:", existingError);
-      }
-      if (!existing) {
-        // Separar nombre y apellidos (simple)
-        const [first_name, ...rest] = newReservation.customer_name.trim().split(" ");
-        const last_name = rest.join(" ") || "-";
-        const { error: insertError } = await supabase.from("customers").insert([
-          {
-            restaurant_id: restaurant.id,
-            first_name,
-            last_name,
-            email: newReservation.customer_email,
-            phone: newReservation.customer_phone || null,
-          }
-        ]);
-        if (insertError) {
-          toast.error("Error guardando cliente en CRM: " + insertError.message);
-          console.error("Error guardando cliente en CRM:", insertError);
-        } else {
-          toast.success("Cliente guardado en CRM");
-        }
-      } else {
-        toast("El cliente ya existe en el CRM");
-      }
-    }
     setNewReservation({
       customer_name: "",
       customer_email: "",
@@ -1138,6 +1101,57 @@ export default function ReservationsPage() {
           });
         } catch (emailError) {
           console.error("Error enviando correo de estado de reserva:", emailError);
+        }
+      }
+
+      // Si la reserva se confirma, añadir cliente al CRM si no existe
+      if (newStatus === "confirmed") {
+        // Buscar la reserva para obtener los datos del cliente
+        const { data: reservationData, error: fetchError } = await supabase
+          .from("reservations")
+          .select("*")
+          .eq("id", reservationId)
+          .single();
+        if (fetchError || !reservationData) {
+          toast.error("No se pudo obtener la reserva para el CRM");
+          console.error("Error obteniendo reserva para CRM:", fetchError);
+          return;
+        }
+        // Comprobar si ya existe el cliente
+        const { data: existing, error: existingError } = await supabase
+          .from("customers")
+          .select("id")
+          .eq("restaurant_id", reservationData.restaurant_id)
+          .eq("email", reservationData.customer_email)
+          .maybeSingle();
+        if (existingError) {
+          toast.error("Error comprobando cliente en CRM: " + existingError.message);
+          console.error("Error comprobando cliente en CRM:", existingError);
+        }
+        if (!existing) {
+          // Separar nombre y apellidos (simple)
+          const [first_name, ...rest] = (reservationData.customer_name || "").trim().split(" ");
+          const last_name = rest.join(" ") || "-";
+          // Refuerzo: aseguro que todos los campos obligatorios están presentes
+          const customerInsert = {
+            restaurant_id: reservationData.restaurant_id,
+            first_name: first_name || "-",
+            last_name: last_name || "-",
+            email: reservationData.customer_email || "-",
+            phone: reservationData.customer_phone || null,
+          };
+          console.log("Insertando en customers:", customerInsert);
+          const { error: insertError } = await supabase.from("customers").insert([
+            customerInsert
+          ]);
+          if (insertError) {
+            toast.error("Error guardando cliente en CRM: " + insertError.message);
+            console.error("Error guardando cliente en CRM:", insertError);
+          } else {
+            toast.success("Cliente guardado en CRM");
+          }
+        } else {
+          toast("El cliente ya existe en el CRM");
         }
       }
 
