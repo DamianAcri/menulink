@@ -22,8 +22,6 @@ export default function ConfigPage() {
   
   // Nuevos estados para la configuración de reservas
   const [maxPartySize, setMaxPartySize] = useState(10);
-  const [timeSlots, setTimeSlots] = useState<{day: number, slots: {start: string, end: string, maxCapacity: number}[]}[]>([]);
-  const [selectedDay, setSelectedDay] = useState(1); // Lunes por defecto
   
   // Función para cambiar el idioma
   const handleLanguageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -204,9 +202,6 @@ export default function ConfigPage() {
     router.push('/dashboard/reservations');
   };
 
-  // Obtener slots para el día seleccionado
-  const selectedDaySlots = timeSlots.find(day => day.day === selectedDay)?.slots || [];
-  
   // Inicializar preferencias cuando el componente se monta
   useState(() => {
     // Verificar preferencia de modo oscuro guardada
@@ -273,7 +268,6 @@ export default function ConfigPage() {
             <p className="text-sm text-gray-500 mb-4">
               Decide cómo quieres gestionar las reservas de tu restaurante
             </p>
-            
             <div className="space-y-2 mb-6">
               <div className="flex items-center">
                 <input
@@ -288,7 +282,6 @@ export default function ConfigPage() {
                   Activar - Mostrar el formulario de reservas a los clientes
                 </label>
               </div>
-              
               <div className="flex items-center">
                 <input
                   id="reservation-disabled"
@@ -303,11 +296,9 @@ export default function ConfigPage() {
                 </label>
               </div>
             </div>
-            
             {reservationMode === 'form' && (
               <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 mt-4">
                 <h4 className="text-md font-medium text-gray-900 mb-3">Configuración básica de reservas</h4>
-                
                 <div className="mb-4">
                   <label htmlFor="max-party-size" className="block text-sm font-medium text-gray-700 mb-1">
                     Tamaño máximo de grupo
@@ -328,10 +319,9 @@ export default function ConfigPage() {
                     Este es el número máximo de personas que un cliente puede seleccionar al hacer una reserva
                   </p>
                 </div>
-                
                 <div className="flex justify-between items-center">
                   <p className="text-sm text-gray-600">
-                    Para gestionar los horarios disponibles, ir a la página de reservas
+                    Para gestionar las franjas horarias de reservas, ve a la página de Reservas.
                   </p>
                   <button 
                     type="button"

@@ -657,48 +657,6 @@ export default function ToolsPage() {
           </div>
         </div>
       </div>
-
-      {/* Configuración de notificaciones */}
-      <div className="bg-white shadow overflow-hidden sm:rounded-lg">
-        <div className="px-4 py-5 sm:p-6">
-          <h3 className="text-lg leading-6 font-medium text-gray-900 flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-            </svg>
-            Notificaciones por email
-          </h3>
-          <div className="mt-2 max-w-xl text-sm text-gray-500">
-            <p>
-              Configura tus preferencias de notificaciones para recibir información importante sobre tu menú digital.
-            </p>
-          </div>
-          <div className="mt-5">
-            <div className="flex items-center">
-              <input
-                id="email-notifications"
-                name="email-notifications"
-                type="checkbox"
-                checked={emailNotifications}
-                onChange={(e) => setEmailNotifications(e.target.checked)}
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-              />
-              <label htmlFor="email-notifications" className="ml-2 block text-sm text-gray-700">
-                Recibir resumen semanal de visitas a mi menú
-              </label>
-            </div>
-            <div className="mt-4">
-              <button
-                type="button"
-                onClick={saveNotificationPreferences}
-                className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white"
-                style={{ backgroundColor: 'var(--accent)' }}
-              >
-                Guardar preferencias
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }
