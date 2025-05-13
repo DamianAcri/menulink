@@ -1,12 +1,28 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, createContext, useContext } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import type { User } from '@supabase/supabase-js';
 import i18n from '@/lib/i18n';
 import { Toaster, toast } from "sonner";
+import { Bell, User as UserIcon, ChevronDown, Search, User2, Menu as MenuIcon } from "lucide-react";
+import { format } from 'date-fns';
+
+// Contexto para controlar el toast de nueva reserva y evitar duplicados
+interface ReservationToastContextType {
+  lastCreatedReservationId: string | null;
+  setLastCreatedReservationId: (id: string | null) => void;
+}
+const ReservationToastContext = createContext<ReservationToastContextType>({
+  lastCreatedReservationId: null,
+  setLastCreatedReservationId: () => {},
+});
+
+export function useReservationToast() {
+  return useContext(ReservationToastContext);
+}
 
 export default function DashboardLayout({
   children,
@@ -20,6 +36,11 @@ export default function DashboardLayout({
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [currentLang, setCurrentLang] = useState('es');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [notifPanelOpen, setNotifPanelOpen] = useState(false);
+  const [restaurantId, setRestaurantId] = useState<string | null>(null);
+  const [lastCreatedReservationId, setLastCreatedReservationId] = useState<string | null>(null);
 
   useEffect(() => {
     // Solo en cliente: sincronizar idioma con localStorage
@@ -89,14 +110,48 @@ export default function DashboardLayout({
     return pathname === path;
   };
 
+  // Cargar notificaciones al cargar el dashboard o cambiar restaurante
   useEffect(() => {
-    // Suscripción global a nuevas reservas para mostrar toast
-    let channel: any = null;
-    let restaurantId: string | null = null;
-    let ignoreFirst = true;
+    if (!user) return;
+    const fetchNotifications = async () => {
+      const { data: restaurant } = await supabase
+        .from('restaurants')
+        .select('id')
+        .eq('user_id', user.id)
+        .single();
+      if (!restaurant) return;
+      setRestaurantId(restaurant.id);
+      const { data: notifs } = await supabase
+        .from('notifications')
+        .select('*')
+        .eq('restaurant_id', restaurant.id)
+        .order('created_at', { ascending: false });
+      setNotifications(notifs || []);
+      setUnreadCount((notifs || []).filter(n => !n.is_read).length);
+    };
+    fetchNotifications();
+  }, [user]);
 
+  // Marcar como leídas al abrir el panel
+  useEffect(() => {
+    if (notifPanelOpen && unreadCount > 0 && restaurantId) {
+      const markAllRead = async () => {
+        await supabase
+          .from('notifications')
+          .update({ is_read: true })
+          .eq('restaurant_id', restaurantId)
+          .eq('is_read', false);
+        setNotifications((prev) => prev.map(n => ({ ...n, is_read: true })));
+        setUnreadCount(0);
+      };
+      markAllRead();
+    }
+  }, [notifPanelOpen, unreadCount, restaurantId]);
+
+  useEffect(() => {
+    // Suscripción global a nuevas reservas para mostrar toast y guardar notificación
+    let channel: any = null;
     async function subscribeToReservations() {
-      // Obtener el restaurante del usuario
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return;
       const { data: restaurant } = await supabase
@@ -105,8 +160,7 @@ export default function DashboardLayout({
         .eq("user_id", session.user.id)
         .single();
       if (!restaurant) return;
-      restaurantId = restaurant.id;
-      // Suscribirse a inserciones en reservations de este restaurante
+      setRestaurantId(restaurant.id);
       channel = supabase
         .channel("dashboard-global-reservations")
         .on(
@@ -117,13 +171,10 @@ export default function DashboardLayout({
             table: "reservations",
             filter: `restaurant_id=eq.${restaurant.id}`,
           },
-          (payload) => {
-            // Evitar mostrar el toast por reservas ya existentes al conectar
-            if (ignoreFirst) {
-              ignoreFirst = false;
-              return;
-            }
+          async (payload) => {
             const r = payload.new;
+            // Evitar duplicado si la reserva la acaba de crear este usuario
+            if (r.id === lastCreatedReservationId) return;
             toast.success(
               <div>
                 <b>¡Nueva reserva recibida!</b>
@@ -133,6 +184,20 @@ export default function DashboardLayout({
               </div>,
               { position: "bottom-right", duration: 7000 }
             );
+            // Guardar notificación en Supabase
+            await supabase.from('notifications').insert({
+              restaurant_id: restaurant.id,
+              type: 'reservation',
+              message: `Nueva reserva de ${r.customer_name} para el ${r.reservation_date} a las ${r.reservation_time?.slice(0,5)} (${r.party_size} personas)`
+            });
+            // Refrescar notificaciones
+            const { data: notifs } = await supabase
+              .from('notifications')
+              .select('*')
+              .eq('restaurant_id', restaurant.id)
+              .order('created_at', { ascending: false });
+            setNotifications(notifs || []);
+            setUnreadCount((notifs || []).filter(n => !n.is_read).length);
           }
         )
         .subscribe();
@@ -141,7 +206,7 @@ export default function DashboardLayout({
     return () => {
       if (channel) supabase.removeChannel(channel);
     };
-  }, []);
+  }, [lastCreatedReservationId]);
 
   if (loading) {
     return (
@@ -151,54 +216,117 @@ export default function DashboardLayout({
     );
   }
 
+  // Altura del navbar (en px)
+  const NAVBAR_HEIGHT = 64;
+  const SIDEBAR_WIDTH = sidebarCollapsed ? 64 : 256;
+
   return (
-    <div className="h-screen flex overflow-hidden bg-white">
-      {/* Sidebar tipo Toast */}
-      <aside className={`hidden md:flex flex-col ${sidebarCollapsed ? 'w-16' : 'w-64'} border-r border-divider bg-white transition-all duration-200 relative`}>
-        {/* Botón de toggle fijo arriba */}
-        <div className="flex items-center h-16 px-4 border-b border-divider relative">
-          {!sidebarCollapsed && (
-            <span className="font-bold text-[22px] tracking-tight select-none text-[var(--primary)]">Menu</span>
-          )}
-          {!sidebarCollapsed && (
-            <span className="ml-1 font-bold text-[22px] tracking-tight select-none text-[var(--foreground)]">Link</span>
-          )}
-          <button
-            className={`absolute right-2 top-1/2 -translate-y-1/2 flex items-center justify-center w-8 h-8 rounded hover:bg-gray-100 transition`}
-            title={sidebarCollapsed ? 'Expandir menú' : 'Comprimir menú'}
-            onClick={() => setSidebarCollapsed((v) => !v)}
-          >
-            {sidebarCollapsed ? (
-              <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
-            ) : (
-              <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></svg>
-            )}
-          </button>
-        </div>
-        <nav className={`flex-1 flex flex-col gap-1 py-4 ${sidebarCollapsed ? 'items-center' : 'px-4'}`}>
-          {renderNavLinks()}
-        </nav>
-        <div className="p-4 border-t border-divider">
-          {/* ...acciones secundarias... */}
-        </div>
-      </aside>
-      {/* Sidebar móvil */}
-      <div className={`md:hidden ${isSidebarOpen ? "block" : "hidden"} fixed inset-0 z-40 flex`}>
-        <div className="fixed inset-0 bg-black bg-opacity-30" onClick={() => setIsSidebarOpen(false)}></div>
-        <aside className="relative flex-1 flex flex-col max-w-xs w-full bg-white border-r border-divider">
-          <div className="flex items-center h-16 px-6 font-bold text-[22px] tracking-tight select-none">
-            <span className="text-[var(--primary)]">Menu</span><span className="ml-1 text-[var(--foreground)]">Link</span>
+    <ReservationToastContext.Provider value={{ lastCreatedReservationId, setLastCreatedReservationId }}>
+      <div className="min-h-screen bg-white">
+        {/* NAVBAR SUPERIOR */}
+        <nav
+          className="fixed top-0 left-0 right-0 z-30 bg-white border-b border-gray-200 flex items-center h-16 px-4 md:px-8"
+          style={{ height: NAVBAR_HEIGHT }}
+        >
+          {/* Logo y botón menú/comprimir SIEMPRE visibles */}
+          <div className="flex items-center gap-2 min-w-[160px] md:min-w-0" style={{ width: SIDEBAR_WIDTH }}>
+            <button
+              className="p-2 rounded hover:bg-gray-100"
+              onClick={() => setSidebarCollapsed((v) => !v)}
+              aria-label={sidebarCollapsed ? 'Expandir menú' : 'Comprimir menú'}
+            >
+              {sidebarCollapsed ? (
+                <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+              ) : (
+                <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 24 24"><path d="M15 19l-7-7 7-7"/></svg>
+              )}
+            </button>
+            <span className="font-bold text-xl text-gray-900 select-none ml-1">Menu</span>
+            <span className="font-bold text-xl text-blue-700 select-none">Link</span>
           </div>
-          <nav className="flex-1 py-3 px-4 space-y-1">
+          {/* Buscador centrado respecto al contenido principal */}
+          <div className="flex-1 flex justify-center">
+            <div className="relative w-full max-w-sm">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                <Search className="w-5 h-5" />
+              </span>
+              <input
+                type="text"
+                placeholder="Buscar..."
+                className="w-full pl-10 pr-3 py-2 rounded-full bg-gray-50 border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400"
+              />
+            </div>
+          </div>
+          {/* Iconos a la derecha */}
+          <div className="flex items-center gap-3 ml-4">
+            <button
+              className="relative w-10 h-10 flex items-center justify-center rounded-full bg-gray-50 border border-gray-200 hover:bg-gray-100 transition"
+              onClick={() => setNotifPanelOpen((v) => !v)}
+              aria-label="Notificaciones"
+            >
+              <Bell className="w-5 h-5 text-gray-600" />
+              {unreadCount > 0 && (
+                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
+              )}
+            </button>
+            {notifPanelOpen && (
+              <div className="absolute right-16 top-14 w-80 bg-white border border-gray-100 rounded-lg shadow-lg py-2 z-50 animate-fade-in max-h-96 overflow-y-auto">
+                <div className="px-4 py-2 text-sm font-semibold border-b">Notificaciones</div>
+                {notifications.length === 0 && (
+                  <div className="px-4 py-6 text-center text-gray-400 text-sm">No hay notificaciones</div>
+                )}
+                {notifications.map((n) => (
+                  <div key={n.id} className={`px-4 py-3 border-b last:border-b-0 ${!n.is_read ? 'bg-blue-50' : ''}`}>
+                    <div className="text-sm text-gray-800">{n.message}</div>
+                    <div className="text-xs text-gray-400 mt-1">{format(new Date(n.created_at), 'dd/MM/yyyy HH:mm')}</div>
+                  </div>
+                ))}
+              </div>
+            )}
+            <UserMenu user={user} onSignOut={handleSignOut} />
+          </div>
+        </nav>
+        {/* SIDEBAR FIJO */}
+        <aside
+          className={`hidden md:flex flex-col fixed top-0 left-0 z-20 bg-white border-r border-divider transition-all duration-200`}
+          style={{ width: SIDEBAR_WIDTH, height: `calc(100vh - ${NAVBAR_HEIGHT}px)`, top: NAVBAR_HEIGHT }}
+        >
+          {/* Solo links, sin logo ni botón */}
+          <nav className={`flex-1 flex flex-col gap-1 py-4 ${sidebarCollapsed ? 'items-center' : 'px-4'}`}>
             {renderNavLinks()}
           </nav>
+          <div className="p-4 border-t border-divider">
+            <a
+              href="mailto:soporte@menulink.com"
+              className="block text-sm text-blue-700 hover:underline text-center"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              ¿Necesitas ayuda? Soporte
+            </a>
+          </div>
         </aside>
+        {/* Sidebar móvil (sin cambios) */}
+        <div className={`md:hidden ${isSidebarOpen ? "block" : "hidden"} fixed inset-0 z-40 flex`}>
+          <div className="fixed inset-0 bg-black bg-opacity-30" onClick={() => setIsSidebarOpen(false)}></div>
+          <aside className="relative flex-1 flex flex-col max-w-xs w-full bg-white border-r border-divider">
+            <div className="flex items-center h-16 px-6 font-bold text-[22px] tracking-tight select-none">
+              <span className="text-[var(--primary)]">Menu</span><span className="ml-1 text-[var(--foreground)]">Link</span>
+            </div>
+            <nav className="flex-1 py-3 px-4 space-y-1">
+              {renderNavLinks()}
+            </nav>
+          </aside>
+        </div>
+        {/* MAIN desplazado */}
+        <main
+          className="flex-1 overflow-y-auto p-6 md:p-8 bg-white"
+          style={{ marginLeft: SIDEBAR_WIDTH, marginTop: NAVBAR_HEIGHT, transition: 'margin-left 0.2s' }}
+        >
+          {children}
+        </main>
       </div>
-      {/* Main content */}
-      <main className="flex-1 overflow-y-auto p-6 md:p-8 bg-white" style={{ minHeight: '100vh' }}>
-        {children}
-      </main>
-    </div>
+    </ReservationToastContext.Provider>
   );
 
   function renderNavLinks() {
@@ -287,4 +415,42 @@ export default function DashboardLayout({
     await supabase.auth.signOut();
     router.push("/auth/login");
   }
+}
+
+function UserMenu({ user, onSignOut }: { user: any, onSignOut: () => void }) {
+  const [open, setOpen] = useState(false);
+  // Cerrar menú al hacer click fuera
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (!(e.target as HTMLElement).closest("#user-menu-dropdown")) setOpen(false);
+    };
+    if (open) document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [open]);
+  return (
+    <div className="relative" id="user-menu-dropdown">
+      <button
+        className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-50 border border-gray-200 hover:bg-gray-100 transition"
+        onClick={() => setOpen((v) => !v)}
+        aria-label="Menú de usuario"
+      >
+        <User2 className="w-5 h-5 text-gray-600" />
+        <ChevronDown className="w-4 h-4 text-gray-400 ml-1" />
+      </button>
+      {open && (
+        <div className="absolute right-0 mt-2 w-56 bg-white border border-gray-100 rounded-lg shadow-lg py-2 z-50 animate-fade-in">
+          <div className="px-4 py-2 text-xs text-gray-500">{user?.email || "Mi cuenta"}</div>
+          <a href="/dashboard/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Perfil</a>
+          <a href="/dashboard/settings" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Configuración</a>
+          <div className="px-4 py-2 text-xs text-gray-400">Plan: Básico</div>
+          <button
+            onClick={onSignOut}
+            className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-50"
+          >
+            Cerrar sesión
+          </button>
+        </div>
+      )}
+    </div>
+  );
 }

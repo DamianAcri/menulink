@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { Calendar as CalendarIcon, Clock, Plus, Settings, Users, Filter, Search, X, MoreHorizontal, Check } from "lucide-react";
 import { format, isSameDay, isToday, parseISO } from "date-fns";
 import { es } from "date-fns/locale/es";
+import { useReservationToast } from "../layout";
 
 type Reservation = {
   id: string;
@@ -48,6 +49,7 @@ export default function ReservationsPage() {
   });
   const [formError, setFormError] = useState<string | null>(null);
   const [formSuccess, setFormSuccess] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Nuevos estados para la gestión de franjas horarias
   const [showTimeSlotsSection, setShowTimeSlotsSection] = useState(false);
@@ -88,6 +90,8 @@ export default function ReservationsPage() {
   const uniqueReservations = Array.from(
     new Map(filteredReservations.map(r => [r.id, r])).values()
   );
+
+  const { setLastCreatedReservationId } = useReservationToast();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -184,58 +188,11 @@ export default function ReservationsPage() {
   }, []);
 
   // Efecto para suscripción en tiempo real y carga de reservas cuando cambia el restaurante
+  // Eliminado: la suscripción global se gestiona en layout.tsx
   useEffect(() => {
     if (!restaurant) return;
-
     // Cargar reservas iniciales
     fetchReservations(restaurant.id);
-
-    // Configurar canal para suscripción a nuevas reservas
-    const channel = supabase
-      .channel("public:reservations")
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "reservations",
-          filter: `restaurant_id=eq.${restaurant.id}`,
-        },
-        (payload) => {
-          console.log("Nueva reserva detectada:", payload);
-
-          // Obtener datos de la nueva reserva
-          const newReservation = payload.new as Reservation;
-
-          // Mostrar notificación
-          toast.success(
-            <div>
-              <p className="font-bold">¡Nueva reserva recibida!</p>
-              <p>Cliente: {newReservation.customer_name}</p>
-              <p>
-                Fecha: {formatDate(newReservation.reservation_date)} a las{" "}
-                {newReservation.reservation_time.substring(0, 5)}
-              </p>
-            </div>,
-            { duration: 6000 }
-          );
-
-          // Recargar lista de reservas
-          fetchReservations(restaurant.id);
-        }
-      )
-      .subscribe();
-
-    console.log(
-      "Canal de suscripción configurado para restaurante:",
-      restaurant.id
-    );
-
-    // Limpiar suscripción al desmontar
-    return () => {
-      console.log("Limpiando suscripción");
-      supabase.removeChannel(channel);
-    };
   }, [restaurant]);
 
   // Efecto separado para actualizar cuando cambian los filtros
@@ -484,8 +441,10 @@ export default function ReservationsPage() {
     e.preventDefault();
     setFormError(null);
     setFormSuccess(null);
+    setIsSubmitting(true);
     if (!restaurant) {
       setFormError("No se ha encontrado el restaurante.");
+      setIsSubmitting(false);
       return;
     }
     if (
@@ -495,6 +454,7 @@ export default function ReservationsPage() {
       !newReservation.reservation_time
     ) {
       setFormError("Nombre, email, fecha y hora son obligatorios.");
+      setIsSubmitting(false);
       return;
     }
     // Crear la reserva
@@ -515,7 +475,22 @@ export default function ReservationsPage() {
       .single();
     if (error) {
       setFormError("Error al crear la reserva.");
+      setIsSubmitting(false);
       return;
+    }
+
+    // Mostrar toast y guardar el ID para evitar duplicados
+    if (data && data.id) {
+      setLastCreatedReservationId(data.id);
+      toast.success(
+        <div>
+          <b>¡Reserva creada correctamente!</b>
+          <div>Cliente: {data.customer_name}</div>
+          <div>Fecha: {data.reservation_date} {data.reservation_time?.slice(0,5)}</div>
+          <div>Personas: {data.party_size}</div>
+        </div>,
+        { position: "bottom-right", duration: 7000 }
+      );
     }
 
     // Enviar correo de nueva reserva (al restaurante y cliente)
@@ -533,7 +508,10 @@ export default function ReservationsPage() {
     }
 
     setFormSuccess("Reserva creada correctamente.");
-    setReservations((prev) => [data, ...prev]);
+    setIsSubmitting(false);
+    // No añadir la reserva manualmente para evitar duplicados, solo limpiar el formulario
+    // La suscripción en tiempo real recargará la lista automáticamente
+    // setReservations((prev) => [data, ...prev]);
     // Si se marcó añadir al CRM, intentar añadir el cliente (si no existe)
     if (newReservation.addToCRM) {
       // Comprobar si ya existe el cliente
@@ -545,17 +523,17 @@ export default function ReservationsPage() {
         .maybeSingle();
       if (!existing) {
         // Separar nombre y apellidos (simple)
-        const [first_name, ...rest] = newReservation.customer_name
-          .trim()
-          .split(" ");
+        const [first_name, ...rest] = newReservation.customer_name.trim().split(" ");
         const last_name = rest.join(" ") || "-";
-        await supabase.from("customers").insert({
-          restaurant_id: restaurant.id,
-          first_name,
-          last_name,
-          email: newReservation.customer_email,
-          phone: newReservation.customer_phone || null,
-        });
+        await supabase.from("customers").insert([
+          {
+            restaurant_id: restaurant.id,
+            first_name,
+            last_name,
+            email: newReservation.customer_email,
+            phone: newReservation.customer_phone || null,
+          }
+        ]);
       }
     }
     setNewReservation({
@@ -682,7 +660,9 @@ export default function ReservationsPage() {
                     <input type="checkbox" name="addToCRM" checked={newReservation.addToCRM} onChange={handleReservationChange} />
                     Añadir cliente al CRM
                   </label>
-                  <button type="submit" className="button-primary w-full">Guardar reserva</button>
+                  <button type="submit" className="button-primary w-full" disabled={isSubmitting}>
+                    {isSubmitting ? "Enviando..." : "Guardar reserva"}
+                  </button>
                   {formError && <div className="text-red-600 text-sm">{formError}</div>}
                   {formSuccess && <div className="text-green-600 text-sm">{formSuccess}</div>}
                 </form>

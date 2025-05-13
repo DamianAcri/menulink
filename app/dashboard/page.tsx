@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
+import { useRouter } from "next/navigation";
+import { Calendar as CalendarIcon, Users, Clock, ArrowRight } from "lucide-react";
 
 export default function Dashboard() {
   const [restaurant, setRestaurant] = useState<{
@@ -16,6 +18,8 @@ export default function Dashboard() {
     menuItems: 0,
     categories: 0,
   });
+  const router = useRouter();
+  const [upcomingReservations, setUpcomingReservations] = useState<any[]>([]);
   
   // Agregamos una variable para refrescar los datos cuando sea necesario
   const [refreshTrigger, setRefreshTrigger] = useState(0);
@@ -96,6 +100,36 @@ export default function Dashboard() {
     fetchData();
   }, [refreshTrigger]); // Agregar refreshTrigger como dependencia
 
+  useEffect(() => {
+    const fetchUpcomingReservations = async () => {
+      if (!restaurant) return;
+      // Solo reservas futuras (hoy o más adelante), ordenadas por fecha y hora
+      const today = new Date();
+      const todayStr = today.toISOString().split('T')[0];
+      const { data, error } = await supabase
+        .from("reservations")
+        .select("id, customer_name, reservation_date, reservation_time, party_size, status")
+        .eq("restaurant_id", restaurant.id)
+        .in("status", ["pending", "confirmed"])
+        .gte("reservation_date", todayStr)
+        .order("reservation_date", { ascending: true })
+        .order("reservation_time", { ascending: true });
+      if (!error && data) {
+        // Filtrar reservas que son hoy pero ya pasaron (hora menor a la actual)
+        const now = new Date();
+        const filtered = data.filter((r: any) => {
+          if (r.reservation_date > todayStr) return true;
+          if (r.reservation_date === todayStr) {
+            return r.reservation_time >= now.toTimeString().slice(0,5);
+          }
+          return false;
+        });
+        setUpcomingReservations(filtered.slice(0, 4));
+      }
+    };
+    fetchUpcomingReservations();
+  }, [restaurant, refreshTrigger]);
+
   // Verificar si debemos refrescar los datos al enfocar la ventana
   useEffect(() => {
     const handleFocus = () => {
@@ -114,95 +148,130 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="mb-6">
-        <h1 className="text-2xl font-semibold">Dashboard</h1>
-        <p className="mt-1 text-secondary text-base">Bienvenido a MenuLink, gestiona tu menú y presencia online.</p>
-      </div>
-      {/* Métricas */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div className="card relative">
-          <span className="absolute top-4 right-4 icon-primary">
-            {/* icono Lucide: Eye */}
-            <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-          </span>
-          <div className="text-xs text-secondary mb-1">Visitas totales</div>
-          <div className="text-2xl font-bold text-[var(--foreground)]">{loading ? "..." : stats.views}</div>
-        </div>
-        <div className="card relative">
-          <span className="absolute top-4 right-4 icon-primary">
-            {/* icono Lucide: UtensilsCrossed */}
-            <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M16.5 2.5 21 7m-7.5 7.5L3 21m0-4.5L7.5 16.5m9-9L21 3m-7.5 7.5L3 3"/></svg>
-          </span>
-          <div className="text-xs text-secondary mb-1">Platos en tu menú</div>
-          <div className="text-2xl font-bold text-[var(--foreground)]">{loading ? "..." : stats.menuItems}</div>
-        </div>
-        <div className="card relative">
-          <span className="absolute top-4 right-4 icon-primary">
-            {/* icono Lucide: Timer */}
-            <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-          </span>
-          <div className="text-xs text-secondary mb-1">Plan actual</div>
-          <div className="text-2xl font-bold text-[var(--foreground)]">
-            {loading
-              ? "..."
-              : restaurant?.subscription_tier === "premium"
-              ? "Premium"
-              : restaurant?.subscription_tier === "pro"
-              ? "Pro"
-              : "Básico"}
+    <div className="max-w-7xl mx-auto px-2 md:px-6 py-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Columna principal */}
+        <div className="lg:col-span-2 flex flex-col gap-8">
+          {/* Estadísticas */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            <StatCard title="Visitas totales" value={loading ? '...' : stats.views} icon={<CalendarIcon className="w-5 h-5 text-blue-500" />} />
+            <StatCard title="Platos en menú" value={loading ? '...' : stats.menuItems} icon={<Users className="w-5 h-5 text-green-500" />} />
+            <StatCard title="Categorías" value={loading ? '...' : stats.categories} icon={<Clock className="w-5 h-5 text-yellow-500" />} />
           </div>
-        </div>
-      </div>
-      {/* Acciones rápidas */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-        <div className="card flex flex-col gap-4">
-          <div className="flex items-center gap-3 mb-2">
-            <span className="icon-primary">
-              {/* icono Lucide: PlusCircle */}
-              <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v8m4-4H8"/></svg>
-            </span>
-            <span className="font-medium">Añadir platos</span>
-          </div>
-          <p className="text-secondary text-sm">Actualiza tu menú con nuevos productos o categorías.</p>
-          <a href="/dashboard/menu" className="button-primary w-fit">Ir a menú</a>
-        </div>
-        <div className="card flex flex-col gap-4">
-          <div className="flex items-center gap-3 mb-2">
-            <span className="icon-primary">
-              {/* icono Lucide: Palette */}
-              <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M7.5 12a.5.5 0 01.5-.5h8a.5.5 0 01.5.5v.5a2.5 2.5 0 01-2.5 2.5h-4A2.5 2.5 0 017 12.5v-.5z"/></svg>
-            </span>
-            <span className="font-medium">Personalizar apariencia</span>
-          </div>
-          <p className="text-secondary text-sm">Cambia colores, logo y estilo de tu menú.</p>
-          <a href="/dashboard/profile" className="button-outline w-fit">Personalizar</a>
-        </div>
-      </div>
-      {/* Vista previa del menú */}
-      {restaurant && (
-        <div className="card mt-6">
-          <h3 className="text-lg font-semibold mb-4">Vista previa de tu menú</h3>
-          <div className="rounded-lg shadow-inner bg-soft p-6">
-            <div className="relative h-96 overflow-hidden rounded-md">
-              <iframe
-                src={`/r/${restaurant?.slug || ""}`}
-                className="absolute inset-0 w-full h-full border-0"
-                title="Vista previa del menú"
-              ></iframe>
+
+          {/* Vista previa del menú */}
+          {restaurant && (
+            <div className="card p-0 overflow-hidden">
+              <div className="flex items-center justify-between px-6 pt-6 pb-2">
+                <h3 className="text-lg font-semibold">Vista previa de tu menú</h3>
+                <a href={`/r/${restaurant.slug}`} target="_blank" className="button-outline flex items-center gap-2 text-sm">
+                  Ver mi página <ArrowRight className="w-4 h-4" />
+                </a>
+              </div>
+              <div className="bg-soft p-4">
+                <div className="relative h-80 md:h-96 rounded-lg overflow-hidden border">
+                  <iframe
+                    src={`/r/${restaurant.slug}`}
+                    className="absolute inset-0 w-full h-full border-0"
+                    title="Vista previa del menú"
+                  ></iframe>
+                </div>
+              </div>
             </div>
-            <div className="mt-4 text-center">
-              <a
-                href={`/r/${restaurant?.slug || ""}`}
-                target="_blank"
-                className="button-outline"
-              >
-                Abrir en nueva pestaña
-              </a>
-            </div>
+          )}
+
+          {/* Acciones rápidas */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <QuickActionCard
+              title="Añadir platos"
+              description="Actualiza tu menú con nuevos productos o categorías."
+              href="/dashboard/menu"
+              icon={<svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v8m4-4H8"/></svg>}
+              buttonText="Ir a menú"
+            />
+            <QuickActionCard
+              title="Personalizar apariencia"
+              description="Cambia colores, logo y estilo de tu menú."
+              href="/dashboard/profile"
+              icon={<svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M7.5 12a.5.5 0 01.5-.5h8a.5.5 0 01.5.5v.5a2.5 2.5 0 01-2.5 2.5h-4A2.5 2.5 0 017 12.5v-.5z"/></svg>}
+              buttonText="Personalizar"
+              outline
+            />
+            <QuickActionCard
+              title="Actualizar contacto"
+              description="Modifica la información de contacto y ubicación."
+              href="/dashboard/contact"
+              icon={<svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M21 10.5V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2h7.5"/><path d="M16 21l5-5m0 0l-5-5m5 5H9"/></svg>}
+              buttonText="Editar contacto"
+              outline
+            />
           </div>
         </div>
-      )}
+        {/* Columna lateral */}
+        <div className="flex flex-col gap-8">
+          {/* Próximas reservas */}
+          <div className="card">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">Próximas reservas</h3>
+              <a href="/dashboard/reservations" className="button-outline text-xs">Ver todas</a>
+            </div>
+            {upcomingReservations.length === 0 ? (
+              <div className="text-gray-500 text-sm py-8 text-center">No hay reservas próximas</div>
+            ) : (
+              <ul className="divide-y divide-gray-100">
+                {upcomingReservations.map((r) => (
+                  <li key={r.id} className="py-3 flex items-center gap-3">
+                    <div className="flex-1">
+                      <div className="font-medium text-gray-900">{r.customer_name}</div>
+                      <div className="text-xs text-gray-500 flex items-center gap-2">
+                        <Clock className="w-4 h-4" />
+                        {r.reservation_date} {r.reservation_time?.slice(0,5)}
+                        <Users className="w-4 h-4 ml-2" />
+                        {r.party_size} {r.party_size === 1 ? 'persona' : 'personas'}
+                      </div>
+                    </div>
+                    <span className={`px-2 py-1 rounded-full text-xs font-semibold border ${r.status === 'confirmed' ? 'bg-green-100 text-green-700 border-green-200' : 'bg-yellow-100 text-yellow-700 border-yellow-200'}`}>{r.status === 'confirmed' ? 'Confirmada' : 'Pendiente'}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+            <div className="mt-4 flex justify-center">
+              <a href="/dashboard/reservations" className="button-primary w-full">Ver todas las reservas</a>
+            </div>
+          </div>
+          {/* Plan actual */}
+          <div className="card">
+            <h3 className="text-lg font-semibold mb-2">Plan actual</h3>
+            <div className="mb-2 text-blue-700 font-bold">Premium</div>
+            <ul className="text-sm text-gray-700 mb-4 list-disc pl-5">
+              <li>Menú digital ilimitado</li>
+              <li>Reservas online</li>
+              <li>Estadísticas avanzadas</li>
+              <li>Soporte prioritario</li>
+            </ul>
+            <button className="button-outline w-full">Mejorar plan</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function StatCard({ title, value, icon }: { title: string; value: any; icon: React.ReactNode }) {
+  return (
+    <div className="card flex flex-col gap-2 p-4">
+      <div className="flex items-center gap-2 text-gray-500 text-xs font-medium">{icon} {title}</div>
+      <div className="text-2xl font-bold text-[var(--foreground)]">{value}</div>
+    </div>
+  );
+}
+
+function QuickActionCard({ title, description, href, icon, buttonText, outline }: { title: string; description: string; href: string; icon: React.ReactNode; buttonText: string; outline?: boolean }) {
+  return (
+    <div className="card flex flex-col gap-3 p-4">
+      <div className="flex items-center gap-2 mb-1">{icon}<span className="font-medium">{title}</span></div>
+      <p className="text-secondary text-sm flex-1">{description}</p>
+      <a href={href} className={outline ? "button-outline w-fit" : "button-primary w-fit"}>{buttonText}</a>
     </div>
   );
 }
