@@ -39,55 +39,55 @@ export default function CRM() {
   const [clientes, setClientes] = useState<Cliente[]>([]);
   const router = useRouter();
 
-  useEffect(() => {
-    // Obtener el usuario y restaurante actual
-    async function fetchClientes() {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return;
-      const { data: restaurant } = await supabase
-        .from("restaurants")
-        .select("id")
-        .eq("user_id", session.user.id)
-        .single();
-      if (!restaurant) return;
-      // Obtener clientes reales del CRM
-      const { data: customers, error } = await supabase
-        .from("customers")
-        .select("id, first_name, last_name, email, phone, notes, created_at")
-        .eq("restaurant_id", restaurant.id)
-        .order("created_at", { ascending: false });
-      if (error) {
-        setClientes([]);
-        return;
-      }
-      // Para cada cliente, obtener sus reservas
-      const clientesConReservas = await Promise.all(
-        (customers || []).map(async (c) => {
-          const { data: reservas } = await supabase
-            .from("reservations")
-            .select("reservation_date, reservation_time, status")
-            .eq("customer_email", c.email)
-            .eq("restaurant_id", restaurant.id)
-            .order("reservation_date", { ascending: false });
-          return {
-            id: c.id,
-            nombre: c.first_name,
-            apellidos: c.last_name,
-            email: c.email,
-            telefono: c.phone || "",
-            notas: c.notes || "",
-            fechaAlta: new Date(c.created_at).toLocaleString("es-ES", {
-              year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit"
-            }),
-            reservas: (reservas || []).map(r => ({
-              fecha: r.reservation_date + (r.reservation_time ? ` ${r.reservation_time.substring(0,5)}h` : ""),
-              estado: r.status
-            }))
-          };
-        })
-      );
-      setClientes(clientesConReservas);
+  async function fetchClientes() {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return;
+    const { data: restaurant } = await supabase
+      .from("restaurants")
+      .select("id")
+      .eq("user_id", session.user.id)
+      .single();
+    if (!restaurant) return;
+    // Obtener clientes reales del CRM
+    const { data: customers, error } = await supabase
+      .from("customers")
+      .select("id, first_name, last_name, email, phone, notes, created_at")
+      .eq("restaurant_id", restaurant.id)
+      .order("created_at", { ascending: false });
+    if (error) {
+      setClientes([]);
+      return;
     }
+    // Para cada cliente, obtener sus reservas
+    const clientesConReservas = await Promise.all(
+      (customers || []).map(async (c) => {
+        const { data: reservas } = await supabase
+          .from("reservations")
+          .select("reservation_date, reservation_time, status")
+          .eq("customer_email", c.email)
+          .eq("restaurant_id", restaurant.id)
+          .order("reservation_date", { ascending: false });
+        return {
+          id: c.id,
+          nombre: c.first_name,
+          apellidos: c.last_name,
+          email: c.email,
+          telefono: c.phone || "",
+          notas: c.notes || "",
+          fechaAlta: new Date(c.created_at).toLocaleString("es-ES", {
+            year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit"
+          }),
+          reservas: (reservas || []).map(r => ({
+            fecha: r.reservation_date + (r.reservation_time ? ` ${r.reservation_time.substring(0,5)}h` : ""),
+            estado: r.status
+          }))
+        };
+      })
+    );
+    setClientes(clientesConReservas);
+  }
+
+  useEffect(() => {
     fetchClientes();
   }, []);
 
@@ -99,36 +99,51 @@ export default function CRM() {
     });
   };
 
-  const handleAñadirCliente = () => {
-    const id = Date.now().toString();
-    const fechaActual = new Date().toLocaleString("es-ES", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+  const handleAñadirCliente = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return;
+    const { data: restaurant } = await supabase
+      .from("restaurants")
+      .select("id")
+      .eq("user_id", session.user.id)
+      .single();
+    if (!restaurant) return;
 
-    const cliente: Cliente = {
-      id,
-      ...nuevoCliente,
-      fechaAlta: fechaActual,
-      reservas: [],
-    };
+    // Validar campos obligatorios
+    if (!nuevoCliente.nombre.trim() || !nuevoCliente.apellidos.trim() || !nuevoCliente.email.trim()) {
+      alert("Nombre, apellidos y email son obligatorios");
+      return;
+    }
 
-    setClientes([...clientes, cliente]);
-    setNuevoCliente({
-      nombre: "",
-      apellidos: "",
-      email: "",
-      telefono: "",
-      notas: "",
+    // Insertar en la tabla real
+    const { error } = await supabase.from("customers").insert({
+      restaurant_id: restaurant.id,
+      first_name: nuevoCliente.nombre.trim(),
+      last_name: nuevoCliente.apellidos.trim(),
+      email: nuevoCliente.email.trim(),
+      phone: nuevoCliente.telefono.trim() || null,
+      notes: nuevoCliente.notas.trim() || null,
     });
+    if (error) {
+      alert("Error al añadir cliente: " + error.message);
+      return;
+    }
+    setNuevoCliente({ nombre: "", apellidos: "", email: "", telefono: "", notas: "" });
     setMostrarFormulario(false);
+    // Recargar clientes
+    await fetchClientes();
   };
 
-  const handleEliminarCliente = (id: string) => {
-    setClientes(clientes.filter((cliente) => cliente.id !== id));
+  const handleEliminarCliente = async (id: string) => {
+    // Confirmar antes de eliminar
+    if (!window.confirm("¿Seguro que deseas eliminar este cliente?")) return;
+    const { error } = await supabase.from("customers").delete().eq("id", id);
+    if (error) {
+      alert("Error al eliminar cliente: " + error.message);
+      return;
+    }
+    // Recargar clientes
+    await fetchClientes();
   };
 
   const clientesFiltrados = clientes.filter((cliente) => {
