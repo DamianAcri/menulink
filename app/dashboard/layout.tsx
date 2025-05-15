@@ -208,6 +208,26 @@ export default function DashboardLayout({
     };
   }, [lastCreatedReservationId]);
 
+  // Cerrar notificaciones al hacer click fuera
+  useEffect(() => {
+    if (!notifPanelOpen) return;
+    function handleClick(e: MouseEvent) {
+      // Si el click es fuera del panel y fuera del botón campana, cerrar
+      const notifPanel = document.getElementById('notif-panel');
+      const bellBtn = document.getElementById('notif-bell-btn');
+      if (
+        notifPanel &&
+        !notifPanel.contains(e.target as Node) &&
+        bellBtn &&
+        !bellBtn.contains(e.target as Node)
+      ) {
+        setNotifPanelOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [notifPanelOpen]);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -262,6 +282,7 @@ export default function DashboardLayout({
           {/* Iconos a la derecha */}
           <div className="flex items-center gap-3 ml-4">
             <button
+              id="notif-bell-btn"
               className="relative w-10 h-10 flex items-center justify-center rounded-full bg-gray-50 border border-gray-200 hover:bg-gray-100 transition"
               onClick={() => setNotifPanelOpen((v) => !v)}
               aria-label="Notificaciones"
@@ -272,7 +293,10 @@ export default function DashboardLayout({
               )}
             </button>
             {notifPanelOpen && (
-              <div className="absolute right-16 top-14 w-80 bg-white border border-gray-100 rounded-lg shadow-lg py-2 z-50 animate-fade-in max-h-96 overflow-y-auto">
+              <div
+                id="notif-panel"
+                className="absolute right-16 top-14 w-80 bg-white border border-gray-100 rounded-lg shadow-lg py-2 z-50 animate-fade-in max-h-96 overflow-y-auto"
+              >
                 <div className="px-4 py-2 text-sm font-semibold border-b">Notificaciones</div>
                 {notifications.length === 0 && (
                   <div className="px-4 py-6 text-center text-gray-400 text-sm">No hay notificaciones</div>
